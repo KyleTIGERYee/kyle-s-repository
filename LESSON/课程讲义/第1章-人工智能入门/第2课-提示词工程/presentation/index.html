@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第2课：提示词工程 - 交互式课件</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+    <div class="presentation-container">
+        <div class="slides-wrapper" id="slidesWrapper">
+            
+            <!-- Slide 1: 封面页 -->
+            <section class="slide" data-index="0">
+                <canvas class="particle-bg" id="particleCanvas"></canvas>
+                <div class="slide-content" style="align-items: center; text-align: center;">
+                    <div class="clay-badge mb-4" style="background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%); color: white; font-size: 1.5rem; padding: 1rem 1.5rem;">
+                        第1章 · 人工智能入门
+                    </div>
+                    <h1 class="font-display text-hero mb-4" style="color: var(--primary);">
+                        提示词工程
+                    </h1>
+                    <p class="text-hero-sub mb-6" style="color: var(--text-muted);">
+                        Prompt Engineering
+                    </p>
+                    <div class="clay-card" style="max-width: 600px;">
+                        <p class="text-body" style="color: var(--text-muted);">
+                            掌握结构化提示词框架，提升AI输出质量
+                        </p>
+                    </div>
+                    <div class="mt-6">
+                        <button class="clay-btn clay-btn-primary" onclick="nextSlide()">
+                            开始学习 →
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 2: 课程目标 -->
+            <section class="slide" data-index="1">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">课程目标</span>
+                    <h2 class="font-display text-title mb-6">完成本课后，你将能够</h2>
+                    <div class="bento-grid">
+                        <div class="bento-item">
+                            <div class="clay-badge mb-4" style="background: #EEF2FF; color: var(--primary);">01</div>
+                            <h3 class="font-display text-subtitle mb-2">掌握框架</h3>
+                            <p class="text-body" style="color: var(--text-muted);">掌握BROKE和CO-STAR等结构化提示词框架</p>
+                        </div>
+                        <div class="bento-item">
+                            <div class="clay-badge mb-4" style="background: #ECFDF5; color: var(--secondary);">02</div>
+                            <h3 class="font-display text-subtitle mb-2">Few-Shot技术</h3>
+                            <p class="text-body" style="color: var(--text-muted);">使用Few-Shot Prompting技术提升输出质量</p>
+                        </div>
+                        <div class="bento-item">
+                            <div class="clay-badge mb-4" style="background: #FEF3C7; color: var(--accent-gold);">03</div>
+                            <h3 class="font-display text-subtitle mb-2">格式控制</h3>
+                            <p class="text-body" style="color: var(--text-muted);">运用分隔符和Markdown格式控制输出</p>
+                        </div>
+                        <div class="bento-item">
+                            <div class="clay-badge mb-4" style="background: #E0F2FE; color: var(--accent-cyan);">04</div>
+                            <h3 class="font-display text-subtitle mb-2">Coze平台</h3>
+                            <p class="text-body" style="color: var(--text-muted);">熟练使用Coze平台的提示词优化功能</p>
+                        </div>
+                        <div class="bento-item large">
+                            <div class="clay-badge mb-4" style="background: #FCE7F3; color: var(--accent-pink);">05</div>
+                            <h3 class="font-display text-subtitle mb-2">实战应用</h3>
+                            <p class="text-body" style="color: var(--text-muted);">编写适用于安居乐寓业务场景的金牌销售提示词</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 3: BROKE框架介绍 -->
+            <section class="slide" data-index="2">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.1.1</span>
+                    <h2 class="font-display text-title mb-4">BROKE框架详解</h2>
+                    <p class="text-body mb-4" style="color: var(--text-muted);">
+                        BROKE是一个融合OKR方法论的提示词框架，特别适合工作任务类场景。
+                    </p>
+                    <div class="framework-flow" id="brokeFlow">
+                        <svg viewBox="0 0 900 200" class="framework-svg">
+                            <defs>
+                                <linearGradient id="nodeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.3" />
+                                    <stop offset="100%" style="stop-color:#818CF8;stop-opacity:0.1" />
+                                </linearGradient>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#4F46E5" />
+                                </marker>
+                            </defs>
+                            
+                            <path class="flow-line" d="M 100 100 L 160 100" stroke="#4F46E5" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                            <path class="flow-line" d="M 220 100 L 280 100" stroke="#4F46E5" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                            <path class="flow-line" d="M 340 100 L 400 100" stroke="#4F46E5" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                            <path class="flow-line" d="M 460 100 L 520 100" stroke="#4F46E5" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                            
+                            <g class="flow-node" data-node="B" transform="translate(70, 100)">
+                                <circle r="40" fill="url(#nodeGradient)" stroke="#4F46E5" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">B</text>
+                                <text y="15" text-anchor="middle" fill="#312E81" font-size="14">Background</text>
+                            </g>
+                            <g class="flow-node" data-node="R" transform="translate(190, 100)">
+                                <circle r="40" fill="url(#nodeGradient)" stroke="#4F46E5" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">R</text>
+                                <text y="15" text-anchor="middle" fill="#312E81" font-size="14">Role</text>
+                            </g>
+                            <g class="flow-node" data-node="O" transform="translate(310, 100)">
+                                <circle r="40" fill="url(#nodeGradient)" stroke="#4F46E5" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">O</text>
+                                <text y="15" text-anchor="middle" fill="#312E81" font-size="14">Objectives</text>
+                            </g>
+                            <g class="flow-node" data-node="K" transform="translate(430, 100)">
+                                <circle r="40" fill="url(#nodeGradient)" stroke="#4F46E5" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">K</text>
+                                <text y="15" text-anchor="middle" fill="#312E81" font-size="14">Key Result</text>
+                            </g>
+                            <g class="flow-node" data-node="E" transform="translate(550, 100)">
+                                <circle r="40" fill="url(#nodeGradient)" stroke="#4F46E5" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">E</text>
+                                <text y="15" text-anchor="middle" fill="#312E81" font-size="14">Evolve</text>
+                            </g>
+                        </svg>
+                        <div class="framework-detail" id="brokeDetail">
+                            <p class="text-body text-center" style="color: var(--text-muted);">点击上方节点查看详情</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: BROKE五要素详解 -->
+            <section class="slide" data-index="3">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.1.1</span>
+                    <h2 class="font-display text-title mb-6">BROKE五要素详解</h2>
+                    <div class="clay-card">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">要素</th>
+                                    <th style="width: 15%;">英文</th>
+                                    <th style="width: 30%;">说明</th>
+                                    <th style="width: 40%;">示例</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong style="color: var(--primary); font-size: 1.3rem;">B</strong>ackground</td>
+                                    <td>背景</td>
+                                    <td>阐述任务背景，提供充足信息</td>
+                                    <td style="color: var(--text-muted);">"我们是深圳长租公寓品牌，服务年轻白领"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--primary); font-size: 1.3rem;">R</strong>ole</td>
+                                    <td>角色</td>
+                                    <td>设定AI扮演的角色</td>
+                                    <td style="color: var(--text-muted);">"你是一位资深的房产销售顾问"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--primary); font-size: 1.3rem;">O</strong>bjectives</td>
+                                    <td>目标</td>
+                                    <td>明确任务目标</td>
+                                    <td style="color: var(--text-muted);">"为新客户推荐合适的房源"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--primary); font-size: 1.3rem;">K</strong>ey Result</td>
+                                    <td>关键结果</td>
+                                    <td>定义成功标准和输出格式</td>
+                                    <td style="color: var(--text-muted);">"推荐3套房源，含价格、面积、交通"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--primary); font-size: 1.3rem;">E</strong>volve</td>
+                                    <td>演变</td>
+                                    <td>根据反馈进行优化</td>
+                                    <td style="color: var(--text-muted);">"如客户对价格敏感，优先推荐性价比高的"</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 5: BROKE框架示例 -->
+            <section class="slide" data-index="4">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.1.1</span>
+                    <h2 class="font-display text-title mb-4">BROKE框架示例</h2>
+                    <div class="typewriter-container">
+                        <div class="typewriter-label">
+                            <span class="clay-badge" style="background: #EEF2FF; color: var(--primary);">完整Prompt示例</span>
+                        </div>
+                        <div class="code-block" id="brokeExample" style="min-height: 400px;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 6: CO-STAR框架介绍 -->
+            <section class="slide" data-index="5">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.1.2</span>
+                    <h2 class="font-display text-title mb-4">CO-STAR框架详解</h2>
+                    <p class="text-body mb-4" style="color: var(--text-muted);">
+                        CO-STAR框架更侧重于内容创作和人际沟通场景，强调对风格、语气和受众的精细考量。
+                    </p>
+                    <div class="framework-flow" id="costarFlow">
+                        <svg viewBox="0 0 900 200" class="framework-svg">
+                            <defs>
+                                <linearGradient id="nodeGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#22C55E;stop-opacity:0.3" />
+                                    <stop offset="100%" style="stop-color:#4ADE80;stop-opacity:0.1" />
+                                </linearGradient>
+                                <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#22C55E" />
+                                </marker>
+                            </defs>
+                            
+                            <path class="flow-line" d="M 75 100 L 125 100" stroke="#22C55E" stroke-width="3" fill="none" marker-end="url(#arrowhead2)"/>
+                            <path class="flow-line" d="M 175 100 L 225 100" stroke="#22C55E" stroke-width="3" fill="none" marker-end="url(#arrowhead2)"/>
+                            <path class="flow-line" d="M 275 100 L 325 100" stroke="#22C55E" stroke-width="3" fill="none" marker-end="url(#arrowhead2)"/>
+                            <path class="flow-line" d="M 375 100 L 425 100" stroke="#22C55E" stroke-width="3" fill="none" marker-end="url(#arrowhead2)"/>
+                            <path class="flow-line" d="M 475 100 L 525 100" stroke="#22C55E" stroke-width="3" fill="none" marker-end="url(#arrowhead2)"/>
+                            
+                            <g class="flow-node" data-node="C" transform="translate(50, 100)">
+                                <circle r="35" fill="url(#nodeGradient2)" stroke="#22C55E" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#22C55E" font-size="20" font-weight="bold">C</text>
+                                <text y="12" text-anchor="middle" fill="#312E81" font-size="14">Context</text>
+                            </g>
+                            <g class="flow-node" data-node="O" transform="translate(150, 100)">
+                                <circle r="35" fill="url(#nodeGradient2)" stroke="#22C55E" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#22C55E" font-size="20" font-weight="bold">O</text>
+                                <text y="12" text-anchor="middle" fill="#312E81" font-size="14">Objective</text>
+                            </g>
+                            <g class="flow-node" data-node="S" transform="translate(250, 100)">
+                                <circle r="35" fill="url(#nodeGradient2)" stroke="#22C55E" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#22C55E" font-size="20" font-weight="bold">S</text>
+                                <text y="12" text-anchor="middle" fill="#312E81" font-size="14">Style</text>
+                            </g>
+                            <g class="flow-node" data-node="T" transform="translate(350, 100)">
+                                <circle r="35" fill="url(#nodeGradient2)" stroke="#22C55E" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#22C55E" font-size="20" font-weight="bold">T</text>
+                                <text y="12" text-anchor="middle" fill="#312E81" font-size="14">Tone</text>
+                            </g>
+                            <g class="flow-node" data-node="A" transform="translate(450, 100)">
+                                <circle r="35" fill="url(#nodeGradient2)" stroke="#22C55E" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#22C55E" font-size="20" font-weight="bold">A</text>
+                                <text y="12" text-anchor="middle" fill="#312E81" font-size="14">Audience</text>
+                            </g>
+                            <g class="flow-node" data-node="R" transform="translate(550, 100)">
+                                <circle r="35" fill="url(#nodeGradient2)" stroke="#22C55E" stroke-width="3"/>
+                                <text y="-5" text-anchor="middle" fill="#22C55E" font-size="20" font-weight="bold">R</text>
+                                <text y="12" text-anchor="middle" fill="#312E81" font-size="14">Response</text>
+                            </g>
+                        </svg>
+                        <div class="framework-detail" id="costarDetail">
+                            <p class="text-body text-center" style="color: var(--text-muted);">点击上方节点查看详情</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: CO-STAR六要素详解 -->
+            <section class="slide" data-index="6">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.1.2</span>
+                    <h2 class="font-display text-title mb-6">CO-STAR六要素详解</h2>
+                    <div class="clay-card">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 12%;">要素</th>
+                                    <th style="width: 15%;">英文</th>
+                                    <th style="width: 25%;">说明</th>
+                                    <th style="width: 23%;">适用场景</th>
+                                    <th style="width: 25%;">示例</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong style="color: var(--secondary); font-size: 1.3rem;">C</strong>ontext</td>
+                                    <td>背景</td>
+                                    <td>提供任务的宏观背景</td>
+                                    <td><span class="clay-badge" style="background: #EEF2FF; color: var(--primary); font-size: 0.8rem;">所有场景</span></td>
+                                    <td style="color: var(--text-muted);">"西乡店新推出精装修公寓"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--secondary); font-size: 1.3rem;">O</strong>bjective</td>
+                                    <td>目标</td>
+                                    <td>明确具体任务</td>
+                                    <td><span class="clay-badge" style="background: #EEF2FF; color: var(--primary); font-size: 0.8rem;">所有场景</span></td>
+                                    <td style="color: var(--text-muted);">"写一段吸引客户的房源介绍"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--secondary); font-size: 1.3rem;">S</strong>tyle</td>
+                                    <td>风格</td>
+                                    <td>指定写作风格</td>
+                                    <td><span class="clay-badge" style="background: #ECFDF5; color: var(--secondary); font-size: 0.8rem;">内容创作</span></td>
+                                    <td style="color: var(--text-muted);">"现代、简洁、有温度"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--secondary); font-size: 1.3rem;">T</strong>one</td>
+                                    <td>语气</td>
+                                    <td>设定情感基调</td>
+                                    <td><span class="clay-badge" style="background: #FEF3C7; color: var(--accent-gold); font-size: 0.8rem;">客户沟通</span></td>
+                                    <td style="color: var(--text-muted);">"亲切友好，像朋友推荐"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--secondary); font-size: 1.3rem;">A</strong>udience</td>
+                                    <td>受众</td>
+                                    <td>明确目标读者</td>
+                                    <td><span class="clay-badge" style="background: #FCE7F3; color: var(--accent-pink); font-size: 0.8rem;">营销文案</span></td>
+                                    <td style="color: var(--text-muted);">"25-30岁年轻白领"</td>
+                                </tr>
+                                <tr>
+                                    <td><strong style="color: var(--secondary); font-size: 1.3rem;">R</strong>esponse</td>
+                                    <td>响应格式</td>
+                                    <td>定义输出格式</td>
+                                    <td><span class="clay-badge" style="background: #EEF2FF; color: var(--primary); font-size: 0.8rem;">所有场景</span></td>
+                                    <td style="color: var(--text-muted);">"标题+正文+3个卖点+CTA"</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 8: CO-STAR框架示例 -->
+            <section class="slide" data-index="7">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.1.2</span>
+                    <h2 class="font-display text-title mb-4">CO-STAR框架示例</h2>
+                    <div class="typewriter-container">
+                        <div class="typewriter-label">
+                            <span class="clay-badge" style="background: #ECFDF5; color: var(--secondary);">完整Prompt示例</span>
+                        </div>
+                        <div class="code-block" id="costarExample" style="min-height: 400px;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: 框架选择指南 -->
+            <section class="slide" data-index="8">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.1.3</span>
+                    <h2 class="font-display text-title mb-6">框架选择指南</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div class="clay-card" style="border-left: 6px solid var(--primary);">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="clay-badge" style="background: var(--primary); color: white; font-size: 1.5rem; padding: 1rem 1.5rem;">BROKE</div>
+                                <h3 class="font-display text-subtitle">什么时候用BROKE？</h3>
+                            </div>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="text-body mb-3" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: var(--primary);">✓</span> 工作任务类场景
+                                </li>
+                                <li class="text-body mb-3" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: var(--primary);">✓</span> 需要明确交付物
+                                </li>
+                                <li class="text-body mb-3" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: var(--primary);">✓</span> 有明确的KPI或成功标准
+                                </li>
+                                <li class="text-body" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: var(--primary);">✓</span> 需要迭代优化
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="clay-card" style="border-left: 6px solid var(--secondary);">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="clay-badge" style="background: var(--secondary); color: white; font-size: 1.5rem; padding: 1rem 1.5rem;">CO-STAR</div>
+                                <h3 class="font-display text-subtitle">什么时候用CO-STAR？</h3>
+                            </div>
+                            <ul style="list-style: none; padding: 0;">
+                                <li class="text-body mb-3" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: var(--secondary);">✓</span> 内容创作类场景
+                                </li>
+                                <li class="text-body mb-3" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: var(--secondary);">✓</span> 需要控制风格和语气
+                                </li>
+                                <li class="text-body mb-3" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: var(--secondary);">✓</span> 面向特定受众
+                                </li>
+                                <li class="text-body" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: var(--secondary);">✓</span> 营销文案、客户沟通
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 10: Few-Shot概念介绍 -->
+            <section class="slide" data-index="9">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.2.1</span>
+                    <h2 class="font-display text-title mb-4">Few-Shot Prompting</h2>
+                    <p class="text-body mb-6" style="color: var(--text-muted);">
+                        Few-Shot Prompting是通过提供少量示例，让模型学习任务模式的技术。
+                    </p>
+                    <div class="bento-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="bento-item">
+                            <h3 class="font-display text-subtitle mb-3" style="color: var(--primary);">为什么有效？</h3>
+                            <p class="text-body" style="color: var(--text-muted);">
+                                Few-Shot示例为大模型提供额外的知识，称为<span style="color: var(--primary); font-weight: 600;">In-Context Learning</span>（上下文学习），允许模型在给定上下文中学习和推理，而无需更新模型参数。
+                            </p>
+                        </div>
+                        <div class="bento-item">
+                            <h3 class="font-display text-subtitle mb-3" style="color: var(--secondary);">最佳实践</h3>
+                            <ul style="list-style: none; padding: 0; color: var(--text-muted);">
+                                <li class="text-body mb-2">• <strong>示例数量</strong>：1-5个效果最佳</li>
+                                <li class="text-body mb-2">• <strong>示例质量</strong>：选择有代表性的</li>
+                                <li class="text-body mb-2">• <strong>示例多样性</strong>：覆盖不同输入类型</li>
+                                <li class="text-body">• <strong>格式一致性</strong>：输入输出格式统一</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: Few-Shot示例 -->
+            <section class="slide" data-index="10">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.2.1</span>
+                    <h2 class="font-display text-title mb-4">Few-Shot示例</h2>
+                    <div class="highlight-scan" id="fewshotScan">
+                        <div class="scan-line" id="scanLine"></div>
+                        <div class="scan-content">
+                            <div class="scan-item" data-line="1">
+                                <span class="line-number">1</span>
+                                <span class="line-content">请将客户的口语化需求转换为标准查询参数。</span>
+                            </div>
+                            <div class="scan-item" data-line="2">
+                                <span class="line-number">2</span>
+                                <span class="line-content"></span>
+                            </div>
+                            <div class="scan-item" data-line="3">
+                                <span class="line-number">3</span>
+                                <span class="line-content" style="color: var(--accent-gold);">示例1：</span>
+                            </div>
+                            <div class="scan-item" data-line="4">
+                                <span class="line-number">4</span>
+                                <span class="line-content">输入："我想找个西乡附近的两房，预算三千左右"</span>
+                            </div>
+                            <div class="scan-item" data-line="5">
+                                <span class="line-number">5</span>
+                                <span class="line-content">输出：{ "区域": "西乡", "户型": "两居室", "预算": 3000, "预算范围": "2800-3200" }</span>
+                            </div>
+                            <div class="scan-item" data-line="6">
+                                <span class="line-number">6</span>
+                                <span class="line-content"></span>
+                            </div>
+                            <div class="scan-item" data-line="7">
+                                <span class="line-number">7</span>
+                                <span class="line-content" style="color: var(--accent-gold);">示例2：</span>
+                            </div>
+                            <div class="scan-item" data-line="8">
+                                <span class="line-number">8</span>
+                                <span class="line-content">输入："南山科技园附近，单间，越便宜越好"</span>
+                            </div>
+                            <div class="scan-item" data-line="9">
+                                <span class="line-number">9</span>
+                                <span class="line-content">输出：{ "区域": "南山科技园", "户型": "单间", "预算": "最低", "优先级": "价格" }</span>
+                            </div>
+                            <div class="scan-item" data-line="10">
+                                <span class="line-number">10</span>
+                                <span class="line-content"></span>
+                            </div>
+                            <div class="scan-item" data-line="11">
+                                <span class="line-number">11</span>
+                                <span class="line-content" style="color: var(--secondary); font-weight: bold;">现在请处理：</span>
+                            </div>
+                            <div class="scan-item" data-line="12">
+                                <span class="line-number">12</span>
+                                <span class="line-content">输入："宝安中心，一房一厅，要近地铁，预算四千以内"</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 12: 分隔符的使用 -->
+            <section class="slide" data-index="11">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.2.2</span>
+                    <h2 class="font-display text-title mb-4">分隔符的使用</h2>
+                    <p class="text-body mb-4" style="color: var(--text-muted);">
+                        分隔符用于隔离指令与数据，防止指令注入，提高提示词的清晰度和安全性。
+                    </p>
+                    <div class="tabs-container">
+                        <div class="tabs-header">
+                            <button class="tab-btn active" onclick="showTab('quotes')">""" 三引号</button>
+                            <button class="tab-btn" onclick="showTab('hash')">### 井号</button>
+                            <button class="tab-btn" onclick="showTab('dash')">--- 横线</button>
+                            <button class="tab-btn" onclick="showTab('xml')">&lt;tag&gt; XML</button>
+                            <button class="tab-btn" onclick="showTab('code')">``` 代码块</button>
+                        </div>
+                        <div class="tab-content active" id="quotes">
+                            <div class="code-block" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">"""
+请分析以下客户反馈
+并提取关键信息
+
+客户反馈：
+"""
+我上周入住西乡店的A栋302房间
+整体体验还不错
+房间采光很好
+但是空调有点吵
+"""
+
+提取要求：
+1. 入住门店
+2. 房间号
+3. 正面反馈
+4. 负面反馈
+"""</div>
+                        </div>
+                        <div class="tab-content" id="hash">
+                            <div class="code-block" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">### 客户反馈 ###
+我上周入住
+西乡店的A栋302房间
+...
+
+### 提取要求 ###
+1. 入住门店
+2. 房间号
+3. 正面反馈
+4. 负面反馈</div>
+                        </div>
+                        <div class="tab-content" id="dash">
+                            <div class="code-block" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">---
+示例1：
+输入：
+"我想找个西乡附近的两房"
+输出：
+{
+  "区域": "西乡"
+  "户型": "两居室"
+}
+---
+示例2：
+输入：
+"南山科技园附近，单间"
+输出：
+{
+  "区域": "南山科技园"
+  "户型": "单间"
+}
+---</div>
+                        </div>
+                        <div class="tab-content" id="xml">
+                            <div class="code-block" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">&lt;customer_feedback&gt;
+我上周入住
+西乡店的A栋302房间
+...
+&lt;/customer_feedback&gt;
+
+&lt;extraction_requirements&gt;
+&lt;item&gt;入住门店&lt;/item&gt;
+&lt;item&gt;房间号&lt;/item&gt;
+&lt;/extraction_requirements&gt;</div>
+                        </div>
+                        <div class="tab-content" id="code">
+                            <div class="code-block" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">```json
+{
+  "区域": "西乡",
+  "户型": "两居室",
+  "预算": 3000
+}
+```</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 13: Markdown格式控制 -->
+            <section class="slide" data-index="12">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.2.3</span>
+                    <h2 class="font-display text-title mb-4">Markdown格式控制</h2>
+                    <p class="text-body mb-4" style="color: var(--text-muted);">
+                        将Prompt Markdown化，本质上是一次"软件工程化"的思维升级。
+                    </p>
+                    <div class="before-after-slider" id="markdownSlider">
+                        <div class="slider-container" style="height: 500px;">
+                            <div class="before-panel" style="overflow-y: auto;">
+                                <span class="panel-label">❌ 无格式</span>
+                                <div class="panel-content">
+                                    <p class="text-body" style="font-size: 1.3rem; line-height: 2;">请为客户生成一份房源对比表。
+
+要求使用表格格式，包含房源名称、价格、面积、通勤时间、评分列。
+
+在最后一行添加推荐结论。
+
+使用加粗标注最优项。</p>
+                                </div>
+                            </div>
+                            <div class="after-panel" id="afterPanel" style="overflow-y: auto;">
+                                <div class="panel-content-wrapper" id="afterPanelWrapper">
+                                    <span class="panel-label">✅ Markdown格式</span>
+                                    <div class="panel-content" style="width: 50%;">
+                                        <div class="code-block" style="font-size: 1rem; line-height: 1.8; white-space: pre-wrap;">请为客户生成一份房源对比表。
+
+要求：
+1. 使用Markdown表格格式
+2. 包含以下列：
+   房源名称、价格、面积、
+   通勤时间、评分
+3. 在最后一行添加"推荐结论"
+4. 使用**加粗**标注最优项
+
+示例输出格式：
+| 对比项 | 房源A | 房源B |
+|--------|-------|-------|
+| 价格 | 2800元 | **2500元** |
+| 面积 | 25㎡ | 22㎡ |
+
+**推荐结论**：
+推荐房源B，性价比最高。</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slider-handle" id="sliderHandle">
+                                <div class="handle-line"></div>
+                                <div class="handle-button">↔</div>
+                                <div class="handle-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 14: Coze自动优化功能 -->
+            <section class="slide" data-index="13">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.3.1</span>
+                    <h2 class="font-display text-title mb-4">Coze自动优化提示词</h2>
+                    <p class="text-body mb-4" style="color: var(--text-muted);">
+                        提示词是智能体的灵魂。Coze的"自动优化提示词"功能可以帮助我们学习优秀Prompt的结构。
+                    </p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div class="typewriter-container" style="height: 100%;">
+                            <div class="typewriter-label">
+                                <span class="clay-badge" style="background: #FEF2F2; color: #DC2626;">优化前</span>
+                            </div>
+                            <div class="code-block" style="min-height: 300px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; line-height: 1.8; white-space: pre-wrap; text-align: center;">
+你是一个租房顾问
+帮客户找房
+                            </div>
+                        </div>
+                        <div class="typewriter-container" style="height: 100%;">
+                            <div class="typewriter-label">
+                                <span class="clay-badge" style="background: #ECFDF5; color: var(--secondary);">优化后</span>
+                            </div>
+                            <div class="code-block" style="min-height: 300px; font-size: 1.1rem; line-height: 1.8; overflow-y: auto; white-space: pre-wrap;"># 角色
+你是安居乐寓的金牌租房顾问
+拥有5年行业经验
+熟悉深圳各区域房源情况
+
+## 技能
+### 技能1：需求分析
+- 主动询问客户的预算、区域、户型偏好
+- 记录客户的特殊需求
+  （如养宠物、需要停车位等）
+
+### 技能2：房源推荐
+- 根据客户需求推荐3-5套合适房源
+- 每套房源说明3个匹配理由
+
+## 限制
+- 只推荐安居乐寓旗下房源
+- 不承诺具体价格，以实际查询为准
+- 保持专业、友好的服务态度</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <p class="text-body" style="color: var(--text-muted);">
+                            <strong>逆向学习要点：</strong>观察角色定义、技能模块划分、限制条件的重要性
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 15: 实战：需求分析 -->
+            <section class="slide" data-index="14">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.4.1</span>
+                    <h2 class="font-display text-title mb-6">实战：需求分析</h2>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div class="clay-card">
+                            <h3 class="font-display text-subtitle mb-4" style="color: var(--primary);">业务场景</h3>
+                            <ul style="list-style: none; padding: 0; color: var(--text-muted);">
+                                <li class="text-body mb-3">• 客户通过AI助手咨询租房</li>
+                                <li class="text-body mb-3">• 需要了解客户需求并推荐房源</li>
+                                <li class="text-body">• 要体现专业性和亲和力</li>
+                            </ul>
+                        </div>
+                        <div class="clay-card">
+                            <h3 class="font-display text-subtitle mb-4" style="color: var(--secondary);">核心能力</h3>
+                            <div class="bento-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="clay-badge" style="background: #EEF2FF; color: var(--primary); justify-content: center;">需求挖掘</div>
+                                <div class="clay-badge" style="background: #ECFDF5; color: var(--secondary); justify-content: center;">房源推荐</div>
+                                <div class="clay-badge" style="background: #FEF3C7; color: var(--accent-gold); justify-content: center;">异议处理</div>
+                                <div class="clay-badge" style="background: #FCE7F3; color: var(--accent-pink); justify-content: center;">促成转化</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clay-card mt-4">
+                        <h3 class="font-display text-subtitle mb-3" style="color: var(--accent-cyan);">安居乐寓背景</h3>
+                        <p class="text-body" style="color: var(--text-muted);">
+                            安居乐寓是深圳领先的长租公寓品牌，在宝安、南山、福田等区域有20+门店。主要客群是25-35岁的年轻白领，提供精装修、拎包入住的公寓产品。目前主推"深梦启航"计划，为应届毕业生提供专属优惠。
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 16: 实战：BROKE框架编写 -->
+            <section class="slide" data-index="15">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.4.2</span>
+                    <h2 class="font-display text-title mb-4">实战：使用BROKE框架编写</h2>
+                    <div class="prompt-builder">
+                        <div class="builder-workspace">
+                            <h3 class="font-display text-subtitle mb-4">构建你的提示词</h3>
+                            <div class="component-list">
+                                <button class="component-btn" onclick="addBrokeComponent('background')">📋 Background</button>
+                                <button class="component-btn" onclick="addBrokeComponent('role')">👤 Role</button>
+                                <button class="component-btn" onclick="addBrokeComponent('objectives')">🎯 Objectives</button>
+                                <button class="component-btn" onclick="addBrokeComponent('keyresult')">✅ Key Result</button>
+                                <button class="component-btn" onclick="addBrokeComponent('evolve')">🔄 Evolve</button>
+                            </div>
+                            <div class="build-area" id="brokeBuildArea">
+                                <p class="text-body text-center" style="color: var(--text-muted);">点击上方按钮添加组件</p>
+                            </div>
+                        </div>
+                        <div class="preview-panel">
+                            <h3 class="font-display text-subtitle mb-4">生成的提示词</h3>
+                            <div class="preview-content" id="brokePreview">// 点击左侧组件开始构建...</div>
+                            <button class="clay-btn clay-btn-secondary w-full" onclick="copyBrokePrompt()">📋 复制提示词</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 17: 实战：CO-STAR框架优化 -->
+            <section class="slide" data-index="16">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.4.3</span>
+                    <h2 class="font-display text-title mb-4">实战：使用CO-STAR框架优化</h2>
+                    <div class="prompt-builder">
+                        <div class="builder-workspace">
+                            <h3 class="font-display text-subtitle mb-4">构建你的提示词</h3>
+                            <div class="component-list">
+                                <button class="component-btn" onclick="addCostarComponent('context')">📋 Context</button>
+                                <button class="component-btn" onclick="addCostarComponent('objective')">🎯 Objective</button>
+                                <button class="component-btn" onclick="addCostarComponent('style')">🎨 Style</button>
+                                <button class="component-btn" onclick="addCostarComponent('tone')">🗣️ Tone</button>
+                                <button class="component-btn" onclick="addCostarComponent('audience')">👥 Audience</button>
+                                <button class="component-btn" onclick="addCostarComponent('response')">📄 Response</button>
+                            </div>
+                            <div class="build-area" id="costarBuildArea">
+                                <p class="text-body text-center" style="color: var(--text-muted);">点击上方按钮添加组件</p>
+                            </div>
+                        </div>
+                        <div class="preview-panel">
+                            <h3 class="font-display text-subtitle mb-4">生成的提示词</h3>
+                            <div class="preview-content" id="costarPreview">// 点击左侧组件开始构建...</div>
+                            <button class="clay-btn clay-btn-secondary w-full" onclick="copyCostarPrompt()">📋 复制提示词</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 18: 实战：Few-Shot示例整合 -->
+            <section class="slide" data-index="17">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.4.4</span>
+                    <h2 class="font-display text-title mb-4">实战：结合Few-Shot示例</h2>
+                    <div class="accordion" id="fewshotAccordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>示例对话1：标准推荐</span>
+                                <span class="accordion-icon">▼</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-body">
+                                    <div class="code-block" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">用户：
+"我想在西乡租房，预算3000左右"
+
+小安：
+"您好！很高兴为您服务😊
+您想在西乡租房
+预算3000元左右，对吧？
+
+根据您的需求
+我为您推荐以下3套房源：
+
+🏠 西乡永丰店·阳光单间
+- 价格：2800元/月
+- 面积：22㎡
+- 卖点：近地铁、采光好、精装修
+
+🏠 西乡银田店·温馨一居
+- 价格：3200元/月
+- 面积：28㎡
+- 卖点：独立厨卫、朝南、安静
+
+您看哪套比较感兴趣？"</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>示例对话2：处理价格异议</span>
+                                <span class="accordion-icon">▼</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-body">
+                                    <div class="code-block" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap;">用户：
+"这些都有点贵"
+
+小安：
+"理解您的考虑💡
+租房确实是一笔不小的开销
+
+让我为您找找
+更优惠的选择：
+
+🏠 西乡永丰店·特惠房源
+- 价格：2400元/月（限时优惠）
+- 面积：20㎡
+- 说明：朝北但通风好，基础装修
+
+另外，如果您是应届毕业生
+我们还有"深梦启航"计划：
+✅ 首月租金8折
+✅ 免押金（信用达标）
+✅ 免费换房一次
+
+您符合这个条件吗？"</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 19: 高级技巧 -->
+            <section class="slide" data-index="18">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.4.5</span>
+                    <h2 class="font-display text-title mb-4">高级技巧：让AI帮你写提示词</h2>
+                    <p class="text-body mb-4" style="color: var(--text-muted);">
+                        当你不知道怎么写提示词时，可以直接问AI！这就是"用AI学AI"的技巧。
+                    </p>
+                    <div class="flip-card" onclick="flipCard(this)" style="max-width: 800px; margin: 0 auto; height: 300px;">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <h3 class="font-display text-subtitle">点击查看元提示词</h3>
+                                <p class="text-body">（用来生成提示词的提示词）</p>
+                            </div>
+                            <div class="flip-card-back">
+                                <div class="code-block" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; text-align: left; width: 100%;">我有一个任务：
+[描述你的任务]
+
+请帮我：
+1. 分析这个任务需要提供哪些信息
+2. 使用BROKE或CO-STAR框架
+   帮我写一个结构化的提示词
+3. 解释为什么这样写更好</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <p class="text-body" style="color: var(--text-muted);">
+                            <strong>举例：</strong>"我想让AI帮我写一封邀请同事参加团建活动的通知"
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 20: 练习1 -->
+            <section class="slide" data-index="19">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.5</span>
+                    <h2 class="font-display text-title mb-6">实战练习 1</h2>
+                    <div class="clay-card" style="max-width: 900px; margin: 0 auto;">
+                        <div class="clay-badge mb-4" style="background: var(--primary); color: white;">练习1</div>
+                        <h3 class="font-display text-subtitle mb-4">使用Coze自动优化提示词功能</h3>
+                        <p class="text-body mb-4" style="color: var(--text-muted);">
+                            <strong>目标：</strong>体验Coze的自动优化功能，学习优秀Prompt的结构
+                        </p>
+                        <div style="background: #F9FAFB; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <p class="text-body" style="color: var(--text-primary); margin-bottom: 0.5rem;"><strong>步骤：</strong></p>
+                            <ol style="color: var(--text-muted); padding-left: 1.5rem;">
+                                <li class="text-body mb-2">登录Coze平台，创建新Bot</li>
+                                <li class="text-body mb-2">在"人设与回复逻辑"区域输入简单描述："你是一个客服，帮客户解答租房问题"</li>
+                                <li class="text-body mb-2">点击"自动优化提示词"按钮</li>
+                                <li class="text-body mb-2">观察优化后的Prompt结构</li>
+                                <li class="text-body">分析优化前后的差异</li>
+                            </ol>
+                        </div>
+                        <div style="background: #EEF2FF; border-radius: 12px; padding: 1.5rem;">
+                            <p class="text-body" style="color: var(--primary);"><strong>思考题：</strong></p>
+                            <ul style="color: var(--text-muted); padding-left: 1.5rem;">
+                                <li class="text-body">Coze添加了哪些你没有想到的要素？</li>
+                                <li class="text-body">优化后的结构有什么特点？</li>
+                                <li class="text-body">你可以如何进一步改进？</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 21: 练习2 -->
+            <section class="slide" data-index="20">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.5</span>
+                    <h2 class="font-display text-title mb-6">实战练习 2</h2>
+                    <div class="clay-card" style="max-width: 900px; margin: 0 auto;">
+                        <div class="clay-badge mb-4" style="background: var(--secondary); color: white;">练习2</div>
+                        <h3 class="font-display text-subtitle mb-4">安居乐寓金牌销售Prompt</h3>
+                        <p class="text-body mb-4" style="color: var(--text-muted);">
+                            <strong>目标：</strong>综合运用本课所学，使用AI编写完整的System Prompt
+                        </p>
+                        <div style="background: #F9FAFB; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                            <p class="text-body" style="color: var(--text-primary); margin-bottom: 0.5rem;"><strong>要求：</strong></p>
+                            <ol style="color: var(--text-muted); padding-left: 1.5rem;">
+                                <li class="text-body mb-2">使用BROKE或CO-STAR框架</li>
+                                <li class="text-body mb-2">包含至少3个Few-Shot示例</li>
+                                <li class="text-body mb-2">使用分隔符区分不同部分</li>
+                                <li class="text-body">对AI编写的prompt进行测试，并根据测试结果进行优化</li>
+                            </ol>
+                        </div>
+                        <div style="background: #ECFDF5; border-radius: 12px; padding: 1.5rem;">
+                            <p class="text-body" style="color: var(--secondary);"><strong>评分标准：</strong></p>
+                            <div class="bento-grid" style="grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1rem;">
+                                <div class="text-center">
+                                    <div class="font-display text-subtitle" style="color: var(--primary);">30%</div>
+                                    <div class="text-small" style="color: var(--text-muted);">结构清晰</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="font-display text-subtitle" style="color: var(--primary);">30%</div>
+                                    <div class="text-small" style="color: var(--text-muted);">示例实用</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="font-display text-subtitle" style="color: var(--primary);">20%</div>
+                                    <div class="text-small" style="color: var(--text-muted);">格式规范</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="font-display text-subtitle" style="color: var(--primary);">20%</div>
+                                    <div class="text-small" style="color: var(--text-muted);">业务贴合</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 22: 本课小结 -->
+            <section class="slide" data-index="21">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">2.6</span>
+                    <h2 class="font-display text-title mb-6">本课小结</h2>
+                    <div class="bento-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="bento-item">
+                            <div class="clay-badge mb-3" style="background: #EEF2FF; color: var(--primary);">框架</div>
+                            <h3 class="font-display text-subtitle mb-2">BROKE</h3>
+                            <p class="text-small" style="color: var(--text-muted);">Background, Role, Objectives, Key Result, Evolve</p>
+                        </div>
+                        <div class="bento-item">
+                            <div class="clay-badge mb-3" style="background: #ECFDF5; color: var(--secondary);">框架</div>
+                            <h3 class="font-display text-subtitle mb-2">CO-STAR</h3>
+                            <p class="text-small" style="color: var(--text-muted);">Context, Objective, Style, Tone, Audience, Response</p>
+                        </div>
+                        <div class="bento-item">
+                            <div class="clay-badge mb-3" style="background: #FEF3C7; color: var(--accent-gold);">技巧</div>
+                            <h3 class="font-display text-subtitle mb-2">Few-Shot</h3>
+                            <p class="text-small" style="color: var(--text-muted);">通过示例引导模型学习</p>
+                        </div>
+                        <div class="bento-item">
+                            <div class="clay-badge mb-3" style="background: #E0F2FE; color: var(--accent-cyan);">技巧</div>
+                            <h3 class="font-display text-subtitle mb-2">分隔符</h3>
+                            <p class="text-small" style="color: var(--text-muted);">隔离指令与数据，防止注入</p>
+                        </div>
+                        <div class="bento-item">
+                            <div class="clay-badge mb-3" style="background: #FCE7F3; color: var(--accent-pink);">技巧</div>
+                            <h3 class="font-display text-subtitle mb-2">Markdown</h3>
+                            <p class="text-small" style="color: var(--text-muted);">结构化输出控制</p>
+                        </div>
+                        <div class="bento-item">
+                            <div class="clay-badge mb-3" style="background: #F3E8FF; color: #9333EA;">工具</div>
+                            <h3 class="font-display text-subtitle mb-2">Coze Optimize</h3>
+                            <p class="text-small" style="color: var(--text-muted);">自动优化提示词</p>
+                        </div>
+                    </div>
+                    <div class="clay-card mt-4">
+                        <h3 class="font-display text-subtitle mb-3" style="color: var(--primary);">下节预告</h3>
+                        <p class="text-body" style="color: var(--text-muted);">
+                            下一课我们将学习<strong>上下文工程</strong>，包括：上下文窗口与记忆的区别、Coze中的短期记忆和长期记忆、使用Database功能存储用户信息。
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 23: 参考资料 -->
+            <section class="slide" data-index="22">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">参考资料</span>
+                    <h2 class="font-display text-title mb-6">推荐学习资源</h2>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
+                        <a href="https://www.promptingguide.ai/" target="_blank" class="clay-card" style="text-decoration: none; color: inherit;">
+                            <div class="clay-badge mb-4" style="background: #EEF2FF; color: var(--primary);">📚</div>
+                            <h3 class="font-display text-subtitle mb-2">Prompt Engineering Guide</h3>
+                            <p class="text-body" style="color: var(--text-muted);">全面的提示词工程指南</p>
+                        </a>
+                        <a href="https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-openai-api" target="_blank" class="clay-card" style="text-decoration: none; color: inherit;">
+                            <div class="clay-badge mb-4" style="background: #ECFDF5; color: var(--secondary);">📖</div>
+                            <h3 class="font-display text-subtitle mb-2">OpenAI最佳实践</h3>
+                            <p class="text-body" style="color: var(--text-muted);">官方提示词工程最佳实践</p>
+                        </a>
+                        <a href="https://www.coze.cn/docs" target="_blank" class="clay-card" style="text-decoration: none; color: inherit;">
+                            <div class="clay-badge mb-4" style="background: #FEF3C7; color: var(--accent-gold);">🤖</div>
+                            <h3 class="font-display text-subtitle mb-2">Coze官方文档</h3>
+                            <p class="text-body" style="color: var(--text-muted);">Coze平台使用文档</p>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 24: 课后作业 -->
+            <section class="slide" data-index="23">
+                <div class="slide-content">
+                    <span class="text-label text-primary mb-2">课后作业</span>
+                    <h2 class="font-display text-title mb-6">巩固练习</h2>
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>作业1：框架应用题</span>
+                                <span class="accordion-icon">▼</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-body">
+                                    为一个新场景（如"处理客户投诉"）分别用BROKE和CO-STAR框架编写提示词，比较两者的差异。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>作业2：Few-Shot实践题</span>
+                                <span class="accordion-icon">▼</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-body">
+                                    收集3-5个安居乐寓的真实客服对话，整理成Few-Shot示例，用于训练AI客服。
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header" onclick="toggleAccordion(this)">
+                                <span>作业3：优化迭代题</span>
+                                <span class="accordion-icon">▼</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-body">
+                                    将上节课编写的提示词，使用本课学到的技巧进行优化，并记录优化前后的对比。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 25: 结束页 -->
+            <section class="slide" data-index="24">
+                <canvas class="particle-bg" id="particleCanvas2"></canvas>
+                <div class="slide-content" style="align-items: center; text-align: center;">
+                    <h1 class="font-display text-hero mb-4" style="color: var(--primary);">
+                        感谢学习！
+                    </h1>
+                    <p class="text-hero-sub mb-6" style="color: var(--text-muted);">
+                        提示词工程是AI应用的核心技能
+                    </p>
+                    <div class="clay-card" style="max-width: 500px;">
+                        <p class="text-body" style="color: var(--text-muted);">
+                            "提示词是智能体的灵魂。写好提示词，让AI成为你的得力助手。"
+                        </p>
+                    </div>
+                    <div class="mt-6">
+                        <button class="clay-btn clay-btn-primary" onclick="goToSlide(0)">
+                            重新播放 ↻
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-dots" id="navDots"></div>
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="nav-arrows">
+            <button class="nav-arrow" onclick="prevSlide()" id="prevBtn">←</button>
+            <button class="nav-arrow" onclick="nextSlide()" id="nextBtn">→</button>
+        </div>
+        <div class="page-counter" id="pageCounter">1 / 25</div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

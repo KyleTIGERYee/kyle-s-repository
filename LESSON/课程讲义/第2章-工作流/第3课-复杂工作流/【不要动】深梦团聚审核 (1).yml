@@ -1,0 +1,734 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 【不要动】深梦团聚审核
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/tongyi:0.1.32@20a5454088fa017b72490e1cbaeebff21094d11b13e41197591734d1c08cdbb5
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: 1773106565487-source-1773107227319-target
+      source: '1773106565487'
+      sourceHandle: source
+      target: '1773107227319'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1773107227319-source-1773113771478-target
+      source: '1773107227319'
+      sourceHandle: source
+      target: '1773113771478'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1773113771478-source-1773124125324-target
+      source: '1773113771478'
+      sourceHandle: source
+      target: '1773124125324'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1773124125324-true-17731240508900-target
+      source: '1773124125324'
+      sourceHandle: 'true'
+      target: '17731240508900'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 17731240508900-source-17731247185370-target
+      source: '17731240508900'
+      sourceHandle: source
+      target: '17731247185370'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 17731247185370-source-1773107054017-target
+      source: '17731247185370'
+      sourceHandle: source
+      target: '1773107054017'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: end
+      id: 1773124125324-bf76c90a-cf33-4491-a220-5db9a051c00f-1773132717310-target
+      source: '1773124125324'
+      sourceHandle: bf76c90a-cf33-4491-a220-5db9a051c00f
+      target: '1773132717310'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: name
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: name
+        - default: ''
+          hint: ''
+          label: idCard
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: idCard
+        - default: ''
+          hint: ''
+          label: phone
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: phone
+        - default: ''
+          hint: ''
+          label: workUnit
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: workUnit
+        - default: ''
+          hint: ''
+          label: jobType
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: jobType
+        - default: ''
+          hint: ''
+          label: store
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: store
+        - default: ''
+          hint: ''
+          label: familySize
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: familySize
+        - default: ''
+          hint: ''
+          label: relationships
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: relationships
+        - default: ''
+          hint: ''
+          label: checkInDate
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: checkInDate
+        - default: ''
+          hint: ''
+          label: stayDays
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: stayDays
+        - default: ''
+          hint: ''
+          label: story
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: story
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - image
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          default: ''
+          hint: ''
+          label: idImages
+          max_length: 5
+          options: []
+          placeholder: ''
+          required: true
+          type: file-list
+          variable: idImages
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - image
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          default: ''
+          hint: ''
+          label: relationImages
+          max_length: 10
+          options: []
+          placeholder: ''
+          required: true
+          type: file-list
+          variable: relationImages
+      height: 421
+      id: '1773106565487'
+      position:
+        x: 5.560173921363685
+        y: 29.694611919765805
+      positionAbsolute:
+        x: 5.560173921363685
+        y: 29.694611919765805
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '17731247185370'
+          - audit_result
+          value_type: string
+          variable: audit_result
+        - value_selector:
+          - '17731247185370'
+          - audit_reason
+          value_type: string
+          variable: audit_reason
+        selected: false
+        title: 输出
+        type: end
+      height: 114
+      id: '1773107054017'
+      position:
+        x: 2269.8774984752963
+        y: 44.07729553130139
+      positionAbsolute:
+        x: 2269.8774984752963
+        y: 44.07729553130139
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            enable_thinking: true
+            temperature: 0
+          mode: chat
+          name: qwen3.5-flash
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: 081fde78-c585-46ed-8e3c-ed94979b7974
+          role: system
+          text: "【申请人信息】\n姓名：{{#1773106565487.name#}}\n身份证：{{#1773106565487.idCard#}}\n\
+            电话：{{#1773106565487.phone#}}\n单位：{{#1773106565487.workUnit#}}\n职业类别：{{#1773106565487.jobType#}}\n\
+            \n\n## 你的角色\n\n\n你是安居乐寓\"深梦团聚-春节免费住\"活动的专业审核专员。你的职责是审核申请人的资格和材料，确保活动公平公正地进行。\n\
+            \n\n## 活动背景\n\n\n\"深梦团聚\"是安居乐寓面向深圳城市建设者的公益活动，在春节期间为符合条件的家庭提供免费住宿，让他们能够与家人团聚过年。\n\
+            \n\n## 审核任务\n\n\n请严格按照以下步骤逐一审核，所有项目必须全部通过才能审核通过：\n\n\n### 审核一：必传图片校验\n\
+            - 检查身份证图片是否已上传\n- 检查工作证明图片是否已上传\n\n\n### 审核二：身份证信息一致性校验\n- 识别上传的身份证图片中的姓名和身份证号码\n\
+            - 验证图片中的姓名与申请人填写的姓名完全一致\n- 验证图片中的身份证号码与申请人填写的身份证号码完全一致\n\n\n### 审核三：年龄合规性校验\n\
+            - 从身份证号码第7-14位提取出生日期（格式：YYYYMMDD）\n- 计算申请人当前年龄，必须≥18周岁\n\n\n### 审核四：职业类型校验\n\
+            确认申请人职业类别是否属于以下允许的类型之一：\n- **快递员**\n- **网约配送员**\n- **网约车司机**\n- **货车司机**\n\
+            - **公交车司机**\n- **地铁一线运营服务人员**\n- **保障房建筑工人**\n\n\n\n### 审核五：工作证明材料校验\n\
+            \n#### 5.1 工作证明类型识别\n检查工作证明图片是否为以下类型之一：\n- 工作证（需包含：姓名、照片、单位名称）\n- 接单证明/平台工作截图（需包含：姓名、平台名称、近期订单记录）\n\
+            - 社保证明（需包含：姓名、参保单位）\n- 其他有效工作证明材料\n\n\n#### 5.2 工作证明内容一致性校验\n- 工作证明中的姓名必须与身份证姓名一致\n\
+            - 工作证明中的人像照片（如有）必须与身份证照片为同一人\n\n#### 5.3 保障房建筑工人特殊要求\n- 若职业类别为\"保障房建筑工人\"\
+            ，必须额外提供总包单位盖章确认的证明材料\n\n\n### 审核六：合理性校验\n- 校验申请人的职业与工作单位是否合理匹配\n- 校验工作证明材料与申请信息是否逻辑一致\n\
+            \n\n## 输出格式要求\n\n\n你必须严格按照以下JSON格式输出，**不要输出任何其他内容**：\n\n\n### 审核通过时（所有项目均通过）：\n\
+            ```json\n{\n  \"audit_result\": \"PASSED\",\n  \"audit_reason\": \"\"\n\
+            }\n```\n\n\n### 审核失败时（任一项目不通过）：\n```json\n{\n  \"audit_result\": \"FAILED\"\
+            ,\n  \"audit_reason\": \"具体的审核失败原因，50字以内的友善中文短语\"\n}\n```\n\n\n**重要规则**：\n\
+            - 审核通过时，`audit_reason` 必须为空字符串 `\"\"`\n- 审核失败时，`audit_reason` 必须填写具体的失败原因和修改建议\n\
+            - 如有多项不通过，优先反馈第一项失败原因\n\n### 审核失败示例：\n```json\n{\n  \"audit_result\":\
+            \ \"FAILED\",\n  \"audit_reason\": \"抱歉，您填写的身份证号码与身份证图片信息不一致，请核对后重新填写。\"\
+            \n}\n```\n\n\n## 沟通风格\n\n\n- 使用专业、友好的语气\n- 拒绝时给出明确的修改建议\n- 对申请人的付出表示感谢\n\
+            \n\n## 注意事项\n\n\n1. **图片审核**：如图片模糊无法辨认，应提示用户重新上传清晰照片\n2. **隐私保护**：输出中不要完整显示身份证号、手机号等敏感信息\n\
+            3. **边界情况**：如遇到边界情况（如职业表述模糊），应倾向于给用户修改机会\n4. **输出格式**：必须输出纯JSON格式，不要包含任何markdown代码块标记\n\
+            5. **严格审核**：必须逐一完成所有审核项目，不可遗漏任何一项"
+        reasoning_format: separated
+        selected: false
+        structured_output:
+          schema:
+            else:
+              properties:
+                audit_reason:
+                  type: string
+                audit_result:
+                  const: FAILED
+              required:
+              - audit_reason
+            if:
+              properties:
+                jobtype:
+                  enum:
+                  - 外卖员
+                  - 快递员
+                  - 网约车司机
+            properties:
+              audit_reason:
+                type: string
+              audit_result:
+                enum:
+                - PASSED
+                - FAILED
+                type: string
+            required:
+            - audit_result
+            then:
+              not:
+                required:
+                - audit_reason
+              properties:
+                audit_result:
+                  const: PASSED
+            type: object
+        structured_output_enabled: false
+        title: 身份认证
+        type: llm
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - '1773106565487'
+            - idImages
+          enabled: true
+      height: 88
+      id: '1773107227319'
+      position:
+        x: 395.00389732619976
+        y: 21
+      positionAbsolute:
+        x: 395.00389732619976
+        y: 21
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "\"\"\"\nDify LLM 输出解析器\n用于解析AI审核结果,提取 audit_result 和 audit_reason 两个变量\n\
+          \"\"\"\nimport json\nimport re\nfrom typing import Union, Any\n\n\ndef clean_json_string(text:\
+          \ str) -> str:\n    \"\"\"\n    清理JSON字符串,移除markdown代码块标记\n    \n    Args:\n\
+          \        text: 原始文本\n        \n    Returns:\n        清理后的JSON字符串\n    \"\
+          \"\"\n    text = text.strip()\n    \n    text = re.sub(r'^```json\\s*',\
+          \ '', text)\n    text = re.sub(r'^```\\s*', '', text)\n    text = re.sub(r'\\\
+          s*```$', '', text)\n    \n    return text.strip()\n\n\ndef parse_audit_result(llm_output:\
+          \ Union[str, dict, Any]) -> dict:\n    \"\"\"\n    解析LLM输出的JSON格式审核结果\n\
+          \    \n    Args:\n        llm_output: LLM输出的原始内容,可能是字符串、字典或其他对象\n      \
+          \  \n    Returns:\n        dict: {\"audit_result\": str, \"audit_reason\"\
+          : str}\n    \"\"\"\n    try:\n        if llm_output is None:\n         \
+          \   return {\"audit_result\": \"FAILED\", \"audit_reason\": \"审核结果为空,请重新提交\"\
+          }\n        \n        if isinstance(llm_output, dict):\n            result\
+          \ = llm_output\n        else:\n            if hasattr(llm_output, '__dict__'):\n\
+          \                obj_dict = llm_output.__dict__\n                if 'text'\
+          \ in obj_dict:\n                    llm_output = obj_dict['text']\n    \
+          \            elif 'content' in obj_dict:\n                    llm_output\
+          \ = obj_dict['content']\n                else:\n                    llm_output\
+          \ = str(llm_output)\n            \n            if not isinstance(llm_output,\
+          \ str):\n                llm_output = str(llm_output)\n            \n  \
+          \          json_str = clean_json_string(llm_output)\n            result\
+          \ = json.loads(json_str)\n        \n        audit_result = result.get(\"\
+          audit_result\", \"FAILED\")\n        audit_reason = result.get(\"audit_reason\"\
+          , \"\")\n        \n        if audit_result not in [\"PASSED\", \"FAILED\"\
+          ]:\n            audit_result = \"FAILED\"\n        \n        if audit_result\
+          \ == \"PASSED\":\n            audit_reason = \"\"\n        \n        return\
+          \ {\n            \"audit_result\": audit_result,\n            \"audit_reason\"\
+          : audit_reason\n        }\n        \n    except json.JSONDecodeError:\n\
+          \        return {\"audit_result\": \"FAILED\", \"audit_reason\": \"审核结果格式异常,请重新提交\"\
+          }\n    except Exception:\n        return {\"audit_result\": \"FAILED\",\
+          \ \"audit_reason\": \"系统处理异常,请重新提交\"}\n\n\ndef main(text: Union[str, dict,\
+          \ Any] = None, **kwargs) -> dict:\n    \"\"\"\n    Dify代码执行节点入口函数\n    \n\
+          \    Args:\n        text: LLM节点的输出(Dify传递的参数名)\n        **kwargs: 其他可能的参数\n\
+          \        \n    Returns:\n        dict: {\"audit_result\": str, \"audit_reason\"\
+          : str}\n    \"\"\"\n    llm_output = text or kwargs.get('llm_output') or\
+          \ kwargs.get('content')\n    return parse_audit_result(llm_output)\n"
+        code_language: python3
+        outputs:
+          audit_reason:
+            children: null
+            type: string
+          audit_result:
+            children: null
+            type: string
+        selected: false
+        title: 代码执行
+        type: code
+        variables:
+        - value_selector:
+          - '1773107227319'
+          - text
+          value_type: string
+          variable: text
+      height: 52
+      id: '1773113771478'
+      position:
+        x: 759.26686933424
+        y: -14.107282142154475
+      positionAbsolute:
+        x: 759.26686933424
+        y: -14.107282142154475
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        model:
+          completion_params:
+            enable_thinking: true
+            temperature: 0
+            thinking_budget: 81901
+          mode: chat
+          name: qwen3.5-flash
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: 081fde78-c585-46ed-8e3c-ed94979b7974
+          role: system
+          text: "【申请人信息】\n姓名：{{#1773106565487.name#}}\n身份证：{{#1773106565487.idCard#}}\n\
+            \n【申请意向】\n家庭计划入住人数（包含申请人）：{{#1773106565487.familySize#}}\n成员关系：{{#1773106565487.relationships#}}\n\
+            \n## 你的角色\n\n\n你是安居乐寓\"深梦团聚-春节免费住\"活动的专业审核专员。你的职责是审核申请人的资格和材料，确保活动公平公正地进行。\n\
+            \n\n## 活动背景\n\n\n\"深梦团聚\"是安居乐寓面向深圳城市建设者的公益活动，在春节期间为符合条件的家庭提供免费住宿，让他们能够与家人团聚过年。\n\
+            \n\n## 审核任务\n\n\n请严格按照以下步骤逐一审核，所有项目必须全部通过才能审核通过：\n\n\n### 审核一：直系亲属定义确认\n\
+            \n**直系亲属范围包括：**\n- 配偶\n- 父母（含养父母）\n- 子女（含养子女）\n- 祖父母、外祖父母\n- 孙子女、外孙子女\n\
+            \n**判断标准：**\n- 用户提交的{{#1773106565487.relationships#}}字段中的关系必须在上述直系亲属范围内\n\
+            - 如关系不在范围内，审核不通过\n\n\n### 审核二：直系亲属证明材料校验\n\n**检查要求：**\n- 验证上传的关系证明材料中至少包含一位直系亲属的证明\n\
+            - 证明材料类型包括：\n  * 户口本（需能清晰辨认申请人与同住人的关系，一般体现在“与户主关系”这一栏，“子”代表儿子、“女”代表女儿）\n\
+            \  * 出生证明（适用于父母子女关系）\n  * 结婚证（适用于配偶关系）\n  * 收养证明（适用于养父母、养子女关系）\n  * 公安机关出具的关系证明\n\
+            \n**判断标准：**\n- 至少有一份材料能证明申请人与某位同住人的直系亲属关系\n- 材料信息清晰可辨认\n\n\n### 审核三：关系一致性校验\n\
+            \n**校验步骤：**\n\n#### 3.1 身份信息提取\n- 从身份证图片中识别申请人的姓名和身份证号码\n- 从关系证明材料中识别同住人的姓名和身份证号码（如有）\n\
+            \n#### 3.2 关系深度分析\n结合以下信息进行综合判断：\n- 申请人的姓名和身份证号码\n- 同住人的姓名和身份证号码\n- 关系证明材料中的关系描述\n\
+            - 身份证号码中的性别、出生日期等信息\n\n**判断逻辑：**\n- 配偶关系：结婚证上的双方姓名与申请人、同住人姓名一致\n- 父母子女关系：户口本或出生证明能体现父子/母子/父女/母女关系，一般体现在“与户主关系”这一栏，“子”代表儿子、“女”代表女儿\n\
+            - 祖孙关系：通过户口本或公安机关证明体现三代直系关系\n- 养父母/养子女关系：需提供收养证明\n\n#### 3.3 一致性验证\n-\
+            \ 判断同住人与用户的实际关系\n- 验证该关系是否与用户提交的{{#1773106565487.relationships#}}字段一致\n\
+            - 如不一致，审核不通过\n\n\n\n### 审核四：材料清晰度校验\n\n**检查要求：**\n- 所有上传的关系证明材料图片清晰可辨认\n\
+            - 关键信息（姓名、身份证号、关系描述）无遮挡、无模糊\n\n## 输出格式要求\n\n\n你必须严格按照以下JSON格式输出，**不要输出任何其他内容**：\n\
+            \n\n### 审核通过时（所有项目均通过）：\n```json\n{\n  \"audit_result\": \"PASSED\",\n\
+            \  \"audit_reason\": \"\"\n}\n```\n\n\n### 审核失败时（任一项目不通过）：\n```json\n\
+            {\n  \"audit_result\": \"FAILED\",\n  \"audit_reason\": \"具体的审核失败原因，50字以内的友善中文短语\"\
+            \n}\n```\n\n\n**重要规则**：\n- 审核通过时，`audit_reason` 必须为空字符串 `\"\"`\n- 审核失败时，`audit_reason`\
+            \ 必须填写具体的失败原因和修改建议\n- 如有多项不通过，优先反馈第一项失败原因\n\n### 审核失败示例：\n\n**示例1：关系不在直系亲属范围内**\n\
+            ```json\n{\n  \"audit_result\": \"FAILED\",\n  \"audit_reason\": \"抱歉，本次活动仅限直系亲属同住，您提交的关系不在支持范围内。\"\
+            \n}\n```\n\n**示例2：缺少关系证明材料**\n```json\n{\n  \"audit_result\": \"FAILED\"\
+            ,\n  \"audit_reason\": \"抱歉，您上传的关系证明材料无法证明直系亲属关系，请上传户口本、出生证明、结婚证等有效材料。\"\
+            \n}\n```\n\n**示例3：关系不一致**\n```json\n{\n  \"audit_result\": \"FAILED\"\
+            ,\n  \"audit_reason\": \"抱歉，关系证明材料显示的关系与您填写的关系不一致，请核对后重新提交。\"\n}\n```\n\
+            \n**示例4：材料模糊**\n```json\n{\n  \"audit_result\": \"FAILED\",\n  \"audit_reason\"\
+            : \"抱歉，您上传的关系证明材料图片模糊，请确保照片光线充足、文字清晰后重新提交。\"\n}\n```\n\n\n## 沟通风格\n\n\n\
+            - 使用专业、友好的语气\n- 拒绝时给出明确的修改建议\n- 对申请人的付出表示感谢\n\n\n## 注意事项\n\n\n1. **图片审核**：如图片模糊无法辨认，应提示用户重新上传清晰照片\n\
+            2. **隐私保护**：输出中不要完整显示身份证号、手机号等敏感信息\n3. **边界情况**：如遇到边界情况（如关系表述模糊），应倾向于给用户修改机会\n\
+            4. **输出格式**：必须输出纯JSON格式，不要包含任何markdown代码块标记\n5. **严格审核**：必须逐一完成所有审核项目，不可遗漏任何一项\n\
+            6. **直系亲属范围**：严格按照定义的范围判断，超出范围的关系一律不通过"
+        reasoning_format: separated
+        selected: false
+        structured_output:
+          schema:
+            else:
+              properties:
+                audit_reason:
+                  type: string
+                audit_result:
+                  const: FAILED
+              required:
+              - audit_reason
+            if:
+              properties:
+                jobtype:
+                  enum:
+                  - 外卖员
+                  - 快递员
+                  - 网约车司机
+            properties:
+              audit_reason:
+                type: string
+              audit_result:
+                enum:
+                - PASSED
+                - FAILED
+                type: string
+            required:
+            - audit_result
+            then:
+              not:
+                required:
+                - audit_reason
+              properties:
+                audit_result:
+                  const: PASSED
+            type: object
+        structured_output_enabled: false
+        title: 同住人认证
+        type: llm
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - '1773106565487'
+            - relationImages
+          enabled: true
+      height: 88
+      id: '17731240508900'
+      position:
+        x: 1582.0055964424675
+        y: -52.02125727116445
+      positionAbsolute:
+        x: 1582.0055964424675
+        y: -52.02125727116445
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 861d85a2-ef00-4c48-8be6-80c12477d50b
+            value: PASSED
+            varType: string
+            variable_selector:
+            - '1773113771478'
+            - audit_result
+          id: 'true'
+          logical_operator: and
+        - case_id: bf76c90a-cf33-4491-a220-5db9a051c00f
+          conditions:
+          - comparison_operator: contains
+            id: 8cce6084-665a-48f2-a8cc-3b01b634e896
+            value: FAILED
+            varType: string
+            variable_selector:
+            - '1773113771478'
+            - audit_result
+          id: bf76c90a-cf33-4491-a220-5db9a051c00f
+          logical_operator: and
+        selected: false
+        title: 条件分支
+        type: if-else
+      height: 172
+      id: '1773124125324'
+      position:
+        x: 1071.0790660828093
+        y: -35.15013422334053
+      positionAbsolute:
+        x: 1071.0790660828093
+        y: -35.15013422334053
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "\"\"\"\nDify LLM 输出解析器\n用于解析AI审核结果,提取 audit_result 和 audit_reason 两个变量\n\
+          \"\"\"\nimport json\nimport re\nfrom typing import Union, Any\n\n\ndef clean_json_string(text:\
+          \ str) -> str:\n    \"\"\"\n    清理JSON字符串,移除markdown代码块标记\n    \n    Args:\n\
+          \        text: 原始文本\n        \n    Returns:\n        清理后的JSON字符串\n    \"\
+          \"\"\n    text = text.strip()\n    \n    text = re.sub(r'^```json\\s*',\
+          \ '', text)\n    text = re.sub(r'^```\\s*', '', text)\n    text = re.sub(r'\\\
+          s*```$', '', text)\n    \n    return text.strip()\n\n\ndef parse_audit_result(llm_output:\
+          \ Union[str, dict, Any]) -> dict:\n    \"\"\"\n    解析LLM输出的JSON格式审核结果\n\
+          \    \n    Args:\n        llm_output: LLM输出的原始内容,可能是字符串、字典或其他对象\n      \
+          \  \n    Returns:\n        dict: {\"audit_result\": str, \"audit_reason\"\
+          : str}\n    \"\"\"\n    try:\n        if llm_output is None:\n         \
+          \   return {\"audit_result\": \"FAILED\", \"audit_reason\": \"审核结果为空,请重新提交\"\
+          }\n        \n        if isinstance(llm_output, dict):\n            result\
+          \ = llm_output\n        else:\n            if hasattr(llm_output, '__dict__'):\n\
+          \                obj_dict = llm_output.__dict__\n                if 'text'\
+          \ in obj_dict:\n                    llm_output = obj_dict['text']\n    \
+          \            elif 'content' in obj_dict:\n                    llm_output\
+          \ = obj_dict['content']\n                else:\n                    llm_output\
+          \ = str(llm_output)\n            \n            if not isinstance(llm_output,\
+          \ str):\n                llm_output = str(llm_output)\n            \n  \
+          \          json_str = clean_json_string(llm_output)\n            result\
+          \ = json.loads(json_str)\n        \n        audit_result = result.get(\"\
+          audit_result\", \"FAILED\")\n        audit_reason = result.get(\"audit_reason\"\
+          , \"\")\n        \n        if audit_result not in [\"PASSED\", \"FAILED\"\
+          ]:\n            audit_result = \"FAILED\"\n        \n        if audit_result\
+          \ == \"PASSED\":\n            audit_reason = \"\"\n        \n        return\
+          \ {\n            \"audit_result\": audit_result,\n            \"audit_reason\"\
+          : audit_reason\n        }\n        \n    except json.JSONDecodeError:\n\
+          \        return {\"audit_result\": \"FAILED\", \"audit_reason\": \"审核结果格式异常,请重新提交\"\
+          }\n    except Exception:\n        return {\"audit_result\": \"FAILED\",\
+          \ \"audit_reason\": \"系统处理异常,请重新提交\"}\n\n\ndef main(text: Union[str, dict,\
+          \ Any] = None, **kwargs) -> dict:\n    \"\"\"\n    Dify代码执行节点入口函数\n    \n\
+          \    Args:\n        text: LLM节点的输出(Dify传递的参数名)\n        **kwargs: 其他可能的参数\n\
+          \        \n    Returns:\n        dict: {\"audit_result\": str, \"audit_reason\"\
+          : str}\n    \"\"\"\n    llm_output = text or kwargs.get('llm_output') or\
+          \ kwargs.get('content')\n    return parse_audit_result(llm_output)\n"
+        code_language: python3
+        outputs:
+          audit_reason:
+            children: null
+            type: string
+          audit_result:
+            children: null
+            type: string
+        selected: false
+        title: 代码执行 (1)
+        type: code
+        variables:
+        - value_selector:
+          - '17731240508900'
+          - text
+          value_type: string
+          variable: text
+      height: 52
+      id: '17731247185370'
+      position:
+        x: 1955.6173042853281
+        y: -70.25465444538195
+      positionAbsolute:
+        x: 1955.6173042853281
+        y: -70.25465444538195
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1773113771478'
+          - audit_result
+          value_type: string
+          variable: audit_result
+        - value_selector:
+          - '1773113771478'
+          - audit_reason
+          value_type: string
+          variable: audit_reason
+        selected: false
+        title: 输出 2
+        type: end
+      height: 114
+      id: '1773132717310'
+      position:
+        x: 1972.7029274583113
+        y: 223.82271813454796
+      positionAbsolute:
+        x: 1972.7029274583113
+        y: 223.82271813454796
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: 143.8084813812501
+      y: 363.2533921624889
+      zoom: 0.6156709499883318
+  rag_pipeline_variables: []

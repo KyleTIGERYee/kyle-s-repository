@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第1课：工作流I - 基础工作流</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Comic+Neue:wght@300;400;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-background text-text-primary overflow-hidden">
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+    
+    <div id="presentation" class="relative w-full h-screen">
+        <div id="slides-container" class="relative w-full h-full">
+            
+            <!-- Slide 1: 封面页 -->
+            <section class="slide active" data-index="0">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center items-center px-12 text-center">
+                    <span class="clay-badge mb-8">第2章 工作流</span>
+                    <h1 class="font-display text-hero font-bold text-primary mb-6">工作流I - 基础工作流</h1>
+                    <p class="font-body text-hero-sub text-text-secondary mb-12">理解工作流原理，掌握基础节点操作</p>
+                    <div class="grid grid-cols-4 gap-4 max-w-4xl">
+                        <div class="interactive-box p-4 text-center">
+                            <div class="text-label text-primary font-semibold">DAG</div>
+                            <div class="text-body text-text-muted text-sm mt-1">有向无环图</div>
+                        </div>
+                        <div class="interactive-box p-4 text-center">
+                            <div class="text-label text-primary font-semibold">节点</div>
+                            <div class="text-body text-text-muted text-sm mt-1">工作流单元</div>
+                        </div>
+                        <div class="interactive-box p-4 text-center">
+                            <div class="text-label text-primary font-semibold">参数提取</div>
+                            <div class="text-body text-text-muted text-sm mt-1">结构化输出</div>
+                        </div>
+                        <div class="interactive-box p-4 text-center">
+                            <div class="text-label text-primary font-semibold">实战</div>
+                            <div class="text-body text-text-muted text-sm mt-1">找房工作流</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 2: 什么是工作流 -->
+            <section class="slide" data-index="1">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.1.1 核心概念</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">什么是工作流？</h2>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">定义</h3>
+                            <p class="text-body text-text-secondary mb-6 leading-relaxed">
+                                <strong class="text-primary">工作流（Workflow）</strong>是指业务过程的部分或整体在计算机应用环境下的自动化，是对工作流程及其各操作步骤之间业务规则的抽象和描述。
+                            </p>
+                            <div class="bg-primary/5 rounded-xl p-6 border-l-4 border-primary">
+                                <p class="text-body text-text-muted italic">
+                                    "Dify 工作流是 Dify 平台最核心的功能之一，它在 AI 应用中负责流程编排——让多个模型调用、工具调用、逻辑节点、变量处理协同工作。"
+                                </p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">通俗理解：工厂生产线</h3>
+                            <div class="workflow-factory" id="factoryAnimation">
+                                <svg viewBox="0 0 500 200" class="w-full">
+                                    <defs>
+                                        <linearGradient id="nodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0.1" />
+                                        </linearGradient>
+                                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                            <polygon points="0 0, 10 3, 0 6" fill="#4F46E5" />
+                                        </marker>
+                                    </defs>
+                                    <g class="factory-node" data-node="1">
+                                        <rect x="20" y="70" width="80" height="60" rx="12" fill="url(#nodeGrad)" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="60" y="105" text-anchor="middle" fill="#4F46E5" font-size="14" font-weight="bold">原料</text>
+                                    </g>
+                                    <path class="flow-arrow" d="M 100 100 L 150 100" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <g class="factory-node" data-node="2">
+                                        <rect x="150" y="70" width="80" height="60" rx="12" fill="url(#nodeGrad)" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="190" y="105" text-anchor="middle" fill="#4F46E5" font-size="14" font-weight="bold">工序A</text>
+                                    </g>
+                                    <path class="flow-arrow" d="M 230 100 L 280 100" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <g class="factory-node" data-node="3">
+                                        <rect x="280" y="70" width="80" height="60" rx="12" fill="url(#nodeGrad)" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="320" y="105" text-anchor="middle" fill="#4F46E5" font-size="14" font-weight="bold">工序B</text>
+                                    </g>
+                                    <path class="flow-arrow" d="M 360 100 L 410 100" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <g class="factory-node" data-node="4">
+                                        <rect x="410" y="70" width="80" height="60" rx="12" fill="url(#nodeGrad)" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="450" y="105" text-anchor="middle" fill="#4F46E5" font-size="14" font-weight="bold">成品</text>
+                                    </g>
+                                    <text x="250" y="170" text-anchor="middle" fill="#6B7280" font-size="12">数字化后的AI工作流 = 自动化生产线</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 3: 为什么需要工作流 -->
+            <section class="slide" data-index="2">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.1.2 核心优势</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">为什么需要工作流？</h2>
+                    <div class="grid grid-cols-2 gap-8 mb-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-4 text-error flex items-center gap-2">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                </svg>
+                                Prompt Engineering的局限性
+                            </h3>
+                            <p class="text-body text-text-muted mb-4">"prompt 工程，看上去像去找一个人，让他从头到尾一次性写完一篇文章，其实挺难的。"</p>
+                            <ul class="space-y-2 text-body text-text-secondary">
+                                <li class="flex items-center gap-2"><span class="text-error">✗</span> 复杂任务难以控制</li>
+                                <li class="flex items-center gap-2"><span class="text-error">✗</span> 条件分支不稳定</li>
+                                <li class="flex items-center gap-2"><span class="text-error">✗</span> 多模型协作困难</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-4 text-success flex items-center gap-2">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                工作流的核心优势
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-success/10 rounded-lg p-3 text-center">
+                                    <div class="text-label text-success font-semibold">可控性</div>
+                                    <div class="text-body text-text-muted text-sm">每步精确控制</div>
+                                </div>
+                                <div class="bg-success/10 rounded-lg p-3 text-center">
+                                    <div class="text-label text-success font-semibold">稳定性</div>
+                                    <div class="text-body text-text-muted text-sm">避免AI自由发挥</div>
+                                </div>
+                                <div class="bg-success/10 rounded-lg p-3 text-center">
+                                    <div class="text-label text-success font-semibold">可复用</div>
+                                    <div class="text-body text-text-muted text-sm">一次搭建多次用</div>
+                                </div>
+                                <div class="bg-success/10 rounded-lg p-3 text-center">
+                                    <div class="text-label text-success font-semibold">可维护</div>
+                                    <div class="text-body text-text-muted text-sm">逻辑清晰易调试</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="interactive-box">
+                        <h3 class="font-display text-xl font-semibold mb-4 text-primary">场景对比</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-body">
+                                <thead>
+                                    <tr class="border-b border-primary/20">
+                                        <th class="text-left py-3 px-4 text-primary">场景</th>
+                                        <th class="text-center py-3 px-4">仅用Prompt</th>
+                                        <th class="text-center py-3 px-4">使用工作流</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-text-secondary">
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-3 px-4">简单问答</td>
+                                        <td class="text-center py-3 px-4 text-success">适合</td>
+                                        <td class="text-center py-3 px-4 text-warning">过度设计</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-3 px-4">多步骤任务</td>
+                                        <td class="text-center py-3 px-4 text-error">难以控制</td>
+                                        <td class="text-center py-3 px-4 text-success">清晰可控</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-3 px-4">条件分支</td>
+                                        <td class="text-center py-3 px-4 text-error">不稳定</td>
+                                        <td class="text-center py-3 px-4 text-success">精确控制</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4">数据处理</td>
+                                        <td class="text-center py-3 px-4 text-error">容易出错</td>
+                                        <td class="text-center py-3 px-4 text-success">稳定可靠</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: AI应用三大支柱 -->
+            <section class="slide" data-index="3">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.1.3 技术架构</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">AI应用三大支柱</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <div class="three-pillars" id="pillarsAnimation">
+                                <svg viewBox="0 0 400 350" class="w-full">
+                                    <defs>
+                                        <linearGradient id="pillarGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.4" />
+                                            <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0.1" />
+                                        </linearGradient>
+                                        <linearGradient id="pillarGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:0.4" />
+                                            <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:0.1" />
+                                        </linearGradient>
+                                        <linearGradient id="pillarGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#EC4899;stop-opacity:0.4" />
+                                            <stop offset="100%" style="stop-color:#EC4899;stop-opacity:0.1" />
+                                        </linearGradient>
+                                        <linearGradient id="pillarGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#6366F1;stop-opacity:0.4" />
+                                            <stop offset="100%" style="stop-color:#6366F1;stop-opacity:0.1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <g class="pillar-layer" data-layer="llm">
+                                        <rect x="50" y="280" width="300" height="50" rx="8" fill="url(#pillarGrad1)" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="200" y="310" text-anchor="middle" fill="#4F46E5" font-size="14" font-weight="bold">LLM层 - 语义理解、文本生成</text>
+                                    </g>
+                                    <g class="pillar-layer" data-layer="rag">
+                                        <rect x="50" y="215" width="300" height="50" rx="8" fill="url(#pillarGrad2)" stroke="#8B5CF6" stroke-width="2"/>
+                                        <text x="200" y="245" text-anchor="middle" fill="#8B5CF6" font-size="14" font-weight="bold">RAG层 - 知识检索、上下文增强</text>
+                                    </g>
+                                    <g class="pillar-layer" data-layer="workflow">
+                                        <rect x="50" y="150" width="300" height="50" rx="8" fill="url(#pillarGrad3)" stroke="#EC4899" stroke-width="2"/>
+                                        <text x="200" y="180" text-anchor="middle" fill="#EC4899" font-size="14" font-weight="bold">Workflow层 - 流程编排、节点执行</text>
+                                    </g>
+                                    <g class="pillar-layer" data-layer="agent">
+                                        <rect x="50" y="85" width="300" height="50" rx="8" fill="url(#pillarGrad4)" stroke="#6366F1" stroke-width="2"/>
+                                        <text x="200" y="115" text-anchor="middle" fill="#6366F1" font-size="14" font-weight="bold">Agent层 - 自主决策、任务规划</text>
+                                    </g>
+                                    <text x="200" y="40" text-anchor="middle" fill="#312E81" font-size="16" font-weight="bold">AI应用系统架构</text>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="interactive-box cursor-pointer hover:border-primary transition-colors" onclick="showPillarDetail('workflow')">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold text-pink-500">Workflow</h4>
+                                        <p class="text-body text-text-muted">流程编排、自动化 | 简历筛选、数据录入</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="interactive-box cursor-pointer hover:border-primary transition-colors" onclick="showPillarDetail('rag')">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold text-purple-500">RAG</h4>
+                                        <p class="text-body text-text-muted">知识检索、问答 | 智能客服、知识库</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="interactive-box cursor-pointer hover:border-primary transition-colors" onclick="showPillarDetail('agent')">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold text-indigo-500">Agent</h4>
+                                        <p class="text-body text-text-muted">自主决策、工具调用 | 复杂任务执行</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 5: 主流工作流平台 -->
+            <section class="slide" data-index="4">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.1.4 平台选择</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">主流工作流平台</h2>
+                    <div class="grid grid-cols-4 gap-6">
+                        <div class="interactive-box text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#4F46E5" opacity="0.3"/>
+                                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-xl font-semibold text-primary mb-2">Coze</h3>
+                            <p class="text-label text-text-muted mb-3">字节跳动出品</p>
+                            <div class="space-y-1 text-body text-text-secondary text-sm">
+                                <p>国内友好</p>
+                                <p>插件丰富</p>
+                                <p>快速搭建</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="10" stroke="#8B5CF6" stroke-width="2"/>
+                                    <path d="M12 6v6l4 2" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-xl font-semibold text-purple-500 mb-2">Dify</h3>
+                            <p class="text-label text-text-muted mb-3">开源/商业</p>
+                            <div class="space-y-1 text-body text-text-secondary text-sm">
+                                <p>功能完整</p>
+                                <p>可私有化</p>
+                                <p>企业级</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-pink-500/10 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 4h16v16H4z" stroke="#EC4899" stroke-width="2" rx="2"/>
+                                    <path d="M9 9h6v6H9z" stroke="#EC4899" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-xl font-semibold text-pink-500 mb-2">n8n</h3>
+                            <p class="text-label text-text-muted mb-3">开源</p>
+                            <div class="space-y-1 text-body text-text-secondary text-sm">
+                                <p>传统+AI</p>
+                                <p>集成能力强</p>
+                                <p>流程自动化</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L4 8v8l8 6 8-6V8l-8-6z" stroke="#6366F1" stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="3" stroke="#6366F1" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-xl font-semibold text-indigo-500 mb-2">LangGraph</h3>
+                            <p class="text-label text-text-muted mb-3">开源框架</p>
+                            <div class="space-y-1 text-body text-text-secondary text-sm">
+                                <p>代码级编排</p>
+                                <p>灵活性最高</p>
+                                <p>复杂应用</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="interactive-box mt-8">
+                        <p class="text-body text-text-secondary text-center">
+                            "工作流式的Agent构建平台应运而生，无论是开源的 n8n、Dify，还是字节跳动推出的 Coze，它们不约而同地采用了相似的模型。"
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 6: DAG有向无环图 -->
+            <section class="slide" data-index="5">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.2.1 核心原理</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">DAG有向无环图</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">什么是DAG？</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-bold">D</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-lg font-semibold text-primary">Directed 有向</h4>
+                                        <p class="text-body text-text-muted">节点之间的连接有方向，A→B表示从A到B</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-purple-500 font-bold">A</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-lg font-semibold text-purple-500">Acyclic 无环</h4>
+                                        <p class="text-body text-text-muted">图中不存在循环路径，不会A→B→C→A</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-pink-500/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-pink-500 font-bold">G</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-lg font-semibold text-pink-500">Graph 图</h4>
+                                        <p class="text-body text-text-muted">由节点和边组成的结构</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">DAG示例</h3>
+                            <div class="dag-demo" id="dagAnimation">
+                                <svg viewBox="0 0 400 300" class="w-full">
+                                    <defs>
+                                        <linearGradient id="dagNodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0.1" />
+                                        </linearGradient>
+                                        <marker id="dagArrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                            <polygon points="0 0, 10 3, 0 6" fill="#4F46E5" />
+                                        </marker>
+                                    </defs>
+                                    <g class="dag-node" data-node="start">
+                                        <circle cx="50" cy="50" r="25" fill="url(#dagNodeGrad)" stroke="#22C55E" stroke-width="2"/>
+                                        <text x="50" y="55" text-anchor="middle" fill="#22C55E" font-size="12" font-weight="bold">开始</text>
+                                    </g>
+                                    <path class="dag-line" d="M 75 50 L 125 50" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#dagArrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <g class="dag-node" data-node="a">
+                                        <circle cx="150" cy="50" r="25" fill="url(#dagNodeGrad)" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="150" y="55" text-anchor="middle" fill="#4F46E5" font-size="12" font-weight="bold">处理A</text>
+                                    </g>
+                                    <path class="dag-line" d="M 150 75 L 150 100" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#dagArrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <path class="dag-line" d="M 175 50 L 225 50" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#dagArrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <g class="dag-node" data-node="b">
+                                        <circle cx="250" cy="50" r="25" fill="url(#dagNodeGrad)" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="250" y="55" text-anchor="middle" fill="#4F46E5" font-size="12" font-weight="bold">处理B</text>
+                                    </g>
+                                    <g class="dag-node" data-node="c">
+                                        <circle cx="150" cy="130" r="25" fill="url(#dagNodeGrad)" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="150" y="135" text-anchor="middle" fill="#4F46E5" font-size="12" font-weight="bold">处理C</text>
+                                    </g>
+                                    <path class="dag-line" d="M 175 130 L 225 130" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#dagArrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <g class="dag-node" data-node="judge">
+                                        <rect x="225" y="105" width="50" height="50" rx="8" fill="url(#dagNodeGrad)" stroke="#F59E0B" stroke-width="2"/>
+                                        <text x="250" y="135" text-anchor="middle" fill="#F59E0B" font-size="12" font-weight="bold">判断</text>
+                                    </g>
+                                    <path class="dag-line" d="M 250 75 L 250 100" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#dagArrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <path class="dag-line" d="M 275 130 L 325 130" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#dagArrow)" stroke-dasharray="50" stroke-dashoffset="50"/>
+                                    <g class="dag-node" data-node="end">
+                                        <circle cx="350" cy="130" r="25" fill="url(#dagNodeGrad)" stroke="#EF4444" stroke-width="2"/>
+                                        <text x="350" y="135" text-anchor="middle" fill="#EF4444" font-size="12" font-weight="bold">结束</text>
+                                    </g>
+                                    <text x="200" y="250" text-anchor="middle" fill="#6B7280" font-size="11">为什么必须是DAG？避免死循环 | 确定执行顺序 | 便于调试</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: 工作流 vs 提示词工程 -->
+            <section class="slide" data-index="6">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.2.2 方法选择</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">工作流 vs 提示词工程</h2>
+                    <div class="interactive-box mb-8">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-body">
+                                <thead>
+                                    <tr class="border-b border-primary/20">
+                                        <th class="text-left py-4 px-6 text-primary">对比维度</th>
+                                        <th class="text-center py-4 px-6 text-primary">提示词工程</th>
+                                        <th class="text-center py-4 px-6 text-primary">工作流</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-text-secondary">
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-4 px-6 font-semibold">复杂度</td>
+                                        <td class="text-center py-4 px-6">适合简单任务</td>
+                                        <td class="text-center py-4 px-6">适合复杂任务</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-4 px-6 font-semibold">可控性</td>
+                                        <td class="text-center py-4 px-6">依赖模型能力</td>
+                                        <td class="text-center py-4 px-6">精确控制每个步骤</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-4 px-6 font-semibold">稳定性</td>
+                                        <td class="text-center py-4 px-6">输出可能不稳定</td>
+                                        <td class="text-center py-4 px-6">输出稳定可预期</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="py-4 px-6 font-semibold">调试难度</td>
+                                        <td class="text-center py-4 px-6">难以定位问题</td>
+                                        <td class="text-center py-4 px-6">可逐节点调试</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-4 px-6 font-semibold">开发成本</td>
+                                        <td class="text-center py-4 px-6 text-success">低</td>
+                                        <td class="text-center py-4 px-6 text-warning">中等</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="interactive-box text-center">
+                            <div class="text-label text-success font-semibold mb-2">简单任务</div>
+                            <p class="text-body text-text-muted text-sm">单轮问答、文本生成</p>
+                            <div class="mt-4 py-2 px-4 bg-success/10 rounded-lg text-success font-semibold">用提示词工程</div>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="text-label text-primary font-semibold mb-2">复杂任务</div>
+                            <p class="text-body text-text-muted text-sm">多步骤、条件判断、数据处理</p>
+                            <div class="mt-4 py-2 px-4 bg-primary/10 rounded-lg text-primary font-semibold">用工作流</div>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="text-label text-purple-500 font-semibold mb-2">极复杂任务</div>
+                            <p class="text-body text-text-muted text-sm">需要自主决策</p>
+                            <div class="mt-4 py-2 px-4 bg-purple-500/10 rounded-lg text-purple-500 font-semibold">用Agent</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 8: 什么是参数提取 -->
+            <section class="slide" data-index="7">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.3.1 核心技能</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">什么是参数提取？</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">定义</h3>
+                            <p class="text-body text-text-secondary mb-6">
+                                <strong class="text-primary">参数提取</strong>是将用户自然语言转化为结构化数据的过程，让AI从文本中识别出关键信息。
+                            </p>
+                            <div class="param-extract-demo" id="paramExtractDemo">
+                                <div class="flex flex-col items-center gap-4">
+                                    <div class="w-full bg-primary/5 rounded-xl p-4 border border-primary/20">
+                                        <div class="text-label text-text-muted mb-2">用户输入</div>
+                                        <p class="text-body text-primary">"我想在西乡租个单间，预算3000左右"</p>
+                                    </div>
+                                    <svg class="w-8 h-8 text-primary animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                                    </svg>
+                                    <div class="w-full bg-purple-500/5 rounded-xl p-4 border border-purple-500/20">
+                                        <div class="text-label text-text-muted mb-2">LLM 提取</div>
+                                        <p class="text-body text-purple-500">识别区域、户型、预算...</p>
+                                    </div>
+                                    <svg class="w-8 h-8 text-purple-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                                    </svg>
+                                    <div class="w-full bg-success/5 rounded-xl p-4 border border-success/20">
+                                        <div class="text-label text-text-muted mb-2">结构化输出</div>
+                                        <pre class="text-body text-success font-mono text-sm">{"area": "西乡", "layoutName": "单间", "maxPrice": "3000"}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">租房场景示例</h3>
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                    <div class="text-label text-text-muted mb-2">用户表达</div>
+                                    <p class="text-body text-text-primary">"我想租一个单间，预算1000"</p>
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <div class="text-label text-primary mb-1">提取的参数</div>
+                                        <code class="text-sm text-purple-500">{layoutName: 单间, minPrice: 0, maxPrice: 1000}</code>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                    <div class="text-label text-text-muted mb-2">用户表达</div>
+                                    <p class="text-body text-text-primary">"我想在西乡租房"</p>
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <div class="text-label text-primary mb-1">提取的参数</div>
+                                        <code class="text-sm text-purple-500">{area: 西乡}</code>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                    <div class="text-label text-text-muted mb-2">用户表达</div>
+                                    <p class="text-body text-text-primary">"宝安区一房一厅"</p>
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <div class="text-label text-primary mb-1">提取的参数</div>
+                                        <code class="text-sm text-purple-500">{area: 宝安区, layoutName: 一房一厅}</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: 结构化输出 -->
+            <section class="slide" data-index="8">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.3.2 输出格式</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">结构化输出</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">什么是结构化输出？</h3>
+                            <p class="text-body text-text-secondary mb-6">
+                                <strong class="text-primary">结构化输出</strong>让AI返回JSON格式的数据，便于后续节点处理。
+                            </p>
+                            <div class="bg-gray-900 rounded-xl p-6 font-mono text-sm overflow-x-auto">
+                                <pre class="text-green-400">{
+  <span class="text-purple-400">"area"</span>: <span class="text-yellow-300">"西乡"</span>,
+  <span class="text-purple-400">"layoutName"</span>: <span class="text-yellow-300">"单间"</span>,
+  <span class="text-purple-400">"minPrice"</span>: <span class="text-yellow-300">"0"</span>,
+  <span class="text-purple-400">"maxPrice"</span>: <span class="text-yellow-300">"3000"</span>
+}</pre>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">为什么需要结构化输出？</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-lg font-semibold text-primary">易于解析</h4>
+                                        <p class="text-body text-text-muted">程序可以直接读取JSON数据</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-lg font-semibold text-purple-500">节点间传递</h4>
+                                        <p class="text-body text-text-muted">数据在工作流节点间流转</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-pink-500/20 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-lg font-semibold text-pink-500">格式统一</h4>
+                                        <p class="text-body text-text-muted">输出格式可预测、可验证</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-primary/5 rounded-xl border-l-4 border-primary">
+                                <p class="text-body text-text-muted">
+                                    <strong class="text-primary">说明：</strong>结构化输出是LLM节点的核心技能，通过配置输出格式，LLM可以稳定地输出我们需要的JSON结构。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 10: 节点功能概览 -->
+            <section class="slide" data-index="9">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.4 核心组件</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">节点功能详解</h2>
+                    <p class="text-body text-text-secondary mb-8 max-w-3xl">
+                        "包括开始/结束节点、大模型节点、条件判断节点、知识检索节点、问题分类节点、工具节点、HTTP节点、循环节点、变量赋值节点等等，基本覆盖了AI应用开发业务编排所需要的全部语义表达。"
+                    </p>
+                    <div class="grid grid-cols-5 gap-4">
+                        <div class="interactive-box text-center cursor-pointer hover:border-primary transition-colors" onclick="showNodeDetail('input')">
+                            <div class="w-14 h-14 rounded-2xl bg-green-500/20 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-lg font-semibold text-green-500 mb-1">输入节点</h3>
+                            <p class="text-body text-text-muted text-sm">Start/Input</p>
+                        </div>
+                        <div class="interactive-box text-center cursor-pointer hover:border-primary transition-colors" onclick="showNodeDetail('llm')">
+                            <div class="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-lg font-semibold text-primary mb-1">LLM节点</h3>
+                            <p class="text-body text-text-muted text-sm">大模型调用</p>
+                        </div>
+                        <div class="interactive-box text-center cursor-pointer hover:border-primary transition-colors" onclick="showNodeDetail('variable')">
+                            <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-7 h-7 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-lg font-semibold text-purple-500 mb-1">变量节点</h3>
+                            <p class="text-body text-text-muted text-sm">Variable/Assigner</p>
+                        </div>
+                        <div class="interactive-box text-center cursor-pointer hover:border-primary transition-colors" onclick="showNodeDetail('condition')">
+                            <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-7 h-7 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-lg font-semibold text-yellow-500 mb-1">条件节点</h3>
+                            <p class="text-body text-text-muted text-sm">Condition/If-Else</p>
+                        </div>
+                        <div class="interactive-box text-center cursor-pointer hover:border-primary transition-colors" onclick="showNodeDetail('output')">
+                            <div class="w-14 h-14 rounded-2xl bg-red-500/20 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display text-lg font-semibold text-red-500 mb-1">输出节点</h3>
+                            <p class="text-body text-text-muted text-sm">End/Output</p>
+                        </div>
+                    </div>
+                    <div id="nodeDetailPanel" class="interactive-box mt-8 hidden">
+                        <div id="nodeDetailContent"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: 输入/LLM/变量节点详情 -->
+            <section class="slide" data-index="10">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.4.1-1.4.3 节点配置</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">基础节点配置</h2>
+                    <div class="tabs-container">
+                        <div class="tabs-header flex gap-2 mb-6">
+                            <button class="tab-btn active px-6 py-3 rounded-xl bg-primary text-white font-semibold transition-all" onclick="showNodeTab('input')">输入节点</button>
+                            <button class="tab-btn px-6 py-3 rounded-xl bg-gray-100 text-text-secondary font-semibold transition-all hover:bg-gray-200" onclick="showNodeTab('llm')">LLM节点</button>
+                            <button class="tab-btn px-6 py-3 rounded-xl bg-gray-100 text-text-secondary font-semibold transition-all hover:bg-gray-200" onclick="showNodeTab('variable')">变量节点</button>
+                        </div>
+                        <div class="tabs-content">
+                            <div id="inputTab" class="tab-panel">
+                                <div class="grid grid-cols-2 gap-8">
+                                    <div class="interactive-box">
+                                        <h3 class="font-display text-xl font-semibold text-green-500 mb-4">功能</h3>
+                                        <p class="text-body text-text-secondary mb-4">接收用户输入或外部数据，作为工作流的起点。</p>
+                                        <h4 class="font-display text-lg font-semibold text-primary mb-3">配置项</h4>
+                                        <ul class="space-y-2 text-body text-text-secondary">
+                                            <li class="flex items-center gap-2"><span class="text-green-500">•</span> 输入参数定义（名称、类型、默认值）</li>
+                                            <li class="flex items-center gap-2"><span class="text-green-500">•</span> 参数校验规则</li>
+                                            <li class="flex items-center gap-2"><span class="text-green-500">•</span> 输入提示信息</li>
+                                        </ul>
+                                    </div>
+                                    <div class="interactive-box">
+                                        <h3 class="font-display text-xl font-semibold text-primary mb-4">Dify vs Coze对比</h3>
+                                        <table class="w-full text-body">
+                                            <thead>
+                                                <tr class="border-b border-gray-200">
+                                                    <th class="text-left py-3 text-primary">特性</th>
+                                                    <th class="text-center py-3 text-primary">Dify</th>
+                                                    <th class="text-center py-3 text-primary">Coze</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-text-secondary">
+                                                <tr class="border-b border-gray-100">
+                                                    <td class="py-3">输入参数定义</td>
+                                                    <td class="text-center py-3 text-success">支持多参数</td>
+                                                    <td class="text-center py-3 text-success">支持多参数</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-100">
+                                                    <td class="py-3">默认值</td>
+                                                    <td class="text-center py-3 text-success">支持</td>
+                                                    <td class="text-center py-3 text-success">支持</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3">系统变量</td>
+                                                    <td class="text-center py-3 font-mono text-sm">sys.query</td>
+                                                    <td class="text-center py-3 font-mono text-sm">input.query</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="llmTab" class="tab-panel hidden">
+                                <div class="grid grid-cols-2 gap-8">
+                                    <div class="interactive-box">
+                                        <h3 class="font-display text-xl font-semibold text-primary mb-4">功能</h3>
+                                        <p class="text-body text-text-secondary mb-4">调用大语言模型进行推理和生成。</p>
+                                        <h4 class="font-display text-lg font-semibold text-primary mb-3">配置项</h4>
+                                        <ul class="space-y-2 text-body text-text-secondary">
+                                            <li class="flex items-center gap-2"><span class="text-primary">•</span> 选择模型（GPT-4、Claude、文心一言等）</li>
+                                            <li class="flex items-center gap-2"><span class="text-primary">•</span> 设置提示词（Prompt）</li>
+                                            <li class="flex items-center gap-2"><span class="text-primary">•</span> 配置Temperature等参数</li>
+                                            <li class="flex items-center gap-2"><span class="text-primary">•</span> 定义输入变量</li>
+                                            <li class="flex items-center gap-2"><span class="text-primary">•</span> 定义输出格式（结构化输出）</li>
+                                        </ul>
+                                    </div>
+                                    <div class="interactive-box">
+                                        <h3 class="font-display text-xl font-semibold text-primary mb-4">Dify vs Coze对比</h3>
+                                        <table class="w-full text-body">
+                                            <thead>
+                                                <tr class="border-b border-gray-200">
+                                                    <th class="text-left py-3 text-primary">特性</th>
+                                                    <th class="text-center py-3 text-primary">Dify</th>
+                                                    <th class="text-center py-3 text-primary">Coze</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-text-secondary">
+                                                <tr class="border-b border-gray-100">
+                                                    <td class="py-3">模型选择</td>
+                                                    <td class="text-center py-3 text-success">多模型支持</td>
+                                                    <td class="text-center py-3 text-success">多模型支持</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-100">
+                                                    <td class="py-3">结构化输出</td>
+                                                    <td class="text-center py-3 text-success">JSON模式</td>
+                                                    <td class="text-center py-3 text-success">结构化输出</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-3">上下文引用</td>
+                                                    <td class="text-center py-3 font-mono text-sm">node.variable</td>
+                                                    <td class="text-center py-3 font-mono text-sm">node.variable</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="variableTab" class="tab-panel hidden">
+                                <div class="grid grid-cols-2 gap-8">
+                                    <div class="interactive-box">
+                                        <h3 class="font-display text-xl font-semibold text-purple-500 mb-4">功能</h3>
+                                        <p class="text-body text-text-secondary mb-4">存储和传递中间结果，在工作流中传递数据。</p>
+                                        <h4 class="font-display text-lg font-semibold text-primary mb-3">使用场景</h4>
+                                        <ul class="space-y-2 text-body text-text-secondary">
+                                            <li class="flex items-center gap-2"><span class="text-purple-500">•</span> 保存LLM的输出结果</li>
+                                            <li class="flex items-center gap-2"><span class="text-purple-500">•</span> 在不同节点间传递数据</li>
+                                            <li class="flex items-center gap-2"><span class="text-purple-500">•</span> 临时存储计算结果</li>
+                                        </ul>
+                                    </div>
+                                    <div class="interactive-box">
+                                        <h3 class="font-display text-xl font-semibold text-primary mb-4">变量类型</h3>
+                                        <div class="space-y-3">
+                                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <span class="font-semibold text-text-primary">String</span>
+                                                <span class="text-text-muted">字符串</span>
+                                                <code class="text-sm text-purple-500">"西乡"</code>
+                                            </div>
+                                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <span class="font-semibold text-text-primary">Number</span>
+                                                <span class="text-text-muted">数字</span>
+                                                <code class="text-sm text-purple-500">3000</code>
+                                            </div>
+                                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <span class="font-semibold text-text-primary">Boolean</span>
+                                                <span class="text-text-muted">布尔值</span>
+                                                <code class="text-sm text-purple-500">true/false</code>
+                                            </div>
+                                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <span class="font-semibold text-text-primary">Object</span>
+                                                <span class="text-text-muted">对象</span>
+                                                <code class="text-sm text-purple-500">{"area": "西乡"}</code>
+                                            </div>
+                                            <div class="flex items-center justify-between py-2">
+                                                <span class="font-semibold text-text-primary">Array</span>
+                                                <span class="text-text-muted">数组</span>
+                                                <code class="text-sm text-purple-500">["西乡", "南山"]</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 12: 条件判断节点 -->
+            <section class="slide" data-index="11">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.4.4 逻辑控制</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">条件判断节点</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">功能与配置</h3>
+                            <p class="text-body text-text-secondary mb-6">实现分支逻辑，根据条件决定执行路径。</p>
+                            <div class="space-y-4">
+                                <div class="bg-yellow-500/10 rounded-xl p-4 border border-yellow-500/30">
+                                    <h4 class="font-display text-lg font-semibold text-yellow-500 mb-2">配置项</h4>
+                                    <ul class="space-y-1 text-body text-text-secondary">
+                                        <li>• 条件表达式</li>
+                                        <li>• True分支</li>
+                                        <li>• False分支</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                    <h4 class="font-display text-lg font-semibold text-primary mb-2">示例场景：用户户型判断</h4>
+                                    <pre class="text-sm text-text-secondary font-mono">用户预算判断：
+  IF layoutName == "开间":
+    → 推荐单间房源
+  ELSE IF layoutName == "一居室":
+    → 推荐一居室房源</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">流程示意</h3>
+                            <div class="condition-flow" id="conditionFlowDemo">
+                                <svg viewBox="0 0 400 280" class="w-full">
+                                    <defs>
+                                        <linearGradient id="condGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#F59E0B;stop-opacity:0.3" />
+                                            <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:0.1" />
+                                        </linearGradient>
+                                    </defs>
+                                    <g class="cond-node">
+                                        <rect x="150" y="20" width="100" height="40" rx="8" fill="#4F46E5" opacity="0.2" stroke="#4F46E5" stroke-width="2"/>
+                                        <text x="200" y="45" text-anchor="middle" fill="#4F46E5" font-size="12" font-weight="bold">用户输入</text>
+                                    </g>
+                                    <path d="M 200 60 L 200 90" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                                    <g class="cond-node">
+                                        <polygon points="200,90 260,130 200,170 140,130" fill="url(#condGrad)" stroke="#F59E0B" stroke-width="2"/>
+                                        <text x="200" y="125" text-anchor="middle" fill="#F59E0B" font-size="10" font-weight="bold">layoutName</text>
+                                        <text x="200" y="140" text-anchor="middle" fill="#F59E0B" font-size="10" font-weight="bold">== "开间"?</text>
+                                    </g>
+                                    <path d="M 140 130 L 80 130 L 80 200" stroke="#22C55E" stroke-width="2" fill="none"/>
+                                    <text x="100" y="120" fill="#22C55E" font-size="10" font-weight="bold">Yes</text>
+                                    <g class="cond-node">
+                                        <rect x="30" y="200" width="100" height="40" rx="8" fill="#22C55E" opacity="0.2" stroke="#22C55E" stroke-width="2"/>
+                                        <text x="80" y="225" text-anchor="middle" fill="#22C55E" font-size="11" font-weight="bold">推荐单间房源</text>
+                                    </g>
+                                    <path d="M 260 130 L 320 130 L 320 200" stroke="#EF4444" stroke-width="2" fill="none"/>
+                                    <text x="290" y="120" fill="#EF4444" font-size="10" font-weight="bold">No</text>
+                                    <g class="cond-node">
+                                        <rect x="270" y="200" width="100" height="40" rx="8" fill="#EF4444" opacity="0.2" stroke="#EF4444" stroke-width="2"/>
+                                        <text x="320" y="225" text-anchor="middle" fill="#EF4444" font-size="11" font-weight="bold">推荐一居室房源</text>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 13: 输出节点 -->
+            <section class="slide" data-index="12">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.4.5 结果返回</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">输出节点</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">功能</h3>
+                            <p class="text-body text-text-secondary mb-6">返回工作流执行结果。</p>
+                            <div class="bg-primary/5 rounded-xl p-4 border-l-4 border-primary mb-6">
+                                <p class="text-body text-text-muted italic">
+                                    "Coze的workflow提供了两种输出模式：一，返回一些变量值，然后让聊天模型基于这些变量值回复用户；二，在workflow里拼接好输出..."
+                                </p>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="bg-green-500/10 rounded-xl p-4 border border-green-500/30">
+                                    <h4 class="font-display text-lg font-semibold text-green-500 mb-2">模式一：返回变量</h4>
+                                    <ul class="space-y-1 text-body text-text-secondary text-sm">
+                                        <li>• 工作流返回结构化数据</li>
+                                        <li>• 由AI根据数据生成回复</li>
+                                        <li>• 适合需要进一步处理的场景</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-primary/10 rounded-xl p-4 border border-primary/30">
+                                    <h4 class="font-display text-lg font-semibold text-primary mb-2">模式二：直接输出</h4>
+                                    <ul class="space-y-1 text-body text-text-secondary text-sm">
+                                        <li>• 工作流直接生成完整回复</li>
+                                        <li>• 适合简单场景</li>
+                                        <li>• 响应速度更快</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">示例配置</h3>
+                            <div class="space-y-4">
+                                <div class="bg-gray-900 rounded-xl p-4 font-mono text-sm">
+                                    <div class="text-green-400 mb-2"># 模式一：返回变量</div>
+                                    <pre class="text-gray-300">输出节点:
+  类型: variables
+  输出:
+    - name: recommendations
+      value: {{llm_result}}
+    - name: count
+      value: {{item_count}}</pre>
+                                </div>
+                                <div class="bg-gray-900 rounded-xl p-4 font-mono text-sm">
+                                    <div class="text-green-400 mb-2"># 模式二：直接输出</div>
+                                    <pre class="text-gray-300">输出节点:
+  类型: text
+  内容: |
+    为您找到{{count}}套房源：
+    {{recommendations}}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 14: 实战场景说明 -->
+            <section class="slide" data-index="13">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.5 实战项目</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">搭建参数提取工作流</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">业务需求</h3>
+                            <p class="text-body text-text-secondary mb-6">搭建一个能从用户自然语言中<strong class="text-primary">提取找房参数</strong>的工作流，实现结构化输出。</p>
+                            <div class="bg-primary/5 rounded-xl p-4 border-l-4 border-primary mb-6">
+                                <p class="text-body text-text-muted">
+                                    <strong class="text-primary">本课核心：</strong>第1课聚焦于LLM的参数提取和结构化输出能力，这是工作流中最基础、最常用的技能。
+                                </p>
+                            </div>
+                            <h4 class="font-display text-lg font-semibold text-primary mb-3">为什么先学参数提取？</h4>
+                            <ul class="space-y-2 text-body text-text-secondary">
+                                <li class="flex items-center gap-2"><span class="text-primary">•</span> 参数提取是工作流的基础能力</li>
+                                <li class="flex items-center gap-2"><span class="text-primary">•</span> 结构化输出让LLM结果可被稳定处理</li>
+                                <li class="flex items-center gap-2"><span class="text-primary">•</span> 意图识别等进阶功能后续学习</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">本课实战目标</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-4 bg-green-500/10 rounded-xl p-4 border border-green-500/30">
+                                    <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                                        <span class="text-green-500 font-bold">1</span>
+                                    </div>
+                                    <p class="text-body text-text-primary">接收用户自然语言输入</p>
+                                </div>
+                                <div class="flex items-center gap-4 bg-primary/10 rounded-xl p-4 border border-primary/30">
+                                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                                        <span class="text-primary font-bold">2</span>
+                                    </div>
+                                    <p class="text-body text-text-primary">使用LLM从自然语言中提取找房参数</p>
+                                </div>
+                                <div class="flex items-center gap-4 bg-purple-500/10 rounded-xl p-4 border border-purple-500/30">
+                                    <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                        <span class="text-purple-500 font-bold">3</span>
+                                    </div>
+                                    <p class="text-body text-text-primary">输出结构化JSON结果</p>
+                                </div>
+                                <div class="flex items-center gap-4 bg-pink-500/10 rounded-xl p-4 border border-pink-500/30">
+                                    <div class="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center">
+                                        <span class="text-pink-500 font-bold">4</span>
+                                    </div>
+                                    <p class="text-body text-text-primary">掌握结构化输出的配置方法</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 15: 工作流设计 -->
+            <section class="slide" data-index="14">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.5.2-1.5.3 工作流设计</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">工作流设计与节点配置</h2>
+                    <div class="interactive-box mb-8">
+                        <h3 class="font-display text-xl font-semibold text-primary mb-6">工作流结构</h3>
+                        <div class="workflow-builder" id="workflowBuilder">
+                            <svg viewBox="0 0 800 120" class="w-full">
+                                <defs>
+                                    <linearGradient id="wbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0.1" />
+                                    </linearGradient>
+                                </defs>
+                                <g class="wb-node" data-node="input">
+                                    <rect x="20" y="30" width="140" height="60" rx="12" fill="#22C55E" opacity="0.2" stroke="#22C55E" stroke-width="2"/>
+                                    <text x="90" y="55" text-anchor="middle" fill="#22C55E" font-size="12" font-weight="bold">输入节点</text>
+                                    <text x="90" y="75" text-anchor="middle" fill="#6B7280" font-size="10">用户查询</text>
+                                </g>
+                                <path d="M 160 60 L 210 60" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                                <g class="wb-node" data-node="llm">
+                                    <rect x="210" y="30" width="160" height="60" rx="12" fill="#4F46E5" opacity="0.2" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="290" y="50" text-anchor="middle" fill="#4F46E5" font-size="12" font-weight="bold">LLM节点</text>
+                                    <text x="290" y="70" text-anchor="middle" fill="#6B7280" font-size="10">参数提取</text>
+                                </g>
+                                <path d="M 370 60 L 420 60" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                                <g class="wb-node" data-node="variable">
+                                    <rect x="420" y="30" width="140" height="60" rx="12" fill="#8B5CF6" opacity="0.2" stroke="#8B5CF6" stroke-width="2"/>
+                                    <text x="490" y="55" text-anchor="middle" fill="#8B5CF6" font-size="12" font-weight="bold">变量节点</text>
+                                    <text x="490" y="75" text-anchor="middle" fill="#6B7280" font-size="10">保存结果</text>
+                                </g>
+                                <path d="M 560 60 L 610 60" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                                <g class="wb-node" data-node="output">
+                                    <rect x="610" y="30" width="140" height="60" rx="12" fill="#EF4444" opacity="0.2" stroke="#EF4444" stroke-width="2"/>
+                                    <text x="680" y="55" text-anchor="middle" fill="#EF4444" font-size="12" font-weight="bold">输出节点</text>
+                                    <text x="680" y="75" text-anchor="middle" fill="#6B7280" font-size="10">返回结果</text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="interactive-box">
+                            <h4 class="font-display text-lg font-semibold text-green-500 mb-3">节点1：输入节点</h4>
+                            <pre class="text-sm text-text-secondary font-mono bg-gray-50 rounded-lg p-4">节点类型: Start
+输入参数:
+  - 名称: user_query
+    类型: string
+    描述: 用户查询内容
+    必填: true</pre>
+                        </div>
+                        <div class="interactive-box">
+                            <h4 class="font-display text-lg font-semibold text-primary mb-3">节点2：LLM节点</h4>
+                            <pre class="text-sm text-text-secondary font-mono bg-gray-50 rounded-lg p-4">节点类型: LLM
+模型: qwen-flash
+提示词: |
+  你是一个租房助手。请分析用户需求...
+  
+结构化输出: JSON Schema</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 16: 测试与验证 -->
+            <section class="slide" data-index="15">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.5.5 测试验证</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">测试与验证</h2>
+                    <div class="accordion" id="testAccordion">
+                        <div class="accordion-item mb-4">
+                            <button class="accordion-header w-full flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all" onclick="toggleAccordion(this)">
+                                <span class="font-display text-lg font-semibold text-primary">测试用例1：完整参数</span>
+                                <span class="accordion-icon text-primary text-xl">+</span>
+                            </button>
+                            <div class="accordion-content hidden">
+                                <div class="p-4 bg-gray-50 rounded-b-xl border border-t-0 border-gray-200">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <div class="text-label text-text-muted mb-2">输入</div>
+                                            <code class="text-sm text-primary">user_query: "我想在西乡租个单间，预算3000左右"</code>
+                                        </div>
+                                        <div>
+                                            <div class="text-label text-text-muted mb-2">预期输出</div>
+                                            <pre class="text-sm text-success font-mono">{
+  "area": "西乡",
+  "layoutName": "单间",
+  "minPrice": "0",
+  "maxPrice": "3000",
+  "status": "success"
+}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item mb-4">
+                            <button class="accordion-header w-full flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all" onclick="toggleAccordion(this)">
+                                <span class="font-display text-lg font-semibold text-primary">测试用例2：部分参数</span>
+                                <span class="accordion-icon text-primary text-xl">+</span>
+                            </button>
+                            <div class="accordion-content hidden">
+                                <div class="p-4 bg-gray-50 rounded-b-xl border border-t-0 border-gray-200">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <div class="text-label text-text-muted mb-2">输入</div>
+                                            <code class="text-sm text-primary">user_query: "宝安区一房一厅"</code>
+                                        </div>
+                                        <div>
+                                            <div class="text-label text-text-muted mb-2">预期输出</div>
+                                            <pre class="text-sm text-success font-mono">{
+  "area": "宝安区",
+  "layoutName": "一房一厅",
+  "minPrice": "",
+  "maxPrice": "",
+  "status": "success"
+}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header w-full flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all" onclick="toggleAccordion(this)">
+                                <span class="font-display text-lg font-semibold text-primary">测试用例3：只有预算</span>
+                                <span class="accordion-icon text-primary text-xl">+</span>
+                            </button>
+                            <div class="accordion-content hidden">
+                                <div class="p-4 bg-gray-50 rounded-b-xl border border-t-0 border-gray-200">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <div class="text-label text-text-muted mb-2">输入</div>
+                                            <code class="text-sm text-primary">user_query: "预算2000以内"</code>
+                                        </div>
+                                        <div>
+                                            <div class="text-label text-text-muted mb-2">预期输出</div>
+                                            <pre class="text-sm text-success font-mono">{
+  "area": "",
+  "layoutName": "",
+  "minPrice": "0",
+  "maxPrice": "2000",
+  "status": "success"
+}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 17: 实战练习 -->
+            <section class="slide" data-index="16">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.6 动手实践</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">实战练习</h2>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="interactive-box border-2 border-primary">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                                    <span class="text-primary font-bold">1</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold text-primary">参数提取工作流</h3>
+                                    <span class="text-label text-success font-semibold">必做</span>
+                                </div>
+                            </div>
+                            <p class="text-body text-text-secondary mb-4">搭建一个"租房参数提取"工作流</p>
+                            <div class="space-y-2 text-body text-text-muted text-sm">
+                                <ul class="ml-4 space-y-1">
+                                    <li>• 接收用户自然语言输入</li>
+                                    <li>• 使用LLM节点提取参数</li>
+                                    <li>• 使用变量节点保存结果</li>
+                                    <li>• 输出结构化JSON</li>
+                                    <li>• 完成5个测试用例</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="interactive-box border-2 border-purple-500/50">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                    <span class="text-purple-500 font-bold">2</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold text-purple-500">优化提示词</h3>
+                                    <span class="text-label text-warning font-semibold">选做</span>
+                                </div>
+                            </div>
+                            <p class="text-body text-text-secondary mb-4">优化LLM节点的提示词，提高准确率</p>
+                            <div class="space-y-2 text-body text-text-muted text-sm">
+                                <p class="font-semibold text-text-primary">优化场景：</p>
+                                <ul class="ml-4 space-y-1">
+                                    <li>• "预算3000左右"如何处理？</li>
+                                    <li>• "宝安附近"区域提取？</li>
+                                    <li>• "一千多"预算处理？</li>
+                                    <li>• "2000到3000"区间处理？</li>
+                                </ul>
+                            </div>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <div class="text-label text-text-muted">提交内容</div>
+                                <ul class="text-sm text-text-secondary mt-2">
+                                    <li>• 优化前后提示词对比</li>
+                                    <li>• 测试对比结果表格</li>
+                                    <li>• 优化心得（300字）</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="interactive-box border-2 border-pink-500/50">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-pink-500/20 flex items-center justify-center">
+                                    <span class="text-pink-500 font-bold">3</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold text-pink-500">扩展参数体系</h3>
+                                    <span class="text-label text-accent font-semibold">加分</span>
+                                </div>
+                            </div>
+                            <p class="text-body text-text-secondary mb-4">在基础工作流上扩展更多参数</p>
+                            <div class="space-y-2 text-body text-text-muted text-sm">
+                                <p class="font-semibold text-text-primary">新增参数：</p>
+                                <ul class="ml-4 space-y-1">
+                                    <li>• distance: 距离要求 <span class="text-yellow-500">⭐⭐</span></li>
+                                    <li>• storeNames: 门店名称 <span class="text-yellow-500">⭐⭐</span></li>
+                                    <li>• facilities: 配套设施 <span class="text-yellow-500">⭐⭐⭐</span></li>
+                                    <li>• orientation: 朝向 <span class="text-yellow-500">⭐⭐⭐</span></li>
+                                    <li>• floor: 楼层要求 <span class="text-yellow-500">⭐⭐⭐⭐</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 18: 课后作业 -->
+            <section class="slide" data-index="17">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">课后作业</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">作业提交要求</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">提交格式</h3>
+                            <div class="bg-gray-50 rounded-xl p-4 font-mono text-sm">
+                                <pre class="text-text-secondary">文件命名：第2章第1课_作业_姓名_日期.md
+
+提交内容结构：
+├── 一、基础作业（必做）
+│   ├── 1.1 Dify项目链接和名称
+│   ├── 1.2 工作流截图
+│   ├── 1.3 提示词配置
+│   ├── 1.4 测试结果表格
+│   └── 1.5 问题与解决
+├── 二、进阶作业（选做）
+└── 三、挑战作业（选做）</pre>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">学习建议</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-bold text-sm">1</span>
+                                    </div>
+                                    <p class="text-body text-text-secondary"><strong class="text-primary">先完成基础作业</strong>：确保掌握核心技能后再挑战进阶</p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-bold text-sm">2</span>
+                                    </div>
+                                    <p class="text-body text-text-secondary"><strong class="text-primary">多测试边界情况</strong>：真实用户输入往往不按套路出牌</p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-bold text-sm">3</span>
+                                    </div>
+                                    <p class="text-body text-text-secondary"><strong class="text-primary">记录优化过程</strong>：提示词优化是迭代过程，记录每次修改</p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-bold text-sm">4</span>
+                                    </div>
+                                    <p class="text-body text-text-secondary"><strong class="text-primary">对比不同平台</strong>：在Coze和Dify上都尝试一下</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="interactive-box mt-8">
+                        <h3 class="font-display text-xl font-semibold text-primary mb-4">常见问题</h3>
+                        <div class="grid grid-cols-3 gap-6">
+                            <div class="bg-gray-50 rounded-xl p-4">
+                                <h4 class="font-semibold text-primary mb-2">Q: 结构化输出不稳定？</h4>
+                                <ul class="text-sm text-text-muted space-y-1">
+                                    <li>• 检查JSON Schema是否正确</li>
+                                    <li>• 强调"只返回JSON"</li>
+                                    <li>• 调低Temperature（0.1-0.3）</li>
+                                </ul>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-4">
+                                <h4 class="font-semibold text-primary mb-2">Q: 参数提取不准确？</h4>
+                                <ul class="text-sm text-text-muted space-y-1">
+                                    <li>• 在提示词中增加更多示例</li>
+                                    <li>• 明确说明每个参数的提取规则</li>
+                                    <li>• 处理好"未提及"的情况</li>
+                                </ul>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-4">
+                                <h4 class="font-semibold text-primary mb-2">Q: Coze和Dify区别？</h4>
+                                <ul class="text-sm text-text-muted space-y-1">
+                                    <li>• 变量引用语法不同</li>
+                                    <li>• 结构化输出配置界面略有差异</li>
+                                    <li>• 核心逻辑相同，可迁移</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 19: 本课小结 -->
+            <section class="slide" data-index="18">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">1.7 课程总结</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">本课小结</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">核心概念回顾</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                        <span class="text-primary font-bold text-sm">1</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-text-primary">工作流（Workflow）</h4>
+                                        <p class="text-body text-text-muted text-sm">业务流程的自动化编排</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                        <span class="text-primary font-bold text-sm">2</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-text-primary">DAG</h4>
+                                        <p class="text-body text-text-muted text-sm">有向无环图，工作流的底层结构</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                        <span class="text-primary font-bold text-sm">3</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-text-primary">参数提取 & 结构化输出</h4>
+                                        <p class="text-body text-text-muted text-sm">将自然语言转化为JSON格式数据</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                        <span class="text-primary font-bold text-sm">4</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-text-primary">节点（Node）与边（Edge）</h4>
+                                        <p class="text-body text-text-muted text-sm">工作流的基本单元和连接</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-primary">基础节点类型</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-green-500/10 rounded-lg p-3 text-center">
+                                    <div class="text-label text-green-500 font-semibold">输入节点</div>
+                                    <div class="text-body text-text-muted text-sm">接收数据 | 工作流起点</div>
+                                </div>
+                                <div class="bg-primary/10 rounded-lg p-3 text-center">
+                                    <div class="text-label text-primary font-semibold">LLM节点</div>
+                                    <div class="text-body text-text-muted text-sm">AI推理 | 参数提取</div>
+                                </div>
+                                <div class="bg-purple-500/10 rounded-lg p-3 text-center">
+                                    <div class="text-label text-purple-500 font-semibold">变量节点</div>
+                                    <div class="text-body text-text-muted text-sm">数据传递 | 节点间流转</div>
+                                </div>
+                                <div class="bg-yellow-500/10 rounded-lg p-3 text-center">
+                                    <div class="text-label text-yellow-500 font-semibold">条件节点</div>
+                                    <div class="text-body text-text-muted text-sm">分支判断 | 逻辑控制</div>
+                                </div>
+                                <div class="bg-red-500/10 rounded-lg p-3 text-center col-span-2">
+                                    <div class="text-label text-red-500 font-semibold">输出节点</div>
+                                    <div class="text-body text-text-muted text-sm">返回结果 | 工作流终点</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="interactive-box mt-8">
+                        <h3 class="font-display text-xl font-semibold text-primary mb-4">下节预告：进阶工作流与RAG基础</h3>
+                        <div class="grid grid-cols-4 gap-4 text-center">
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <div class="text-label text-primary font-semibold">意图识别节点</div>
+                                <div class="text-body text-text-muted text-sm">判断用户想做什么</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <div class="text-label text-primary font-semibold">知识库检索节点</div>
+                                <div class="text-body text-text-muted text-sm">RAG基础</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <div class="text-label text-primary font-semibold">HTTP请求节点</div>
+                                <div class="text-body text-text-muted text-sm">API调用</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <div class="text-label text-primary font-semibold">代码节点</div>
+                                <div class="text-body text-text-muted text-sm">数据处理</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 导航控制 -->
+        <div class="ui-element fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6">
+            <button id="prevBtn" class="nav-btn" onclick="prevSlide()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div class="slide-counter bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg">
+                <span id="currentSlide" class="text-primary font-bold">1</span>
+                <span class="text-text-muted">/</span>
+                <span id="totalSlides" class="text-text-muted">19</span>
+            </div>
+            <button id="nextBtn" class="nav-btn" onclick="nextSlide()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 页面指示点 -->
+        <div class="ui-element fixed right-8 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3" id="dotsContainer">
+        </div>
+
+        <!-- 进度条 -->
+        <div class="ui-element fixed bottom-0 left-0 right-0 h-1 bg-gray-200 z-50">
+            <div id="progressBar" class="h-full bg-primary transition-all duration-500" style="width: 5.26%"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

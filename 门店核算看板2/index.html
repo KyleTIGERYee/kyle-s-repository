@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <title>安居乐寓 门店核算看板</title>
+  <!-- Google Fonts: Poppins + Open Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- 百度地图回调函数（需要在 API 加载前定义） -->
+  <script type="text/javascript">
+    // 百度地图初始化回调函数
+    function initBMap() {
+      console.log('[百度地图] API 加载完成');
+      window.BMapReady = true;
+      // 触发自定义事件通知 React 组件
+      window.dispatchEvent(new Event('BMapReady'));
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['Poppins', 'sans-serif'],
+            body: ['Open Sans', 'sans-serif'],
+            sans: ['Open Sans', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.11.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "recharts": "https://esm.sh/recharts@^3.6.0"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-blue-500/30 dark:bg-slate-950 dark:text-slate-200 light:bg-slate-50 light:text-slate-800">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+
+  <!-- 百度地图 JavaScript API（必须放在 body 中，因为 API 使用 document.body.appendChild） -->
+  <script type="text/javascript"
+    src="https://api.map.baidu.com/api?v=3.0&ak=xFenM98bx3DYAA9tmdWwcHllYp7x5ono&callback=initBMap"></script>
+</body>
+
+</html>

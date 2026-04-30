@@ -1,0 +1,1879 @@
+app:
+  description: V8.0 Agentic架构升级版：集成结果反思(Reflector)、智能容错(Recovery)与思维链规划(Planner)。
+  icon: 🤖
+  icon_background: '#D1FAE5'
+  mode: advanced-chat
+  name: AI找房助手_UAT
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/tongyi:0.1.27@787b0cf1b75f43e682396822b527c3d3f77248790d7d3534a7f2ef7ca6b03daf
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables:
+  - description: 存储用户的搜索条件
+    id: b5561326-908e-4de9-b6b7-806dab7b87f6
+    name: search_state
+    selector:
+    - conversation
+    - search_state
+    value: ''
+    value_type: string
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: '👋 嗨！我是升级版 AI 找房顾问。
+
+
+      我可以：
+
+      1. 🏠 **深度搜房**：不仅找房，还能为您分析性价比。
+
+      2. 💡 **智能建议**：如果您找不到房，我会告诉您原因并提供方案。
+
+      3. 🔑 **管家直连**：一键预约看房。
+
+
+      请告诉我您的需求吧！（例如："帮我找南山3000元左右的一居室"）'
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: true
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: true
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        sourceType: if-else
+        targetType: http-request
+      id: branch_to_search
+      selected: false
+      source: action_branch
+      sourceHandle: search
+      target: search_api
+      targetHandle: target
+      type: custom
+    - data:
+        sourceType: http-request
+        targetType: code
+      id: search_to_verify
+      selected: false
+      source: search_api
+      sourceHandle: source
+      target: search_verify
+      targetHandle: target
+      type: custom
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: agent_brain-source-agent_parser-target
+      selected: false
+      source: agent_brain
+      sourceHandle: source
+      target: agent_parser
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: search_verify-source-search_result_branch-target
+      selected: false
+      source: search_verify
+      sourceHandle: source
+      target: search_result_branch
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: answer
+      id: butler_api-fail-branch-1766975015859-target
+      selected: false
+      source: butler_api
+      sourceHandle: fail-branch
+      target: '1766975015859'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: answer
+      id: search_api-fail-branch-1766975015859-target
+      selected: false
+      source: search_api
+      sourceHandle: fail-branch
+      target: '1766975015859'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: butler_api-source-1766975339860-target
+      selected: false
+      source: butler_api
+      sourceHandle: source
+      target: '1766975339860'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1766975339860-source-17669753690600-target
+      selected: false
+      source: '1766975339860'
+      sourceHandle: source
+      target: '17669753690600'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 17669753690600-fail-17669754050530-target
+      selected: false
+      source: '17669753690600'
+      sourceHandle: fail
+      target: '17669754050530'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: http-request
+      id: action_branch-butler-butler_api-target
+      selected: false
+      source: action_branch
+      sourceHandle: butler
+      target: butler_api
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: if-else
+      id: 1766714307001-source-1766990384062-target
+      selected: false
+      source: '1766714307001'
+      sourceHandle: source
+      target: '1766990384062'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 17669904048370-source-final_answer_direct-target
+      selected: false
+      source: '17669904048370'
+      sourceHandle: source
+      target: final_answer_direct
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 17669753690600-success-1766995990645-target
+      selected: false
+      source: '17669753690600'
+      sourceHandle: success
+      target: '1766995990645'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: 1766995990645-source-final_answer_tool-target
+      selected: false
+      source: '1766995990645'
+      sourceHandle: source
+      target: final_answer_tool
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: assigner
+      id: agent_parser-source-1767514042659-target
+      selected: false
+      source: agent_parser
+      sourceHandle: source
+      target: '1767514042659'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: assigner
+        targetType: if-else
+      id: 1767514042659-source-action_branch-target
+      selected: false
+      source: '1767514042659'
+      sourceHandle: source
+      target: action_branch
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: start_node-source-agent_brain-target
+      selected: false
+      source: start_node
+      sourceHandle: source
+      target: agent_brain
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: knowledge-retrieval
+      id: action_branch-dcae6179-4333-4e35-83e5-60aa2893e595-1766714307001-target
+      selected: false
+      source: action_branch
+      sourceHandle: dcae6179-4333-4e35-83e5-60aa2893e595
+      target: '1766714307001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 17675175848220-source-17675175877010-target
+      selected: false
+      source: '17675175848220'
+      sourceHandle: source
+      target: '17675175877010'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 17675175877010-source-17675175899190-target
+      selected: false
+      source: '17675175877010'
+      sourceHandle: source
+      target: '17675175899190'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 17675175899190-success-17675175954140-target
+      selected: false
+      source: '17675175899190'
+      sourceHandle: success
+      target: '17675175954140'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: 17675175954140-source-1766992829699-target
+      selected: false
+      source: '17675175954140'
+      sourceHandle: source
+      target: '1766992829699'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17675175899190-fail-1767517640663-target
+      selected: false
+      source: '17675175899190'
+      sourceHandle: fail
+      target: '1767517640663'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: answer
+      id: 17675175848220-fail-branch-1766975015859-target
+      source: '17675175848220'
+      sourceHandle: fail-branch
+      target: '1766975015859'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1767517640663-source-1766992829699-target
+      source: '1767517640663'
+      sourceHandle: source
+      target: '1766992829699'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1766990384062-false-17669904048370-target
+      source: '1766990384062'
+      sourceHandle: 'false'
+      target: '17669904048370'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: http-request
+      id: 1766990384062-true-17675175848220-target
+      source: '1766990384062'
+      sourceHandle: 'true'
+      target: '17675175848220'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: action_branch-false-1767520833386-target
+      source: action_branch
+      sourceHandle: 'false'
+      target: '1767520833386'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1767520833386-source-final_answer_tool-target
+      source: '1767520833386'
+      sourceHandle: source
+      target: final_answer_tool
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: search_result_branch-fail-1767580235030-target
+      source: search_result_branch
+      sourceHandle: fail
+      target: '1767580235030'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: 1767580235030-source-1766975313287-target
+      source: '1767580235030'
+      sourceHandle: source
+      target: '1766975313287'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: search_result_branch-success-1767584032042-target
+      source: search_result_branch
+      sourceHandle: success
+      target: '1767584032042'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: 1767584032042-source-final_answer_tool-target
+      source: '1767584032042'
+      sourceHandle: source
+      target: final_answer_tool
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1766975313287-source-1767663435254-target
+      source: '1766975313287'
+      sourceHandle: source
+      target: '1767663435254'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: token
+          max_length: 255
+          options: []
+          required: true
+          type: text-input
+          variable: token
+        - label: wxMiniAppId
+          max_length: 48
+          options: []
+          required: true
+          type: text-input
+          variable: wxMiniAppId
+        - label: lat
+          max_length: 48
+          options: []
+          required: false
+          type: text-input
+          variable: lat
+        - label: lng
+          max_length: 48
+          options: []
+          required: false
+          type: text-input
+          variable: lng
+      height: 187
+      id: start_node
+      position:
+        x: 0
+        y: 346
+      positionAbsolute:
+        x: 0
+        y: 346
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - sys
+          - query
+        desc: 核心大脑：Router + Planner + CoT 参数提取
+        memory:
+          query_prompt_template: '{{#sys.query#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.1
+          mode: chat
+          name: qwen-flash-2025-07-28
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: agent_sys
+          role: system
+          text: "# Role\n你是一个高智商的 **AI 业务规划师 (Planner & Router)**。\n你通过“思维链 (Chain\
+            \ of Thought)”来处理用户的租房需求。你的核心任务是精准识别意图、清洗标准化参数，并维护对话状态。\n\n# Objectives\n\
+            1. **Intent Analysis**: 识别用户是想搜房、找管家、问政策还是闲聊。\n2. **State Management**:\
+            \ 判断用户是在“继续”上一轮搜索，还是“推翻”了历史条件。\n3. **Slot Filling & Validation**: 检查参数是否完整。\n\
+            \n# ⛔ 负向约束 (Negative Constraints)\n- **严禁承接**以下业务：转租、换房、退租、报修、保洁、投诉、支付、签约。\n\
+            - 当用户提出上述**不支持**的需求时，**绝不能**尝试收集信息，必须将 intent 设为 `chat`，并交由下游 Chat Agent\
+            \ 拒绝服务。\n- **严禁**直接回答事实性问题（如“水费多少”），因为你没有数据，你回答的都是错的！此类问题请路由至 `query_kb`。\n\
+            \n# Input Context\n当前已保存的搜索条件\n{{#conversation.search_state#}}\n\n# Thinking\
+            \ Protocol (CoT)\n在输出最终 JSON 前，必须先在 `thought` 字段中进行推理：\n\n1. **分析意图与场景辨析**：\n\
+            \   * **关于“门店”**\n     * *\"xx店在哪？\"* -> `query_kb`\n     * *\"我要约看xx店\"\
+            * -> `find_butler`\n     * *\"我想找xx店的房子\"* -> `search_house`\n   * **关于“房源”**\n\
+            \     * *\"帮我找房\"* -> `search_house`\n     * *\"我看中这套了\"* -> `find_butler`\n\
+            \   * **关于“闲聊”**\n     * 无法归类到上述意图的 -> `chat`\n\n2. **指代消解 (Reference\
+            \ Resolution) [\U0001F525必须执行]**：\n   - **触发场景**：当用户说“帮我约**第一套**”、“**那个**带阳台的”、“**西乡那家**”时。\n\
+            \   - **执行动作**：你必须**回看上一轮 AI 的回复内容**（即 Context History）。\n   - **映射逻辑**：\n\
+            \     - 用户说“第一套” -> 提取上一轮回复中**排在第 1 位**的门店名称（如“西乡永丰店”）。\n     - 用户说“第二套”\
+            \ -> 提取上一轮回复中**排在第 2 位**的门店名称。\n   - **关键结果**：必须将提取到的具体店名（如“西乡永丰店”）填入\
+            \ `storeNames` 字段，**严禁**只保留空值或只更新意图而不更新店名！\n\n3. **参数变更与上下文确认 (关键逻辑)**：\n\
+            \   * **Scenario A: 显式变更**\n     - 用户直接说：“换个南山的”、“预算调高点”。-> 直接提取参数。\n\
+            \   * **Scenario B: 颗粒度下钻 (Refinement)**\n     - 在已有区域（如宝安）基础上，用户说“翻身附近的”。->\
+            \ 必须提取 `address: 翻身`。\n   * **Scenario C: 隐式确认 (Contextual Affirmation)\
+            \ [\U0001F525必须执行]**\n     - **触发条件**：用户输入极短的肯定词，如“好”、“行”、“可以”、“听你的”、“试试看”、“ok”，以及其他意义不明、与找房场景无关的词语时。\n\
+            \     - **执行动作**：**必须回溯上一轮 AI 的回复**。\n     - **判断**：上一轮 AI 是否提出了建议？\n\
+            \       - 若 AI 说：“要不看看**宝安区**？”，用户说“好” -> **提取 `area: 宝安区`，意图设为 `search_house`**。\n\
+            \       - 若 AI 说：“您是想找离公司近一点（比如福田/南山）的，还是更看重租金划算（比如宝安/龙华）呢**？”，用户说“性价比”\
+            \ -> **提取 `area: 宝安区、龙华区`，意图设为 `search_house`**。\n       - 若 AI 说：“要不把预算提到**2500**？”，用户说“行”\
+            \ -> **提取 `maxPrice: 2500`（不可以提高minprice），意图设为 `search_house`**。\n   \
+            \  - **禁止**：如果用户说“好”，但上一轮 AI 只是在闲聊或打招呼，则维持 `chat`。\n\n4. **完整性检查**\n \
+            \  - 搜房条件中：区域/门店/地铁/minPrice/maxPrice/户型，任意一个字段不为空，即视为满足搜房条件。\n   - 如果用户只给了一个条件（如：只说了“预算2000到3000”），严禁追问，必须直接执行\
+            \ search_house。\n   - 如果用户说“我要找房”但未提供任何条件 -> **不能搜，必须追问**。\n\n# Output\
+            \ Schema (JSON Only)\n**输出必须是纯 JSON**，不要包含 Markdown 格式：\n{\n  \"thought\"\
+            : \"<你的思维链分析内容...>\",\n  \"intent\": \"search_house | find_butler | chat\
+            \ | query_kb\",\n  \"params_update\": {\n    \"area\": \"...\",\n    \"\
+            minPrice\": \"...\",\n    \"storeNames\": \"...\",\n    \"address\": \"\
+            ...\"\n  }\n}\n\n# 字段详解\n## params (参数提取规则)\n- **area**: （深圳市区域）仅限：光明区,南山区,坪山区,宝安区,盐田区,福田区,罗湖区,龙华区,龙岗区,大鹏新区。\n\
+            - **layoutName**: 必须转换为标准词：开间（如单间），一居室（如一房一厅），二居室（如两房一厅），宿舍。\n- **minPrice\
+            \ / maxPrice**: 纯数字。\n- **address**: 具体的POI、地铁站、模糊地名、街道名。当用户指定具体地点时（哪怕该地点属于已选区域），必须提取此字段。\n\
+            - **storeNames**: 必须映射为下方标准店名。**特别注意**：如果用户说“第一套/第二套”，必须根据**上下文历史**将指代转化为具体的**标准店名**填入此处，不可留空。\n\
+            ## \U0001F3E0 标准门店映射表 (Store Mapping)\n**[重要] 必须将用户口语映射为以下标准名称，禁止输出表中不存在的店名：**\n\
+            - **寓见安居系列**: 荟智苑, 萃云阁, 禧龙苑, 招商开元, 安居福厦里, 远洋新干线, 中海寰宇, 深南广场, 科技生态园, 明汇府\
+            \ (需补全 \"寓见安居|\" 前缀)\n- **宝安/西乡/福永**: 凤凰长圳店, 石岩应人石店, 福海塘尾西店, 福海塘尾东店, 福永旗舰店,\
+            \ 西乡麻布店, 西乡流塘店, 西乡永丰店, 机场东店, 机场北店, 沙井后亭店, 松岗东方店, 新安翻身店, 福永村店, 福永怀德店, 福永马山小区店,\
+            \ 福永福围西街店, 福永福围广生店, 福永兴围店, 福海新和店, 福海和平店, 福海桥头店, 航城鹤洲东店, 航城鹤洲南店, 航城宝罗店,\
+            \ 新桥洪田店\n- **龙华/民治/大浪**: 大浪元芬店, 龙华红山店, 民治白石龙店\n- **坂田/布吉/龙岗**: 坂田岗头店,\
+            \ 坂田马蹄山店, 布吉大芬店, 石岩罗租社区店, 石岩罗租中新店, 石岩罗租上新店, 坪山大万新村店\n- **福田/罗湖/盐田/南山**:\
+            \ 上沙塘晏店, 上沙沙嘴店, 上沙龙秋店, 石厦新洲店, 黄贝岭店, 笋岗店, 精茂花园店, 华强北店, 地勘大院店, 莲塘仙湖店, 莲花景田店,\
+            \ 梅林店\n\n# Scenario Examples (场景校准)\n\nCase 1: 标准搜房\nUser: \"我想看民治店和红山店的房子\"\
+            \nOutput:\n{\n  \"thought\": \"查表映射：'民治店'->'民治白石龙店'，'红山店'->'龙华红山店'。意图为搜房。\"\
+            ,\n  \"intent\": \"search_house\",\n  \"params_update\": { \"storeNames\"\
+            : \"龙华红山店,民治白石龙店\" }\n}\n\nCase 2: 意图变更\nUser: \"太远了，换个福田的吧\"\nOutput:\n\
+            {\n  \"thought\": \"用户明确要求'换个福田'。需更新区域为福田区。\",\n  \"intent\": \"search_house\"\
+            ,\n  \"params_update\": { \"area\": \"福田区\" }\n}\n\nCase 3: 越界业务\nUser:\
+            \ \"我想转租\"\nOutput:\n{\n  \"thought\": \"越界业务，Router 不提取参数。\",\n  \"intent\"\
+            : \"chat\",\n  \"params_update\": {}\n}\n\nCase 4: 知识咨询\nUser: \"水费贵吗？\"\
+            \nOutput:\n{\n  \"thought\": \"政策咨询。\",\n  \"intent\": \"query_kb\",\n\
+            \  \"params_update\": {}\n}\n\nCase 5: 条件缺失\nUser: \"帮我找个房\"\nOutput:\n\
+            {\n  \"thought\": \"无任何条件，无法搜索，转闲聊追问。\",\n  \"intent\": \"chat\",\n  \"\
+            params_update\": {}\n}\n\nCase 6: 颗粒度下钻\nContext: (上一轮: {\"area\": \"\
+            宝安区\"})\nUser: \"翻身地铁站附近的\"\nOutput:\n{\n  \"thought\": \"用户在'宝安区'基础上指定'翻身'。虽翻身属宝安，但属于更细颗粒度，必须提取\
+            \ address。\",\n  \"intent\": \"search_house\",\n  \"params_update\": {\
+            \ \"address\": \"翻身地铁站\" }\n}\n\nCase 7: 上下文建议确认 (Contextual Affirmation)\n\
+            Context: (上一轮 AI: \"要不咱们试着把范围扩大一点点？比如看看旁边的**宝安区**？\")\nUser: \"好\"\nOutput:\n\
+            {\n  \"thought\": \"用户回复'好'，这是一个肯定指令。回溯上一轮 Context，发现 AI 建议了 '宝安区'。用户意图是接受建议并搜索。\"\
+            ,\n  \"intent\": \"search_house\",\n  \"params_update\": { \"area\": \"\
+            宝安区\" }\n}\n\nCase 8: 指代消解 (Reference Resolution) [\U0001F525关键]\nContext:\
+            \ (上一轮 AI 展示了: 1. 西乡永丰店 2. 新安翻身店 3. 西乡麻布店)\nUser: \"帮我约第一套\"\nOutput:\n\
+            {\n  \"thought\": \"用户说'约第一套'。回溯 Context，第一套对应的是'西乡永丰店'。意图为找管家(约看房)，且必须填入具体的\
+            \ storeNames。\",\n  \"intent\": \"find_butler\",\n  \"params_update\"\
+            : { \"storeNames\": \"西乡永丰店\" }\n}"
+        - id: agent_user
+          role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        structured_output:
+          schema:
+            additionalProperties: false
+            properties:
+              intent:
+                description: 用户意图分类
+                enum:
+                - search_house
+                - find_butler
+                - chat
+                - query_kb
+                type: string
+              params_update:
+                additionalProperties: false
+                description: 需要更新的参数集合
+                properties:
+                  address:
+                    description: 具体地点/POI
+                    type: string
+                  area:
+                    description: 行政区域
+                    type: string
+                  distance:
+                    description: 距离
+                    type: string
+                  layoutName:
+                    description: 房型名称
+                    type: string
+                  maxPrice:
+                    description: 最高价格
+                    type: string
+                  minPrice:
+                    description: 最低价格
+                    type: string
+                  storeNames:
+                    description: 门店名称（无论是搜房还是找管家，都使用此字段。如有多个用逗号分隔）
+                    type: string
+                type: object
+              thought:
+                description: 思维链推理过程
+                type: string
+            required:
+            - thought
+            - intent
+            - params_update
+            type: object
+        structured_output_enabled: false
+        title: Agent Brain (Planner)
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 132
+      id: agent_brain
+      position:
+        x: 340.48912816153984
+        y: 373
+      positionAbsolute:
+        x: 340.48912816153984
+        y: 373
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(router_output, current_state_str):\n    \"\"\
+          \"\n    State Manager V5: 完美兼容 Dict 和 String 输入，修复单引号问题。\n    \"\"\"\n \
+          \   \n    router_data = {}\n    parse_error = None\n\n    # --- 1. 智能解析\
+          \ Router Output (核心修复) ---\n    try:\n        # A. 如果已经是字典 (Dify 结构化输出常态)，直接使用\n\
+          \        if isinstance(router_output, dict):\n            router_data =\
+          \ router_output\n            \n        # B. 如果是字符串，尝试解析\n        else:\n\
+          \            raw_text = str(router_output) if router_output else \"{}\"\n\
+          \            \n            # 暴力提取 { ... }\n            start_idx = raw_text.find('{')\n\
+          \            end_idx = raw_text.rfind('}')\n\n            if start_idx !=\
+          \ -1 and end_idx != -1:\n                json_str = raw_text[start_idx :\
+          \ end_idx + 1]\n            else:\n                json_str = raw_text\n\
+          \n            # 尝试标准解析\n            try:\n                # 预处理：防止 LLM 输出换行符导致解析挂掉\n\
+          \                clean_json_str = json_str.replace('\\n', ' ').replace('\\\
+          r', '')\n                router_data = json.loads(clean_json_str)\n    \
+          \        except json.JSONDecodeError:\n                # C. 救急：如果 json.loads\
+          \ 失败，可能是 Python 单引号字符串 (例如 \"{'a':1}\")\n                # 尝试把单引号替换为双引号\
+          \ (简单粗暴但有效)\n                try:\n                    fixed_str = json_str.replace(\"\
+          '\", '\"').replace(\"None\", \"null\").replace(\"True\", \"true\").replace(\"\
+          False\", \"false\")\n                    router_data = json.loads(fixed_str)\n\
+          \                except Exception as e_inner:\n                    raise\
+          \ Exception(f\"JSON解析彻底失败: {str(e_inner)}\")\n\n    except Exception as\
+          \ e:\n        # 捕获所有解析错误，记录下来用于调试，而不是直接变 chat\n        parse_error = str(e)\n\
+          \        # 只有在真的解析不了时，才兜底为 chat\n        router_data = {\"intent\": \"chat\"\
+          , \"params_update\": {}}\n\n    # --- 2. 提取数据 ---\n    # 如果 intent 也是空的，说明解析彻底挂了\n\
+          \    intent = router_data.get(\"intent\", \"chat\")\n    new_params = router_data.get(\"\
+          params_update\", {})\n    \n    # --- 3. 读取旧状态 ---\n    state = {}\n   \
+          \ try:\n        if current_state_str:\n            if isinstance(current_state_str,\
+          \ dict):\n                state = current_state_str\n            else:\n\
+          \                s_clean = str(current_state_str).strip()\n            \
+          \    if s_clean:\n                    # 同样处理旧状态可能存在的单引号问题\n            \
+          \        try:\n                        state = json.loads(s_clean)\n   \
+          \                 except:\n                        state = json.loads(s_clean.replace(\"\
+          '\", '\"'))\n    except:\n        state = {}\n\n    # --- 4. 智能合并逻辑 ---\n\
+          \    # 如果切换了区域 (area)，则清空门店(storeNames)、地址、距离\n    if new_params.get(\"\
+          area\") and new_params[\"area\"] != state.get(\"area\"):\n        state[\"\
+          storeNames\"] = \"\" \n        state[\"address\"] = \"\" \n        state[\"\
+          distance\"] = \"\" \n    \n    # 更新字段\n    for key, value in new_params.items():\n\
+          \        if value is not None and str(value) != \"\":\n            # 过滤掉旧的\
+          \ storeName\n            if key == \"storeName\":\n                state[\"\
+          storeNames\"] = value\n            else:\n                state[key] = value\n\
+          \n    # --- 5. 准备 API Payload ---\n    api_payload = state.copy()\n    if\
+          \ intent == \"search_house\":\n        if \"minPrice\" not in api_payload:\
+          \ api_payload[\"minPrice\"] = \"0\"\n        if \"maxPrice\" not in api_payload:\
+          \ api_payload[\"maxPrice\"] = \"10000\"\n        \n    new_state_str = json.dumps(state,\
+          \ ensure_ascii=False)\n\n    def safe_str(val, default=\"\"):\n        if\
+          \ val is None: return default\n        return str(val)\n\n    # --- 6. 返回结果\
+          \ ---\n    return {\n        \"intent\": safe_str(intent),\n        \"new_state_str\"\
+          : new_state_str,\n        \"area\": safe_str(api_payload.get(\"area\")),\n\
+          \        \"address\": safe_str(api_payload.get(\"address\")),\n        \"\
+          layoutName\": safe_str(api_payload.get(\"layoutName\")),\n        \"minPrice\"\
+          : safe_str(api_payload.get(\"minPrice\", \"0\")),\n        \"maxPrice\"\
+          : safe_str(api_payload.get(\"maxPrice\", \"10000\")),\n        \"storeNames\"\
+          : safe_str(api_payload.get(\"storeNames\")),\n        \"distance\": safe_str(api_payload.get(\"\
+          distance\")),\n        # 增加 Debug 字段：如果解析出错了，这里会显示错误原因\n        \"debug_error\"\
+          : safe_str(parse_error)\n    }"
+        code_language: python3
+        desc: 解析Agent输出的JSON
+        outputs:
+          address:
+            children: null
+            type: string
+          area:
+            children: null
+            type: string
+          debug_error:
+            children: null
+            type: string
+          distance:
+            children: null
+            type: string
+          intent:
+            children: null
+            type: string
+          layoutName:
+            children: null
+            type: string
+          maxPrice:
+            children: null
+            type: string
+          minPrice:
+            children: null
+            type: string
+          new_state_str:
+            children: null
+            type: string
+          storeNames:
+            children: null
+            type: string
+        selected: false
+        title: State Manager
+        type: code
+        variables:
+        - value_selector:
+          - agent_brain
+          - text
+          variable: router_output
+        - value_selector:
+          - conversation
+          - search_state
+          value_type: object
+          variable: current_state_str
+      height: 80
+      id: agent_parser
+      position:
+        x: 681.5080497152996
+        y: 397
+      positionAbsolute:
+        x: 681.5080497152996
+        y: 397
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: search
+          conditions:
+          - comparison_operator: is
+            id: c_search
+            value: search_house
+            varType: string
+            variable_selector:
+            - agent_parser
+            - intent
+          id: search
+          logical_operator: and
+        - case_id: butler
+          conditions:
+          - comparison_operator: is
+            id: c_butler
+            value: find_butler
+            varType: string
+            variable_selector:
+            - agent_parser
+            - intent
+          id: butler
+          logical_operator: and
+        - case_id: dcae6179-4333-4e35-83e5-60aa2893e595
+          conditions:
+          - comparison_operator: is
+            id: 4550eb86-6164-4c8c-954a-445f9d48fa22
+            value: query_kb
+            varType: string
+            variable_selector:
+            - agent_parser
+            - intent
+          id: dcae6179-4333-4e35-83e5-60aa2893e595
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 动作分发
+        type: if-else
+      height: 220
+      id: action_branch
+      position:
+        x: 1365.8569004188862
+        y: 329
+      positionAbsolute:
+        x: 1365.8569004188862
+        y: 329
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#17669904048370.text#}}'
+        desc: ''
+        selected: false
+        title: 直接回复 (智能问答)
+        type: answer
+        variables: []
+      height: 102
+      id: final_answer_direct
+      position:
+        x: 2809
+        y: 668
+      positionAbsolute:
+        x: 2809
+        y: 668
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: body_json
+            key: ''
+            type: text
+            value: "{\n  \"area\": \"{{#agent_parser.area#}}\",\n  \"layoutName\"\
+              : \"{{#agent_parser.layoutName#}}\",\n  \"minPrice\": \"{{#agent_parser.minPrice#}}\"\
+              ,\n  \"maxPrice\": \"{{#agent_parser.maxPrice#}}\",\n  \"address\":\
+              \ \"{{#agent_parser.address#}}\",\n  \"storeNames\": \"{{#agent_parser.storeNames#}}\"\
+              ,\n  \"distance\": \"{{#agent_parser.distance#}}\",\n  \"lng\": \"{{#start_node.lng#}}\"\
+              ,\n  \"lat\": \"{{#start_node.lat#}}\"\n}"
+          type: json
+        desc: ''
+        error_strategy: fail-branch
+        headers: 'applet-token:{{#start_node.token#}}
+
+          wxMiniAppId:{{#start_node.wxMiniAppId#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: true
+        ssl_verify: true
+        timeout:
+          connect: 10
+          read: 30
+          write: 30
+        title: API搜房
+        type: http-request
+        url: https://uat-weapp.szajly.com/api/wechat/ai/searchHouse
+        variables: []
+      height: 189
+      id: search_api
+      position:
+        x: 1726
+        y: 129
+      positionAbsolute:
+        x: 1726
+        y: 129
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\r\n\r\ndef main(api_resp: str) -> dict:\r\n    try:\r\n\
+          \        if not api_resp:\r\n            return {\"has_data\": \"false\"\
+          }\r\n        \r\n        data = json.loads(api_resp)\r\n        if data.get(\"\
+          data\") and data[\"data\"].get(\"list\") and len(data[\"data\"][\"list\"\
+          ]) > 0:\r\n            return {\"has_data\": \"true\"}\r\n        \r\n \
+          \       return {\"has_data\": \"false\"}\r\n    except:\r\n        return\
+          \ {\"has_data\": \"false\"}"
+        code_language: python3
+        desc: ''
+        outputs:
+          has_data:
+            children: null
+            type: string
+        selected: false
+        title: 数据校验
+        type: code
+        variables:
+        - value_selector:
+          - search_api
+          - body
+          variable: api_resp
+      height: 52
+      id: search_verify
+      position:
+        x: 2067
+        y: 161.96864020314197
+      positionAbsolute:
+        x: 2067
+        y: 161.96864020314197
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: success
+          conditions:
+          - comparison_operator: is
+            id: c_ok
+            value: 'true'
+            varType: string
+            variable_selector:
+            - search_verify
+            - has_data
+          id: success
+          logical_operator: and
+        - case_id: fail
+          conditions:
+          - comparison_operator: is
+            id: c_fail
+            value: 'false'
+            varType: string
+            variable_selector:
+            - search_verify
+            - has_data
+          id: fail
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 搜索结果判断
+        type: if-else
+      height: 172
+      id: search_result_branch
+      position:
+        x: 2409.968640203142
+        y: 78.79230646709132
+      positionAbsolute:
+        x: 2409.968640203142
+        y: 78.79230646709132
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: body_json
+            key: ''
+            type: text
+            value: "{\n  \"storeNames\": \"{{#agent_parser.storeNames#}}\"\n}"
+          type: json
+        desc: ''
+        error_strategy: fail-branch
+        headers: 'applet-token:{{#start_node.token#}}
+
+          wxMiniAppId:{{#start_node.wxMiniAppId#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 10
+          read: 30
+          write: 30
+        title: API管家
+        type: http-request
+        url: https://uat-weapp.szajly.com/api/wechat/ai/recommend/butler
+        variables: []
+      height: 189
+      id: butler_api
+      position:
+        x: 1726
+        y: 381
+      positionAbsolute:
+        x: 1726
+        y: 381
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#1767584032042.result#}}{{#1766995990645.result#}}{{#butler_api.body#}}{{#search_api.body#}}{{#1767520833386.text#}}'
+        desc: ''
+        selected: false
+        title: 工具结果回复
+        type: answer
+        variables: []
+      height: 177
+      id: final_answer_tool
+      position:
+        x: 4050
+        y: 458
+      positionAbsolute:
+        x: 4050
+        y: 458
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        dataset_ids:
+        - ssDw4ecgZXoWJF0Z28G3/sesr5aEYTe3rCmwu+fGavPJmWdNBO8HELVWjfdhDsbs
+        multiple_retrieval_config:
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: gte-rerank-v2
+            provider: langgenius/tongyi/tongyi
+          top_k: 4
+        query_variable_selector:
+        - start_node
+        - sys.query
+        retrieval_mode: multiple
+        selected: false
+        title: 知识检索
+        type: knowledge-retrieval
+      height: 90
+      id: '1766714307001'
+      position:
+        x: 1726
+        y: 649
+      positionAbsolute:
+        x: 1726
+        y: 649
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: 服务器繁忙，请稍后重试！
+        selected: false
+        title: 直接回复 3
+        type: answer
+        variables: []
+      height: 100
+      id: '1766975015859'
+      position:
+        x: 2067
+        y: 329
+      positionAbsolute:
+        x: 2067
+        y: 329
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1767580235030'
+          - text
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: qwen-flash-2025-07-28
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: 5f89376e-3995-46f9-a86d-621f24d7764d
+          role: system
+          text: "# Role\nSenior Rental Consultant (金牌租房顾问)\n\n# Input Context\n上游分析师\
+            \ (Analyzer) 对“搜索无结果”的诊断报告如下：\n{{#1767580235030.text#}}\n\n# Task\n请根据分析师的\
+            \ JSON 数据，撰写一条给用户的回复。\n\n1. **Tone (语调)**:\n   - 像一个为你着想的老朋友，而不是冷冰冰的客服。\n\
+            \   - **核心逻辑**：不要直接说“没房”，要说“那边的房子太抢手了/太贵了，但我知道一个更好的地方！”\n\n2. **Content\
+            \ Logic (内容逻辑)**:\n   - **Step 1 共情**: \"哎呀，刚才帮您把库里的房源都翻了一遍，这个具体位置/条件下暂时没看到空房呢\
+            \ \U0001F97A。\"\n   \n   - **Step 2 建议 (根据 strategy 动态调整)**:\n     - **[\U0001F525\
+            重点] 如果是 `change_area`**:\n       - 话术：“其实您可以看看旁边的 **[value]**！那边也是很多在{{area}}上班的朋友的首选，**通勤很方便，而且性价比超高！**\
+            \ \U0001F680”\n       - (不要只说换地方，要强调“性价比”和“通勤便利”来诱惑用户)。\n     - **如果是\
+            \ `increase_budget`**:\n       - 话术：“因为这片区域行情比较火热，要不咱们试着把预算稍微提到 **[value]**\
+            \ 左右？或许能捡到漏哦！\U0001F4B0”\n     - **如果是 `change_layout`**:\n       - 话术：“咱们这边主打精致整租，要不看看\
+            \ **[value]**？一个人住或者情侣住都特别舒服！✨”\n\n   - **Step 3 引导**: \n     - 结尾加上：“您觉得怎么样？要不我帮您查查？”\n\
+            \n# Output Rules\n- 直接输出回复内容，不要带引号。\n- 适当使用 Emoji (\U0001F4AA, \U0001F3E0\
+            , \U0001F687) 增加信任感。"
+        selected: false
+        title: Recovery Agent (空结果分析)
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1766975313287'
+      position:
+        x: 3271.7170690880134
+        y: 67.48543765244011
+      positionAbsolute:
+        x: 3271.7170690880134
+        y: 67.48543765244011
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(api_resp: str) -> dict:\n    try:\n       \
+          \ if not api_resp:\n            return {\"has_data\": \"false\"}\n     \
+          \   \n        data = json.loads(api_resp)\n        if data.get(\"data\"\
+          ) and data[\"data\"].get(\"list\") and len(data[\"data\"][\"list\"]) > 0:\n\
+          \            return {\"has_data\": \"true\"}\n        \n        return {\"\
+          has_data\": \"false\"}\n    except:\n        return {\"has_data\": \"false\"\
+          }"
+        code_language: python3
+        outputs:
+          has_data:
+            children: null
+            type: string
+        selected: false
+        title: 数据校验2
+        type: code
+        variables:
+        - value_selector:
+          - butler_api
+          - body
+          value_type: string
+          variable: api_resp
+      height: 52
+      id: '1766975339860'
+      position:
+        x: 2067
+        y: 480
+      positionAbsolute:
+        x: 2067
+        y: 480
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: success
+          conditions:
+          - comparison_operator: contains
+            id: c_ok
+            value: 'true'
+            varType: string
+            variable_selector:
+            - '1766975339860'
+            - has_data
+          id: success
+          logical_operator: and
+        - case_id: fail
+          conditions:
+          - comparison_operator: contains
+            id: c_fail
+            value: 'false'
+            varType: string
+            variable_selector:
+            - '1766975339860'
+            - has_data
+          id: fail
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 搜索结果判断 (1)
+        type: if-else
+      height: 172
+      id: '17669753690600'
+      position:
+        x: 2448
+        y: 441.6550422345621
+      positionAbsolute:
+        x: 2448
+        y: 441.6550422345621
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '哎呀，这个房间没有找到对应的管家呢 🥺。
+
+          要不咱们换个房源试试？'
+        selected: false
+        title: 直接回复 4 (1)
+        type: answer
+        variables: []
+      height: 116
+      id: '17669754050530'
+      position:
+        x: 2826.312667088349
+        y: 339.39054528604566
+      positionAbsolute:
+        x: 2826.312667088349
+        y: 339.39054528604566
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: empty
+            id: 36865598-8d6b-4689-a6cf-4c47b6776a10
+            value: ''
+            varType: array[object]
+            variable_selector:
+            - '1766714307001'
+            - result
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 条件分支 4
+        type: if-else
+      height: 124
+      id: '1766990384062'
+      position:
+        x: 2081.6989294590467
+        y: 706.9642162939124
+      positionAbsolute:
+        x: 2081.6989294590467
+        y: 706.9642162939124
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1766714307001'
+          - result
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: qwen-flash-2025-07-28
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: c9f3cc83-a842-481d-87f2-1c2cf932ca11
+          role: system
+          text: '# Role
+
+            知识库咨询专家
+
+
+            # Input
+
+            - 知识库片段: {{#context#}}
+
+            - 用户问题：{{#sys.query#}}
+
+
+            # Instructions
+
+            1. 仅依据知识库回答，不要编造。
+
+            2. 如果知识库提到了相关的管家或门店，请主动提示用户“可以帮您预约管家”。
+
+            # Tone
+
+            - **热情、专业、接地气**。
+
+            - 多用 Emoji (✨, 🏡, 🤝) 调节气氛。
+
+            '
+        selected: false
+        title: 知识答复 (Consultant)
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '17669904048370'
+      position:
+        x: 2448
+        y: 671
+      positionAbsolute:
+        x: 2448
+        y: 671
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#17675175954140.result#}}{{#1767517640663.text#}}{{#17675175848220.body#}}'
+        selected: false
+        title: 直接回复 6
+        type: answer
+        variables: []
+      height: 140
+      id: '1766992829699'
+      position:
+        x: 3832
+        y: 898
+      positionAbsolute:
+        x: 3832
+        y: 898
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(response_data: str):\n    try:\n        # 1.\
+          \ 解析 JSON 数据\n        data_dict = json.loads(response_data)\n        \n\
+          \        # 2. 获取管家列表\n        manager_list = data_dict.get('data', {}).get('list',\
+          \ [])\n        \n        if not manager_list:\n            return {\"result\"\
+          : \"暂时没有找到该门店的专属管家。\"}\n        \n        # 3. 提取第一个管家的相关字段\n        manager\
+          \ = manager_list[0]\n        name = manager.get(\"realname\", \"未知\")\n\
+          \        phone = manager.get(\"phone\", \"暂无电话\")\n        store_name =\
+          \ manager.get(\"storeName\", \"相关门店\")\n        \n        final_text = (\n\
+          \            f\"\U0001F389 为您找到专属管家！\\n\\n\"\n            f\"\U0001F464\
+          \ **{name}**\\n\\n\"\n            f\"\U0001F4DE **{phone}**\\n\\n\"\n  \
+          \          f\"\U0001F3EA {store_name}\\n\\n\"\n            f\"可以打电话或加微信预约看房哦！\"\
+          \n        )\n        \n        return {\n            \"result\": final_text\n\
+          \        }\n        \n    except Exception as e:\n        return {\n   \
+          \         \"result\": f\"提取管家信息失败: {str(e)}\"\n        }"
+        code_language: python3
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 管家名片
+        type: code
+        variables:
+        - value_selector:
+          - butler_api
+          - body
+          value_type: string
+          variable: response_data
+      height: 52
+      id: '1766995990645'
+      position:
+        x: 2826.312667088349
+        y: 526.8238180668139
+      positionAbsolute:
+        x: 2826.312667088349
+        y: 526.8238180668139
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        items:
+        - input_type: variable
+          operation: over-write
+          value:
+          - agent_parser
+          - new_state_str
+          variable_selector:
+          - conversation
+          - search_state
+          write_mode: over-write
+        selected: false
+        title: 变量赋值
+        type: assigner
+        version: '2'
+      height: 84
+      id: '1767514042659'
+      position:
+        x: 1024
+        y: 397
+      positionAbsolute:
+        x: 1024
+        y: 397
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: body_json
+            key: ''
+            type: text
+            value: "{\n  \"storeNames\": \"{{#agent_parser.storeNames#}}\"\n}"
+          type: json
+        desc: ''
+        error_strategy: fail-branch
+        headers: 'applet-token:{{#start_node.token#}}
+
+          wxMiniAppId:{{#start_node.wxMiniAppId#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          connect: 10
+          read: 30
+          write: 30
+        title: API管家 (1)
+        type: http-request
+        url: https://uat-weapp.szajly.com/api/wechat/ai/recommend/butler
+        variables: []
+      height: 189
+      id: '17675175848220'
+      position:
+        x: 2448
+        y: 832.3465655926743
+      positionAbsolute:
+        x: 2448
+        y: 832.3465655926743
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(api_resp: str) -> dict:\n    try:\n       \
+          \ if not api_resp:\n            return {\"has_data\": \"false\"}\n     \
+          \   \n        data = json.loads(api_resp)\n        if data.get(\"data\"\
+          ) and data[\"data\"].get(\"list\") and len(data[\"data\"][\"list\"]) > 0:\n\
+          \            return {\"has_data\": \"true\"}\n        \n        return {\"\
+          has_data\": \"false\"}\n    except:\n        return {\"has_data\": \"false\"\
+          }"
+        code_language: python3
+        outputs:
+          has_data:
+            children: null
+            type: string
+        selected: false
+        title: 数据校验2 (1)
+        type: code
+        variables:
+        - value_selector:
+          - '17675175848220'
+          - body
+          value_type: string
+          variable: api_resp
+      height: 52
+      id: '17675175877010'
+      position:
+        x: 2789
+        y: 906
+      positionAbsolute:
+        x: 2789
+        y: 906
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: success
+          conditions:
+          - comparison_operator: contains
+            id: c_ok
+            value: 'true'
+            varType: string
+            variable_selector:
+            - '17675175877010'
+            - has_data
+          id: success
+          logical_operator: and
+        - case_id: fail
+          conditions:
+          - comparison_operator: contains
+            id: c_fail
+            value: 'false'
+            varType: string
+            variable_selector:
+            - '17675175877010'
+            - has_data
+          id: fail
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 搜索结果判断 (2)
+        type: if-else
+      height: 172
+      id: '17675175899190'
+      position:
+        x: 3130
+        y: 847.6664700681944
+      positionAbsolute:
+        x: 3130
+        y: 847.6664700681944
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(response_data: str):\n    try:\n        # 1.\
+          \ 解析 JSON 数据\n        data_dict = json.loads(response_data)\n        \n\
+          \        # 2. 获取管家列表\n        manager_list = data_dict.get('data', {}).get('list',\
+          \ [])\n        \n        if not manager_list:\n            return {\"result\"\
+          : \"暂时没有找到该门店的专属管家。\"}\n        \n        # 3. 提取第一个管家的相关字段\n        manager\
+          \ = manager_list[0]\n        name = manager.get(\"realname\", \"未知\")\n\
+          \        phone = manager.get(\"phone\", \"暂无电话\")\n        store_name =\
+          \ manager.get(\"storeName\", \"相关门店\")\n        \n        final_text = (\n\
+          \            f\"抱歉，这个问题我暂时还不会，请您咨询管家：\\n\"\n            f\"\U0001F464 **{name}**\\\
+          n\"\n            f\"\U0001F4DE **{phone}**\\n\"\n            f\"\U0001F3EA\
+          \ {store_name}\\n\\n\"\n            f\"可以打电话或加微信进行咨询哦！\"\n        )\n  \
+          \      \n        return {\n            \"result\": final_text\n        }\n\
+          \        \n    except Exception as e:\n        return {\n            \"\
+          result\": f\"提取管家信息失败: {str(e)}\"\n        }"
+        code_language: python3
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 管家名片 (1)
+        type: code
+        variables:
+        - value_selector:
+          - '17675175848220'
+          - body
+          value_type: string
+          variable: response_data
+      height: 52
+      id: '17675175954140'
+      position:
+        x: 3491
+        y: 923
+      positionAbsolute:
+        x: 3491
+        y: 923
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - sys
+          - query
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: qwen-flash-2025-07-28
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: ec96a24b-ebbb-4717-b005-9a2fea8e9fe3
+          role: system
+          text: '# Role
+
+            客服兜底助手
+
+
+            # Rules
+
+            用户询问的问题知识库无法回答。请引导用户提供更多信息，或建议他们咨询人工客服。不要回复“我不知道”。
+
+            '
+        selected: false
+        title: 无管家名片
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1767517640663'
+      position:
+        x: 3491
+        y: 1054
+      positionAbsolute:
+        x: 3491
+        y: 1054
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - sys
+          - query
+        model:
+          completion_params:
+            temperature: 0.2
+          mode: chat
+          name: qwen-flash-2025-07-28
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: 8ef870b8-573e-4b99-9535-b7bc81d88f66
+          role: system
+          text: "# Role\n安居乐寓·金牌租房顾问 (Anju Leyu Rental Specialist)\n\n# Goals\n你的核心目标是**建立信任**并**引导转化**。\n\
+            你需要像一个真实的门店金牌销售一样，热情接待用户，解答关于“你能做什么”的疑问，同时礼貌地拒绝所有与“租房/管家/居住”无关的话题，并将注意力重新聚焦到找房上。\n\
+            **绝对准则**：你没有知识库\n\n# Userinput\n{{#sys.query#}}\n{{#conversation.search_state#}}\n\
+            \n# \U0001F6E1️ Guardrails (负向约束 - 绝对边界)\n**你不是通用 AI，你不知道天文地理或编程代码。**\n\
+            当用户提出以下非业务需求时，请使用 **“话题回转 (Pivot)”** 技巧拒绝并引导：\n\n1. **拒绝通用任务**：\n   -\
+            \ 写代码、做数学题、翻译、写诗、闲聊明星八卦。\n   - *话术示范*：“哎呀，这个我可不擅长 \U0001F602，我的脑子里只有全深圳的房源地图！要不咱们聊聊您想住哪儿？”\n\
+            \n2. **拒绝越界业务** ：\n- **严禁承接**以下业务：转租、换房、退租、报修、保洁、投诉、支付、签约。\n- 当用户提出上述**不支持**的需求时，**绝不能**尝试收集信息。\n\
+            - **严禁**直接回答事实性问题（如“水费多少”），因为你没有数据，你回答的都是错的！。\n   - *话术示范*：“关于退租/售后的问题，我权限不够，怕耽误您。建议您直接联系您的专属管家或拨打人工客服哦！\U0001F481\
+            ‍♀️”\n\n3. **拒绝敏感话题**：\n   - 政治、暴力、色情等。\n   - *话术示范*：“咱们还是聊聊找个温馨的小窝吧！\U0001F3E0\
+            ”\n\n\n# Capabilities (你能做什么)\n当用户问“你能干嘛”、“你是谁”时，请自信地展示你的三板斧：\n1. **精准搜房**：覆盖深圳全区域，整租公寓（开间/一居/二居）。\n\
+            2. **性价比分析**：帮你算通勤、比价格，找洼地。\n3. **直连管家**：一键预约看房，不收中介费。\n\n# Conversation\
+            \ Strategy (对话策略)\n\n## 1. 模糊需求引导 (Slot Filling)\n如果 Router 将用户分流到这里，通常是因为用户**没说具体条件**（如只说了“我想租房”）。\n\
+            - **必须追问**：不要干巴巴地问。要给选项。\n- *Bad*: “请问您要找哪里？”\n- *Good*: “没问题！您是想找离公司近一点的（比如福田），还是性价比高一点的（比如宝安/龙华）呢？\U0001F697\
+            ”\n\n## 2. 热情破冰 (Greeting)\n- 用户发“你好/Hi”时，不要只回“你好”。\n- *Action*: 自我介绍\
+            \ + 抛出钩子。\n- *Example*: “Hi！我是安居乐寓的 AI 顾问。最近宝安出了几套特价房，要不要帮您看看？\U0001F440\
+            ”\n\n# Few-Shot Examples (场景示范)\n\n**Case 1: 用户问能力**\nUser: \"你都能干什么呀？\"\
+            \nAI: \"我是您的专属找房小帮手呀！\U0001F4AA\n我可以帮您**按预算搜房**、**对比通勤距离**，还能帮您**预约管家**直接看房。\n\
+            您最近是在看哪一块区域的房子呢？（比如西乡、民治？）\"\n\n**Case 2: 用户求通用服务 (Pivot 策略)**\nUser:\
+            \ \"帮我写一段 Python 代码，解析这个 JSON。\"\nAI: \"哎呀，代码这种高深的东西我可晕了 \U0001F635。我最擅长的是解析**房源性价比**！\n\
+            要不您告诉我您的预算，我帮您看看怎么租最划算？\U0001F4B0\"\n\n**Case 3: 用户抱怨/投诉**\nUser: \"你们管家回消息太慢了，我要投诉。\"\
+            \nAI: \"非常抱歉给您带来了不好的体验 \U0001F614。作为 AI 我这边无法处理投诉流程，为了尽快解决您的问题，建议您直接拨打我们的\
+            \ 400 人工客服热线，或者在小程序里点击‘联系人工’哦。\"\n\n**Case 4: 用户需求模糊**\nUser: \"帮我找个房\"\
+            \nAI: \"好嘞，包在我身上！\U0001FAE1\n请问您大概想找哪个片区的呢？或者您在哪上班，我帮您按通勤时间推荐？\n（我们现在**龙华**和**宝安**的房源很充足哦～）\"\
+            \n\n**Case 5: 用户闲聊**\nUser: \"今天天气真好\"\nAI: \"是呀，这么好的天气最适合去看房啦！☀️\n要不要趁着天气好，去看看**西乡**那边带阳台的房间？采光超级棒的！\"\
+            \n\n# Tone\n- **热情、专业、接地气**。\n- 多用 Emoji (✨, \U0001F3E1, \U0001F91D) 调节气氛。\n\
+            - 永远以“**提问**”结尾，掌握对话主动权。"
+        selected: false
+        title: Chat Agent (引导)
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1767520833386'
+      position:
+        x: 1726
+        y: 816.0634928770893
+      positionAbsolute:
+        x: 1726
+        y: 816.0634928770893
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - conversation
+          - search_state
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: qwen-flash-2025-07-28
+          provider: langgenius/tongyi/tongyi
+        prompt_template:
+        - id: d36a8fcb-ecb5-4f8c-8fd0-c1fa07f8744c
+          role: system
+          text: "# Role\nSearch Diagnostic Expert (搜索诊断专家)\n\n# Context\n用户进行了搜房，但系统返回了空结果\
+            \ (Empty Result)。\n用户的搜索条件 (Search State) 如下：\n{{#conversation.search_state#}}\n\
+            \n# Knowledge Base (业务硬限制)\n- **房型范围**：仅有开间、一居室、二居室、宿舍。（严禁：合租、三居室、大平层）。\n\
+            - **租赁模式**：仅整租。\n- **区域迁徙逻辑 (Commute Strategy)**:\n  - 南山/福田 (核心区) 没房\
+            \ -> 优先推荐 **宝安/西乡/民治/龙华** (通勤圈)。\n  - 罗湖/盐田 没房 -> 优先推荐 **布吉/龙岗**。\n\n\
+            # Thinking Protocol (CoT)\n在输出最终回复前，你**必须**先在 `<thinking>` 标签中输出思维链，严格按以下步骤思考：\n\
+            \n1. **Condition Parsing (条件解析)**:\n   - 提取用户的 `area`, `minPrice/maxPrice`,\
+            \ `layoutName`, `address`。\n   - 检查预算参数是否为空。\n\n2. **Root Cause Diagnosis\
+            \ (病因诊断)**:\n   - **库存/区域限制 (高优)**: 该区域（特别是南山、福田）是否本身就很难满足此条件？或者用户指定的\
+            \ `address` 过于具体？\n   - **业务不符 (硬伤)**: 用户是否想要合租、三居室？\n   - **预算过低 (低优)**:\
+            \ 仅在区域无法更换，且预算明显低于市场底价时才考虑。\n\n3. **Strategy Formulation (策略制定 - ⚠️严格优先级)**:\n\
+            \   - **Priority 1: Change Area (换个地方)** [默认首选]\n     - 只要用户选了核心区（南山/福田）或指定了具体地点，**优先**建议切换到临近的高性价比区域（如宝安、龙华）。这是解决空结果最有效的手段。\n\
+            \   - **Priority 2: Change Layout (换个房型)**\n     - 如果用户找合租/大户型，建议换成整租开间/一居室。\n\
+            \   - **Priority 3: Increase Budget (加点预算)** [最后手段]\n     - 只有在“区域无法变更”且“房型也匹配”的情况下，才建议提预算。\n\
+            \n# ⛔ 负向约束 (Negative Constraints)\n- **严禁瞎指挥**：如果 `minPrice` 和 `maxPrice`\
+            \ 均为空（或为0/10000默认值），**绝对禁止**使用 `increase_budget`。此时必须建议 `change_area`。\n\
+            \n# Output Schema (JSON Only)\n在 `<thinking>` 结束后，输出一个纯 JSON 对象供下游节点使用：\n\
+            ```json\n{\n  \"diagnosis\": \"location_saturated\" | \"budget_too_low\"\
+            \ | \"business_mismatch\" | \"unknown\",\n  \"reasoning_summary\": \"\
+            用户在南山找房未果，且未指定预算，应当引导去宝安。\",\n  \"suggestion_strategy\": {\n    \"action\"\
+            : \"change_area\" | \"change_layout\" | \"increase_budget\",\n    \"value\"\
+            : \"宝安区\" // 建议的区域名、房型或具体金额\n  }\n}"
+        selected: false
+        title: Search_Analyzer (搜索分析师)
+        type: llm
+        vision:
+          enabled: false
+      height: 88
+      id: '1767580235030'
+      position:
+        x: 2926.911663875243
+        y: 78.79230646709132
+      positionAbsolute:
+        x: 2926.911663875243
+        y: 78.79230646709132
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(response_data):\n    \"\"\"\n    解析搜房API返回的JSON，并根据房源属性生成智能推荐语\n\
+          \    \"\"\"\n    try:\n        # --- 1. 智能兼容输入类型 (Dict 或 String) ---\n \
+          \       if isinstance(response_data, dict):\n            data_dict = response_data\n\
+          \        elif response_data:\n            try:\n                clean_str\
+          \ = str(response_data).replace('\\n', ' ').replace('\\r', '')\n        \
+          \        data_dict = json.loads(clean_str)\n            except:\n      \
+          \          return {\"result\": f\"JSON解析失败，请检查API返回格式。原始数据前50字符: {str(response_data)[:50]}\"\
+          }\n        else:\n            return {\"result\": \"抱歉，未获取到房源数据 (Input Empty)。\"\
+          }\n\n        # --- 2. 数据提取与校验 ---\n        store_list = data_dict.get('data',\
+          \ {}).get('list', [])\n        \n        if not store_list:\n          \
+          \  return {\"result\": \"抱歉，当前条件下暂无匹配房源，建议您调整预算或区域再试试。\"}\n\n        # ---\
+          \ 3. 预计算最低价 & 计算展示数量 ---\n        # [新增] 计算实际展示的房源数量 (最多3套)\n        actual_display_list\
+          \ = store_list[:3]\n        display_count = len(actual_display_list)\n\n\
+          \        batch_min_price = float('inf')\n        for store in actual_display_list:\n\
+          \            layouts = store.get('layoutList', [])\n            if layouts:\n\
+          \                prices = [item.get('price') for item in layouts if item.get('price')\
+          \ is not None]\n                if prices:\n                    min_p =\
+          \ min(prices)\n                    if min_p < batch_min_price:\n       \
+          \                 batch_min_price = min_p\n\n        # --- 4. 结果构建 ---\n\
+          \        output_parts = [\"为您精选了以下几套高性价比房源！\U0001F389\\n\"]\n        \n\
+          \        for i, store in enumerate(actual_display_list):\n            #\
+          \ --- 基础信息提取 ---\n            store_name = store.get(\"storeName\", \"未知门店\"\
+          )\n            address = store.get(\"storeAddress\", \"暂无地址\")\n       \
+          \     metro_line = store.get(\"nearMetroName\", \"\")\n            station\
+          \ = store.get(\"nearStationName\", \"\")\n            \n            raw_distance\
+          \ = store.get(\"nearStationDistance\")\n            distance = float(raw_distance)\
+          \ if raw_distance is not None else 0\n            \n            # --- 房型与价格提取\
+          \ ---\n            layouts = store.get('layoutList', [])\n            if\
+          \ not layouts: continue\n            \n            prices = [item.get('price',\
+          \ 0) for item in layouts if item.get('price') is not None]\n           \
+          \ spaces = [item.get('insideSpace', 0) for item in layouts if item.get('insideSpace')\
+          \ is not None]\n            \n            current_min_price = min(prices)\
+          \ if prices else 0\n            max_space = max(spaces) if spaces else 0\n\
+          \            first_layout_name = layouts[0].get('layoutName', '房源')\n\n\
+          \            # --- \U0001F4A1 智能推荐语生成逻辑 (Core Logic) ---\n            reason_parts\
+          \ = []\n            \n            # A. 价格评价 (根据数量动态调整话术)\n            if\
+          \ current_min_price > 0 and current_min_price <= batch_min_price:\n    \
+          \            if display_count >= 3:\n                    reason_parts.append(\"\
+          这套是三套里最实惠的\")\n                elif display_count > 1:\n               \
+          \     reason_parts.append(\"这两套里价格更优\")\n                else:\n       \
+          \             reason_parts.append(\"本区域的价格洼地\") # 只有1套时的绝对夸赞\n         \
+          \   elif current_min_price > 0 and current_min_price < 1200:\n         \
+          \       reason_parts.append(\"价格非常亲民\")\n            \n            # B.\
+          \ 面积评价\n            if max_space > 15:\n                reason_parts.append(\"\
+          空间更宽敞舒适\")\n            elif max_space > 0 and max_space < 12:\n       \
+          \         reason_parts.append(\"小户型也能住得舒服\")\n            elif max_space\
+          \ > 0:\n                reason_parts.append(\"居住性价比超高\")\n\n           \
+          \ # C. 交通评价\n            if distance > 0:\n                if distance <\
+          \ 300:\n                    reason_parts.append(\"通勤超方便！\U0001F680\")\n\
+          \                elif distance < 600:\n                    reason_parts.append(\"\
+          出行很便利。✨\")\n                elif distance > 800:\n                    reason_parts\
+          \ = [\"虽然离地铁稍远点\"] + reason_parts\n                    reason_parts.append(\"\
+          但周边环境安静，适合喜欢不折腾的你～\U0001F343\")\n            \n            # D. 兜底逻辑\n \
+          \           if not reason_parts:\n                reason_parts = [\"综合配置不错，很多租客都看好这套！\U0001F525\
+          \"]\n\n            # 拼接推荐语\n            final_reason = \"，\".join(reason_parts)\n\
+          \            if not final_reason.endswith((\"！\", \"～\", \"。\", \"\U0001F680\
+          \", \"✨\", \"\U0001F525\", \"\U0001F343\")):\n                final_reason\
+          \ += \"！✨\"\n\n            # --- 拼接单条记录 ---\n            traffic_line =\
+          \ \"\"\n            if distance > 0:\n                traffic_line = f\"\
+          \U0001F687 **交通**：{metro_line}{station}站，距离{int(distance)}米\\n\\n\"\n  \
+          \          \n            entry = (\n                f\"\U0001F3E0 **{store_name}\
+          \ · {first_layout_name}**\\n\\n\"\n                f\"\U0001F4B0 **价格**：{int(current_min_price)}元/月起\\\
+          n\\n\"\n                f\"\U0001F4CD **位置**：{address}\\n\\n\"\n       \
+          \         f\"{traffic_line}\"\n                f\"\U0001F4A1 **推荐理由**：{final_reason}\\\
+          n\\n\"\n            )\n            output_parts.append(entry)\n\n      \
+          \  # 5. 添加固定的引导结尾\n        output_parts.append(\"看中哪套可以直接对我说呢，比如 “帮我约第一套”\U0001F481\
+          ‍♀️\")\n        \n        return {\"result\": \"\\n\".join(output_parts)}\n\
+          \n    except Exception as e:\n        return {\"result\": f\"数据处理异常: {str(e)}\
+          \ 类型: {type(response_data)}\"}"
+        code_language: python3
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 找房结果输出
+        type: code
+        variables:
+        - value_selector:
+          - search_api
+          - body
+          value_type: string
+          variable: response_data
+      height: 52
+      id: '1767584032042'
+      position:
+        x: 2872.8068791311066
+        y: -13.407312754967137
+      positionAbsolute:
+        x: 2872.8068791311066
+        y: -13.407312754967137
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#1766975313287.text#}}'
+        selected: false
+        title: 直接回复 6
+        type: answer
+        variables: []
+      height: 102
+      id: '1767663435254'
+      position:
+        x: 3576.6397268434403
+        y: 78.79230646709132
+      positionAbsolute:
+        x: 3576.6397268434403
+        y: 78.79230646709132
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -912.3378075310723
+      y: 113.57069561332463
+      zoom: 0.8346042470725206
+  rag_pipeline_variables: []

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flag生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 32px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 24px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .flag-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #495057;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flag-box.highlight {
+            background: #e7f3ff;
+            border-color: #6c757d;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .info-item {
+            background: #f1f3f5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-family: 'Courier New', monospace;
+            color: #212529;
+            word-break: break-all;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Flag生成器</h1>
+
+        <div class="flag-box" id="flagDisplay">
+            点击下方按钮生成Flag
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">当前时间戳</div>
+                <div class="info-value" id="timestamp">-</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Base64长度</div>
+                <div class="info-value" id="length">-</div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-primary" onclick="generateFlag()">🔄 生成Flag</button>
+            <button class="btn-success" onclick="copyFlag()">📋 复制到剪贴板</button>
+            <button class="btn-secondary" onclick="downloadFlag()">💾 下载为文件</button>
+        </div>
+
+        <div class="footer">
+            <p>基于标准Base64编码 | 可直接在浏览器中使用</p>
+            <p>格式: "2026ReportDisplayKey|时间戳"</p>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">已复制到剪贴板!</div>
+
+    <script>
+        // 生成Flag的核心函数
+        function generateFlag() {
+            const timestamp = Date.now();
+            const dataToEncode = `2026ReportDisplayKey|${timestamp}`;
+
+            // 使用btoa函数进行Base64编码（与Java的Base64.getEncoder().encodeToString()一致）
+            const flag = btoa(unescape(encodeURIComponent(dataToEncode)));
+
+            // 更新界面显示
+            document.getElementById('flagDisplay').textContent = flag;
+            document.getElementById('flagDisplay').classList.add('highlight');
+            document.getElementById('timestamp').textContent = timestamp;
+            document.getElementById('length').textContent = flag.length;
+
+            // 移除高亮效果
+            setTimeout(() => {
+                document.getElementById('flagDisplay').classList.remove('highlight');
+            }, 1000);
+
+            return flag;
+        }
+
+        // 复制到剪贴板
+        function copyFlag() {
+            const flagDisplay = document.getElementById('flagDisplay');
+            const flag = flagDisplay.textContent;
+
+            if (!flag || flag === '点击下方按钮生成Flag') {
+                showToast('请先生成Flag!');
+                return;
+            }
+
+            // 使用现代API复制到剪贴板
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(flag)
+                    .then(() => showToast('已复制到剪贴板!'))
+                    .catch(() => fallbackCopy(flag));
+            } else {
+                fallbackCopy(flag);
+            }
+        }
+
+        // 备用复制方法（兼容旧浏览器）
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast('已复制到剪贴板!');
+            } catch (err) {
+                showToast('复制失败，请手动复制');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        // 下载为文本文件
+        function downloadFlag() {
+            const flagDisplay = document.getElementById('flagDisplay');
+            const flag = flagDisplay.textContent;
+
+            if (!flag || flag === '点击下方按钮生成Flag') {
+                showToast('请先生成Flag!');
+                return;
+            }
+
+            // 创建Blob对象
+            const blob = new Blob([flag], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            // 创建下载链接
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `flag_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+
+            // 清理
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast('文件已下载!');
+        }
+
+        // 显示提示消息
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 页面加载时自动生成一次
+        window.addEventListener('DOMContentLoaded', () => {
+            // 可选：页面加载时自动生成
+            // generateFlag();
+        });
+    </script>
+</body>
+</html>

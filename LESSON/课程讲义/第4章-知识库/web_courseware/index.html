@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第4章 知识库：从RAG到全量文档</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Google Fonts: Baloo 2 & Comic Neue for Claymorphism theme -->
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#F0FDF4',
+                        accent: '#8B5CF6',
+                        background: '#EEF2FF',
+                    },
+                    fontFamily: {
+                        display: ['"Baloo 2"', 'cursive'],
+                        body: ['"Comic Neue"', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-[#312E81] font-body overflow-hidden h-screen w-screen">
+
+    <!-- 背景装饰 -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <!-- 幻灯片容器 -->
+    <main id="slides-container" class="relative w-full h-full z-10">
+        <!-- Slide 0: Cover -->
+        <section class="slide active" data-index="0">
+            <div class="slide-content mx-auto h-full flex flex-col lg:flex-row justify-center items-center px-12 gap-12">
+                <div class="lg:w-1/2 flex flex-col justify-center items-start text-left">
+                    <span class="text-label text-accent mb-4 px-4 py-1 bg-white/50 rounded-full shadow-sm">AI 核心课程 · 第4章</span>
+                    <h1 class="text-hero font-display font-bold leading-tight text-primary mb-6">
+                        知识库：从RAG到全量文档<br>
+                        <span class="text-accent underline decoration-wavy decoration-primary/30">掌握未来架构</span>
+                    </h1>
+                    <p class="text-hero-sub text-text-secondary max-w-xl">
+                        跳出切片的桎梏，拥抱长上下文时代的全局理解能力。基于 PageIndex 与 M-R-E-R-G 协议。
+                    </p>
+                    <div class="mt-8 flex gap-4">
+                        <button onclick="nextSlide()" class="clay-btn bg-primary text-white px-8 py-3 rounded-full font-bold shadow-float hover:-translate-y-1 transition-all">
+                            开始学习
+                        </button>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 hidden lg:flex justify-center items-center">
+                    <img src="assets/rag_concept.png" alt="RAG Concept" class="w-full max-w-md rounded-3xl shadow-float floating">
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 1: Objectives -->
+        <section class="slide" data-index="1">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12 max-w-5xl">
+                <span class="text-label text-accent uppercase tracking-widest mb-2">Learning Objectives</span>
+                <h2 class="text-title font-display font-bold mb-12">本章学习目标</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="clay-card p-8">
+                        <div class="flex items-start gap-4">
+                            <span class="bg-primary/20 text-primary w-8 h-8 rounded-full flex items-center justify-center font-bold">1</span>
+                            <p class="text-body font-bold">深入理解传统 RAG 工作原理及其工程复杂度</p>
+                        </div>
+                    </div>
+                    <div class="clay-card p-8">
+                        <div class="flex items-start gap-4">
+                            <span class="bg-primary/20 text-primary w-8 h-8 rounded-full flex items-center justify-center font-bold">2</span>
+                            <p class="text-body font-bold">识别 RAG 的局限性和碎片化导致的信息丢失点</p>
+                        </div>
+                    </div>
+                    <div class="clay-card p-8">
+                        <div class="flex items-start gap-4">
+                            <span class="bg-primary/20 text-primary w-8 h-8 rounded-full flex items-center justify-center font-bold">3</span>
+                            <p class="text-body font-bold">掌握全量文档架构 (PageIndex + M-R-E-R-G)</p>
+                        </div>
+                    </div>
+                    <div class="clay-card p-8">
+                        <div class="flex items-start gap-4">
+                            <span class="bg-primary/20 text-primary w-8 h-8 rounded-full flex items-center justify-center font-bold">4</span>
+                            <p class="text-body font-bold">判断何时使用 RAG，何时使用全量文档</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 2: RAG Architecture -->
+        <section class="slide" data-index="2">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <div class="flex items-center justify-center gap-4 mb-8">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-12 h-12 text-primary"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <h2 class="text-title font-display font-bold text-primary">RAG 系统架构：让模型拥有外部大脑</h2>
+                </div>
+                
+                <div class="relative flex justify-center items-center h-[500px]">
+                    <!-- RAG Flow Diagram (Simplified Animation with SVG) -->
+                    <svg viewBox="0 0 1000 500" class="w-full max-w-5xl overflow-visible">
+                        <!-- Points -->
+                        <g id="points">
+                            <circle cx="100" cy="250" r="50" class="fill-white stroke-primary stroke-[4px] shadow-sm" />
+                            <text x="100" y="258" text-anchor="middle" class="font-bold fill-primary text-base">用户查询</text>
+                            
+                            <rect x="250" y="190" width="140" height="120" rx="24" class="fill-accent/10 stroke-accent stroke-[4px]" />
+                            <text x="320" y="258" text-anchor="middle" class="font-bold fill-accent text-base">检索模块</text>
+
+                            <rect x="460" y="190" width="140" height="120" rx="24" class="fill-primary/10 stroke-primary stroke-[4px]" />
+                            <text x="530" y="258" text-anchor="middle" class="font-bold fill-primary text-base">向量数据库</text>
+
+                            <rect x="670" y="190" width="140" height="120" rx="24" class="fill-accent/10 stroke-accent stroke-[4px]" />
+                            <text x="740" y="258" text-anchor="middle" class="font-bold fill-accent text-base">生成模块</text>
+
+                            <circle cx="910" cy="250" r="50" class="fill-primary stroke-white stroke-[4px]" />
+                            <text x="910" y="258" text-anchor="middle" class="font-bold fill-white text-base">结果</text>
+                        </g>
+
+                        <!-- Arrows with animations -->
+                        <path id="path1" d="M155,250 L250,250" stroke="#4F46E5" stroke-width="4" fill="none" stroke-dasharray="8,8" />
+                        <path id="path2" d="M390,250 L460,250" stroke="#8B5CF6" stroke-width="4" fill="none" class="animate-pulse" />
+                        <path id="path3" d="M600,250 L670,250" stroke="#4F46E5" stroke-width="4" fill="none" />
+                        <path id="path4" d="M810,250 L860,250" stroke="#8B5CF6" stroke-width="4" fill="none" />
+                    </svg>
+                </div>
+                <div class="text-center mt-8">
+                    <p class="text-subtitle text-text-secondary">检索 (Retrieve) + 增强 (Augment) + 生成 (Generate)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Document Processing Layer -->
+        <section class="slide" data-index="3">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-8 text-primary">第一层：文档处理层</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="clay-card p-6 bg-white/60">
+                        <h3 class="text-subtitle mb-4 text-accent">多格式解析</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 bg-accent rounded-full"></span> PDF/Word/HTML</li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 bg-accent rounded-full"></span> 扫描件 (OCR)</li>
+                            <li class="flex items-center gap-2"><span class="w-2 h-2 bg-accent rounded-full"></span> 图表理解 (Vision)</li>
+                        </ul>
+                    </div>
+                    <div class="clay-card p-6 bg-primary/5 border-primary/20">
+                        <h3 class="text-subtitle mb-4 text-primary">核心挑战 ★</h3>
+                        <p class="text-body leading-relaxed">
+                            表格识别、图文混排、多栏排版... 每一项都是工程挑战。
+                        </p>
+                    </div>
+                    <div class="clay-card p-6 bg-white/60">
+                        <h3 class="text-subtitle mb-4 text-accent">工具推荐</h3>
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <span class="px-3 py-1 bg-white shadow-sm rounded-lg text-sm border">PyPDF2</span>
+                            <span class="px-3 py-1 bg-white shadow-sm rounded-lg text-sm border">PaddleOCR</span>
+                            <span class="px-3 py-1 bg-white shadow-sm rounded-lg text-sm border">Unstructured</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Chunking Strategy -->
+        <section class="slide" data-index="4">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <div class="flex items-center gap-4 mb-8">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-12 h-12 text-primary"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+                    <h2 class="text-title font-display font-bold text-primary">分段策略 (Chunking)：RAG 最难的一环</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Bad Case -->
+                    <div class="clay-card p-8 bg-red-50/30 border-red-200">
+                        <div class="flex items-center gap-3 mb-6">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-red-500"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                            <h3 class="text-subtitle text-red-600">固定长度切片</h3>
+                        </div>
+                        <div class="p-6 bg-white rounded-2xl border-2 border-dashed border-red-200 text-body text-red-800">
+                            <p class="mb-4">...如果用户满足以下条件，可以申请退款：1. 购买后7天内提出申请 2. <span class="bg-red-100 px-1 font-bold">[此处断开]</span></p>
+                            <hr class="my-4 border-red-100">
+                            <p class="opacity-50 text-base">下一片段：产品未使用且包装完整...</p>
+                        </div>
+                        <p class="mt-4 text-base font-bold text-red-500">后果：逻辑链条断裂，模型无法给出完整答案。</p>
+                    </div>
+
+                    <!-- Good Case -->
+                    <div class="clay-card p-8 bg-green-50/30 border-green-200">
+                        <div class="flex items-center gap-3 mb-6">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-green-500"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <h3 class="text-subtitle text-green-600">语义/递归切片</h3>
+                        </div>
+                        <div class="p-6 bg-white rounded-2xl border-2 border-green-200 text-body text-green-800">
+                            <p>如果用户满足以下条件，可以申请退款：<br>
+                            1. 购买后7天内提出申请<br>
+                            2. 产品未使用且包装完整<br>
+                            3. 提供原始购买凭证</p>
+                        </div>
+                        <p class="mt-4 text-base font-bold text-green-600">优势：保持语义单位完整，索引质量大幅提升。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Vector Retrieval -->
+        <section class="slide" data-index="5">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <div class="flex items-center gap-4 mb-8">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-12 h-12 text-primary"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <h2 class="text-title font-display font-bold text-primary">向量相似性：几何解释</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="clay-card p-10 bg-white/80 aspect-video flex items-center justify-center relative">
+                        <!-- Redrawn Geometric Diagram -->
+                        <svg viewBox="0 0 400 300" class="w-full h-full overflow-visible">
+                            <!-- Axes -->
+                            <line x1="40" y1="260" x2="360" y2="260" stroke="#94a3b8" stroke-width="3" />
+                            <line x1="40" y1="260" x2="40" y2="20" stroke="#94a3b8" stroke-width="3" />
+                            <text x="365" y="265" class="text-xs fill-slate-400 font-bold">X</text>
+                            <text x="35" y="15" class="text-xs fill-slate-400 font-bold">Y</text>
+
+                            <!-- Vectors -->
+                            <!-- Query Vector V1 -->
+                            <line x1="40" y1="260" x2="280" y2="80" stroke="#4F46E5" stroke-width="5" />
+                            <polygon points="280,80 270,90 282,95" fill="#4F46E5" />
+                            <text x="290" y="80" class="text-base font-bold fill-primary font-display">查询向量 (Query)</text>
+
+                            <!-- Document Vector V2 -->
+                            <line x1="40" y1="260" x2="320" y2="180" stroke="#8B5CF6" stroke-width="5" />
+                            <polygon points="320,180 305,182 312,192" fill="#8B5CF6" />
+                            <text x="330" y="195" class="text-base font-bold fill-accent font-display">文档向量 (Doc)</text>
+
+                            <!-- Angle (Cosine) -->
+                            <path d="M80,260 A40,40 0 0,0 75,230" fill="none" stroke="#F59E0B" stroke-width="3" />
+                            <text x="85" y="240" class="text-xl font-bold fill-warning">θ</text>
+                            <text x="140" y="275" class="text-sm fill-warning font-bold">余弦相似度 (角度越小越相似)</text>
+
+                            <!-- Distance (Euclidean) -->
+                            <line x1="280" y1="80" x2="320" y2="180" stroke="#EF4444" stroke-width="2" stroke-dasharray="6,4" />
+                            <text x="305" y="130" class="text-sm fill-red-500 font-bold" transform="rotate(70, 305, 130)">欧氏距离 (直线距离)</text>
+                        </svg>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="clay-card p-6 border-l-8 border-primary">
+                            <h4 class="text-subtitle text-primary mb-4 flex items-center gap-3">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                向量是什么？
+                            </h4>
+                            <p class="text-body">[0.12, -0.05, 0.88, ...]</p>
+                            <p class="text-base mt-2 opacity-70">将每一个词或分段映射为 AI 可以计算的数百维数字空间。</p>
+                        </div>
+                        <div class="clay-card p-6 border-l-8 border-accent">
+                            <h4 class="text-subtitle text-accent mb-4 flex items-center gap-3">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-8 h-8"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                召回原理
+                            </h4>
+                            <ul class="text-body space-y-3">
+                                <li class="flex items-center gap-3">
+                                    <span class="w-3 h-3 bg-warning rounded-full"></span>
+                                    <span>余弦：更关注语义方向是否一致</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <span class="w-3 h-3 bg-red-400 rounded-full"></span>
+                                    <span>欧氏：更关注绝对空间距离</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Hybrid Retrieval & RRF -->
+        <section class="slide" data-index="6">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-8 text-primary">混合检索 (Hybrid) 与 RRF 融合</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div class="clay-card p-8 bg-white/60">
+                        <h3 class="text-subtitle text-accent mb-6">为什么要混合？</h3>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-white rounded-xl shadow-sm border border-accent/20">
+                                <p class="font-bold text-accent">🔍 关键词检索 (BM25)</p>
+                                <p class="text-sm">擅长：专有名词、编号、特定短语。</p>
+                            </div>
+                            <div class="p-4 bg-white rounded-xl shadow-sm border border-primary/20">
+                                <p class="font-bold text-primary">🧠 向量检索 (Vector)</p>
+                                <p class="text-sm">擅长：语义近似、同义词匹配。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clay-card p-8 bg-primary/5">
+                        <h3 class="text-subtitle text-primary mb-4">RRF 融合算法</h3>
+                        <div class="bg-white p-6 rounded-2xl shadow-inner font-mono text-center">
+                            <p class="text-xl">Score = Σ 1 / (60 + rank)</p>
+                        </div>
+                        <p class="mt-4 text-text-muted text-sm leading-relaxed">
+                            RRF（倒数排名融合）不看原始分数，只看排名。排名越靠前，权重越高。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Re-ranking -->
+        <section class="slide" data-index="7">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <div class="flex items-center gap-4 mb-8">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-12 h-12 text-primary"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                    <h2 class="text-title font-display font-bold text-primary">重排序 (Re-ranking)：精益求精</h2>
+                </div>
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="flex-1 clay-card p-6 border-dashed border-2 relative">
+                        <div class="absolute -top-3 left-6 px-3 bg-white text-text-muted text-sm font-bold border rounded-full">1. 召回 (Recall)</div>
+                        <p class="text-sm text-text-muted mb-4 italic">数万文档中选出 Top 50</p>
+                        <div class="space-y-2 opacity-50">
+                            <div class="h-8 bg-gray-100 rounded-lg w-full"></div>
+                            <div class="h-8 bg-gray-100 rounded-lg w-[80%]"></div>
+                            <div class="h-8 bg-gray-100 rounded-lg w-[90%]"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-10 h-10 text-primary opacity-50"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </div>
+                    <div class="flex-1 clay-card p-6 border-primary border-2 relative bg-primary/5">
+                        <div class="absolute -top-3 left-6 px-3 bg-primary text-white text-sm font-bold rounded-full">2. 重排 (Rerank)</div>
+                        <p class="text-sm text-primary mb-4 italic">精选最匹配的 Top 3</p>
+                        <div class="space-y-2">
+                            <div class="h-10 bg-white rounded-lg shadow-sm border border-primary/30 flex items-center px-4 font-bold">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 mr-2 text-primary"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                                最优答案 A
+                            </div>
+                            <div class="h-10 bg-white rounded-lg shadow-sm border border-primary/30 flex items-center px-4">相关答案 B</div>
+                            <div class="h-10 bg-white rounded-lg shadow-sm border border-primary/30 flex items-center px-4">相关答案 C</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: 7 Failure Points -->
+        <section class="slide" data-index="8">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12 overflow-y-auto">
+                <div class="flex items-center justify-center gap-4 mb-8">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-12 h-12 text-red-500"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <h2 class="text-title font-display font-bold text-center text-primary font-bold">RAG 系统落地的 7 大失败点</h2>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <!-- Flip Card Item 1 -->
+                    <div class="flip-card h-64 cursor-pointer group" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                            <div class="flip-card-front absolute inset-0 [backface-visibility:hidden] clay-card flex flex-col items-center justify-center p-6 bg-white text-center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-16 h-16 text-red-500 mb-4"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                <p class="text-xl font-bold">FP1: 内容缺失</p>
+                            </div>
+                            <div class="flip-card-back absolute inset-0 [backface-visibility:hidden] clay-card flex items-center justify-center p-6 bg-primary text-white [transform:rotateY(180deg)] text-center">
+                                <p class="text-base">知识库内无正确信息，导致模型凭空捏造。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Flip Card Item 2 -->
+                    <div class="flip-card h-64 cursor-pointer group" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                            <div class="flip-card-front absolute inset-0 [backface-visibility:hidden] clay-card flex flex-col items-center justify-center p-6 bg-white text-center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-16 h-16 text-warning mb-4"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+                                <p class="text-xl font-bold">FP2: 漏掉排名</p>
+                            </div>
+                            <div class="flip-card-back absolute inset-0 [backface-visibility:hidden] clay-card flex items-center justify-center p-6 bg-accent text-white [transform:rotateY(180deg)] text-center">
+                                <p class="text-base">正确答案存在，但未进入检索排名前列。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Flip Card Item 3 -->
+                    <div class="flip-card h-64 cursor-pointer group" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                            <div class="flip-card-front absolute inset-0 [backface-visibility:hidden] clay-card flex flex-col items-center justify-center p-6 bg-white text-center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-16 h-16 text-primary mb-4"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                <p class="text-xl font-bold">FP3: 不在上下文</p>
+                            </div>
+                            <div class="flip-card-back absolute inset-0 [backface-visibility:hidden] clay-card flex items-center justify-center p-6 bg-primary text-white [transform:rotateY(180deg)] text-center">
+                                <p class="text-base">检索到了正确片段，但因为各种原因没能被喂给模型。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- More -->
+                    <div class="flip-card h-64 cursor-pointer group" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-[.flipped]:[transform:rotateY(180deg)]">
+                            <div class="flip-card-front absolute inset-0 [backface-visibility:hidden] clay-card flex flex-col items-center justify-center p-6 bg-white text-center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-16 h-16 text-text-muted mb-4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                <p class="text-xl font-bold">查看更多</p>
+                            </div>
+                            <div class="flip-card-back absolute inset-0 [backface-visibility:hidden] clay-card flex items-center justify-center p-6 bg-text-muted text-white [transform:rotateY(180deg)] text-center">
+                                <p class="text-base">格式错误、具体性不足、内容不完整、无法提取。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-8 text-center text-text-muted italic text-lg">这需要更强大的理解架构 —— 全量文档协议。</p>
+            </div>
+        </section>
+
+        <!-- Slide 9: Context Window Evolution -->
+        <section class="slide" data-index="9">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <div class="flex items-center gap-4 mb-10">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-12 h-12 text-primary"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                    <h2 class="text-title font-display font-bold text-primary font-bold">范式转移：百万级上下文时代</h2>
+                </div>
+                <div class="clay-card p-10 bg-white/60">
+                    <div class="flex items-end gap-6 h-80 mb-10 border-b-2 border-slate-100 pb-2">
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-primary/20 rounded-t-xl transition-all duration-1000" style="height: 5%;"></div>
+                            <p class="text-sm mt-4 font-bold">GPT-3.5 (4K)</p>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-primary/40 rounded-t-xl transition-all duration-1000" style="height: 15%;"></div>
+                            <p class="text-sm mt-4 font-bold">GPT-4 (128K)</p>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center">
+                            <div class="w-full bg-primary rounded-t-xl transition-all duration-1000 animate-pulse" style="height: 100%;"></div>
+                            <p class="text-sm mt-4 font-bold text-primary">Gemini 1.5 Pro (2M+)</p>
+                        </div>
+                    </div>
+                    <div class="clay-card p-8 bg-accent/5 border-l-8 border-accent">
+                        <p class="text-subtitle italic opacity-80 leading-relaxed md:text-3xl">"当你可以直接读完整项业务文档甚至整个知识库时，为什么还要依赖碎片化的检索？"</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10.1: PageIndex Philosophy -->
+        <section class="slide" data-index="10">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-8 text-primary">PageIndex：无向量推理式 RAG</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="clay-card p-10 bg-white flex flex-col items-center text-center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-16 h-16 text-primary mb-6"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <h3 class="text-subtitle mb-4">传统向量 RAG</h3>
+                        <p class="text-body text-text-muted">基于片段相似度，类似于在“大海”中捞取碎片，容易丢失局部细节与全局逻辑的关联。</p>
+                    </div>
+                    <div class="clay-card p-10 bg-primary/10 border-primary text-center">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-16 h-16 text-green-600 mb-6"><path d="M12 2L8 6h8l-4-4zM12 6L7 12h10l-5-6zM12 12l-7 8h14l-7-8zM12 20v2"/></svg>
+                        <h3 class="text-subtitle mb-4">PageIndex 树搜索</h3>
+                        <p class="text-body text-text-muted">基于文档自然结构，像“查阅目录”，LLM 逐层推理导航，保留完整语义。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10.2: Interactive Tree Search -->
+        <section class="slide" data-index="11">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-8 text-primary">交互演示：树状索引搜索过程</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[550px]">
+                    <div class="lg:col-span-1 clay-card p-8 bg-white overflow-y-auto">
+                        <h4 class="text-subtitle text-base mb-6 border-b pb-4">文档结构树</h4>
+                        <ul class="space-y-6 text-lg" id="treeNav">
+                            <li class="cursor-pointer hover:text-primary transition-colors font-bold flex items-center" onclick="showTreeNode('0001')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mr-3 text-primary"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                2023 财务报告
+                            </li>
+                            <li class="pl-8 cursor-pointer hover:text-primary transition-colors flex items-center" onclick="showTreeNode('0002')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 mr-3 text-accent"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                1. 执行摘要
+                            </li>
+                            <li class="pl-8 cursor-pointer hover:text-primary transition-colors flex items-center font-bold" onclick="showTreeNode('0003')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 mr-3 text-primary"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                2. 收入分析
+                            </li>
+                            <li class="pl-16 cursor-pointer hover:text-primary transition-colors flex items-center" onclick="showTreeNode('0004')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5 mr-3 text-accent"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                2.1 产品A收入
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="lg:col-span-2 clay-card p-10 bg-white/80 relative">
+                        <div id="nodeDisplay" class="h-full flex flex-col justify-center text-center">
+                            <div class="flex flex-col items-center opacity-40">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-16 h-16 mb-4"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                                <p class="text-body italic">点击左侧节点模拟 LLM 推理导航过程</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10.3: Benchmarks -->
+        <section class="slide" data-index="12">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-8 text-primary text-center">性能从未如此飞跃</h2>
+                <div class="flex justify-center items-center gap-12">
+                    <div class="text-center">
+                        <div class="text-6xl font-bold text-gray-300 mb-2">72%</div>
+                        <p class="text-sm">传统 RAG (FinanceBench)</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-8xl font-bold text-primary mb-2 scale-110">98.7%</div>
+                        <p class="text-sm font-bold text-primary">PageIndex 架构</p>
+                    </div>
+                </div>
+                <div class="mt-12 clay-card p-6 bg-white/60 max-w-2xl mx-auto text-center">
+                    <p class="text-body">"金融、法律等对精度要求极高的场景，Pageindex 是唯一解。"</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11.1: M-R-E-R-G Overview -->
+        <section class="slide" data-index="13">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-8 text-primary">M-R-E-R-G：安居乐寓知识库协议</h2>
+                <div class="flex items-center justify-between gap-4">
+                    <div class="mrerg-step bg-white p-6 rounded-2xl shadow-soft border-2 border-primary w-full text-center">
+                        <span class="text-4xl font-display font-bold text-primary">M</span>
+                        <p class="font-bold mt-2">Map</p>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-primary opacity-30"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    <div class="mrerg-step bg-white p-6 rounded-2xl shadow-soft border-2 border-primary w-full text-center">
+                        <span class="text-4xl font-display font-bold text-primary">R</span>
+                        <p class="font-bold mt-2">Reflect</p>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-primary opacity-30"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    <div class="mrerg-step bg-white p-6 rounded-2xl shadow-soft border-2 border-primary w-full text-center">
+                        <span class="text-4xl font-display font-bold text-primary">E</span>
+                        <p class="font-bold mt-2">Explore</p>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-primary opacity-30"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    <div class="mrerg-step bg-white p-6 rounded-2xl shadow-soft border-2 border-primary w-full text-center">
+                        <span class="text-4xl font-display font-bold text-primary">R</span>
+                        <p class="font-bold mt-2">Read</p>
+                    </div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-primary opacity-30"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    <div class="mrerg-step bg-white p-6 rounded-2xl shadow-soft border-2 border-primary w-full text-center">
+                        <span class="text-4xl font-display font-bold text-primary">G</span>
+                        <p class="font-bold mt-2">Generate</p>
+                    </div>
+                </div>
+                <p class="mt-12 text-center text-text-muted italic">基于多维加权导航与级联深度探测。我们将拆解每一个步骤。</p>
+            </div>
+        </section>
+
+        <!-- Slide 11.2: Map & Reflect -->
+        <section class="slide" data-index="14">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-8 text-primary">Map (全景导航) & Reflect (反思依赖)</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="clay-card p-8 bg-white/60">
+                        <h4 class="text-subtitle text-accent mb-6">M - 全景加权导航</h4>
+                        <div class="p-6 bg-white rounded-2xl shadow-inner border border-accent/20">
+                            <p class="text-sm font-bold mb-2">用户问：“深梦扬帆退款规则”</p>
+                            <div class="space-y-2 mt-4" id="mapDisplay">
+                                <div class="p-2 bg-accent/10 border rounded-lg text-xs leading-relaxed">词库映射：“退款” 
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 inline-block mx-1"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                    [退订、退房、原路退回、结算...]</div>
+                                <div class="p-2 border rounded-lg text-xs">检索 system_map.json 
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 inline-block mx-1"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                    找到：AM-004-退房操作...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clay-card p-8 bg-primary/5">
+                        <h4 class="text-subtitle text-primary mb-6">R - 反思业务依赖</h4>
+                        <div class="relative bg-white p-6 rounded-2xl shadow-soft italic text-text-muted">
+                            <span class="absolute -top-1 left-2 text-6xl opacity-10">“</span>
+                            深梦扬帆活动涉及企业客户。我检索到了活动规则，但我可能还缺少：<br>
+                            1. 企业合同模板中的违约条款？<br>
+                            2. 财务原路退费的审批 SOP？
+                            <div class="mt-4 p-2 bg-primary/20 text-primary rounded-lg text-xs font-bold text-center flex items-center justify-center gap-2">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                触发级联检索决定
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11.3: Explore & Read -->
+        <section class="slide" data-index="15">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-10 text-primary">阶段二：E (Explore) & R (Read)</h2>
+                <div class="clay-card p-10 bg-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-6 mb-8">
+                            <div class="w-20 h-20 bg-accent/20 rounded-full flex items-center justify-center animate-pulse">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-10 h-10 text-accent"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-subtitle font-bold">级联式探测 (Recursive Explore)</h4>
+                                <p class="text-body opacity-70 italic">像水波纹一样，从一个线索发现更多隐藏关联。</p>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="clay-card p-5 bg-accent/5 border-l-4 border-accent text-body">1层探测：找到《赔偿协议》</div>
+                            <div class="clay-card p-5 bg-accent/5 border-l-4 border-accent text-body ml-8">2层探测：发现引用了《2022 装修标准》</div>
+                            <div class="clay-card p-5 bg-accent/5 border-l-4 border-accent text-body ml-16">3层探测：最终锁定“三类折旧”计算公式</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11.4: Generate -->
+        <section class="slide" data-index="16">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-8 text-primary">最终阶段：G (Generate)</h2>
+                <div class="clay-card p-12 bg-primary text-white">
+                    <div class="flex items-center gap-6 mb-8">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-20 h-20"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        <h3 class="text-hero-sub font-bold">高维合成：从碎片到真理</h3>
+                    </div>
+                    <p class="text-body leading-relaxed mb-10 opacity-90">
+                        不再是拼接文本段落，而是将前四个阶段收集到的深度语义逻辑，重新编码。
+                        输出的不仅是答案，更是<strong>带有严谨思维链条（CoT）的可验证报告。</strong>
+                    </p>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="p-5 bg-white/20 rounded-xl border border-white/30 text-center font-bold">跨章节对齐</div>
+                        <div class="p-5 bg-white/20 rounded-xl border border-white/30 text-center font-bold">逻辑一致性</div>
+                        <div class="p-5 bg-white/20 rounded-xl border border-white/30 text-center font-bold">自动源引用</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12: Decision Matrix -->
+        <section class="slide" data-index="17">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <h2 class="text-title font-display font-bold mb-10 text-primary font-bold text-center">架构决策：我该选哪一个？</h2>
+                <div class="clay-card overflow-hidden bg-white/80">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-primary/10">
+                                <th class="p-6 border-b text-xl">维度</th>
+                                <th class="p-6 border-b text-xl">传统 RAG (切片)</th>
+                                <th class="p-6 border-b text-xl text-primary">全量文档 (M-R-E-R-G)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-lg font-medium">
+                            <tr>
+                                <td class="p-6 border-b font-bold bg-slate-50/50">适用文档</td>
+                                <td class="p-6 border-b">海量碎小知识（如维基、百科）</td>
+                                <td class="p-6 border-b">严谨业务文档（如 PDF、合规）</td>
+                            </tr>
+                            <tr>
+                                <td class="p-6 border-b font-bold bg-slate-50/50">响应速度</td>
+                                <td class="p-6 border-b">秒级响应</td>
+                                <td class="p-6 border-b">分钟级响应（精读较慢）</td>
+                            </tr>
+                            <tr>
+                                <td class="p-6 border-b font-bold bg-slate-50/50">准确度</td>
+                                <td class="p-6 border-b">70% - 85% (易断章取义)</td>
+                                <td class="p-6 border-b text-primary font-bold">95% - 99% (逻辑完整)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Real World Demo -->
+        <section class="slide" data-index="18">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                <div class="flex items-center gap-4 mb-10">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-12 h-12 text-primary"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <h2 class="text-title font-display font-bold text-primary">实战演示：安居乐寓退房自动化</h2>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <img src="assets/full_doc_concept.png" alt="Full Doc Concept" class="rounded-[40px] shadow-float max-h-[500px] w-full object-cover border-8 border-white">
+                    <div class="space-y-6">
+                        <div class="clay-card p-6 bg-white border-l-8 border-primary">
+                            <p class="text-xl font-bold mb-1">Step 1: 全文扫描</p>
+                            <p class="text-base text-text-muted">系统读取《退房管理条例全本》，解析复杂的赔偿金计算公式。</p>
+                        </div>
+                        <div class="clay-card p-6 bg-white border-l-8 border-accent">
+                            <p class="text-xl font-bold mb-1">Step 2: 级联反思</p>
+                            <p class="text-base text-text-muted">自动触发检索《租房合同》中的特定违约条款，对齐两份关联文件。</p>
+                        </div>
+                        <div class="clay-card p-6 bg-white border-l-8 border-primary">
+                            <p class="text-xl font-bold mb-1">Step 3: 自主生成</p>
+                            <p class="text-base text-primary font-bold">生成带精确引用的结清报告，且逻辑 100% 严丝合缝。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Homework -->
+        <section class="slide" data-index="19">
+            <div class="slide-content mx-auto h-full flex flex-col justify-center px-12 text-center">
+                <div class="clay-card p-16 bg-primary text-white max-w-4xl mx-auto border-none shadow-float">
+                    <div class="flex justify-center mb-8">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-20 h-20 text-white animate-bounce"><path d="M12 3l1.912 3.874L18.18 7.45l-3.09 3.011.729 4.259L12 12.71l-3.818 2.01.729-4.259-3.09-3.011 4.268-.576L12 3z"/></svg>
+                    </div>
+                    <h2 class="text-title font-display font-bold mb-10">课后实践清单</h2>
+                    <ul class="text-left space-y-8 text-xl">
+                        <li class="flex items-start gap-5">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-white mt-1 shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                            <p>找出你目前业务中 3 个 RAG 可能失效的“逻辑死角”。</p>
+                        </li>
+                        <li class="flex items-start gap-5">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-white mt-1 shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                            <p>尝试为你的产品画出一个 PageIndex 树状导航草图。</p>
+                        </li>
+                        <li class="flex items-start gap-5">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-8 h-8 text-white mt-1 shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+                            <p>思考：如果给你 100 万上下文窗口，你会如何重构现有的知识库？</p>
+                        </li>
+                    </ul>
+                    <div class="mt-16">
+                        <button class="clay-btn bg-white text-primary px-12 py-5 rounded-full font-bold text-2xl hover:scale-105 transition-all shadow-lg">
+                            完成本章，掌握未来！
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 导航控制 -->
+    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6 bg-white/40 backdrop-blur-md px-6 py-3 rounded-full shadow-soft border border-white/50">
+        <button id="prevBtn" onclick="prevSlide()" class="nav-btn disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <div class="flex items-center gap-2 font-display font-bold text-primary">
+            <span id="currentSlide">1</span>
+            <span class="text-primary/30">/</span>
+            <span id="totalSlides">?</span>
+        </div>
+        <button id="nextBtn" onclick="nextSlide()" class="nav-btn disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </nav>
+
+    <!-- 底部进度条 -->
+    <div class="fixed bottom-0 left-0 right-0 h-2 bg-white/20 z-50">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500 w-0"></div>
+    </div>
+
+    <!-- 脚本引入 -->
+    <script src="script.js"></script>
+</body>
+</html>

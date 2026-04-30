@@ -1,0 +1,252 @@
+/* Theme transition */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+}
+
+/* Custom scrollbar hiding for clean mobile look */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+/* Light mode scrollbar */
+.light ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.light ::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+.light ::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+.light ::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* 百度地图信息窗口去白边样式覆盖 */
+.BMap_pop .BMap_top,
+.BMap_pop .BMap_center,
+.BMap_pop .BMap_bottom {
+  display: none;
+}
+
+.BMap_pop>div>div {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.BMap_shadow {
+  display: none !important;
+}
+
+.BMap_pop img[src*="map/images/iw_gif.gif"],
+.BMap_pop img[src*="iw3.png"] {
+  display: none !important;
+}
+
+.BMap_bubble_content {
+  background-color: transparent !important;
+}
+
+/* AI Chat Markdown Styles - Dark */
+.dark .markdown-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: inherit;
+}
+
+.dark .markdown-body p {
+  margin-bottom: 0.75em;
+}
+
+.dark .markdown-body ul,
+.dark .markdown-body ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.dark .markdown-body ul {
+  list-style-type: disc;
+}
+
+.dark .markdown-body ol {
+  list-style-type: decimal;
+}
+
+.dark .markdown-body li {
+  margin-bottom: 0.25em;
+}
+
+.dark .markdown-body pre {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 0.75em;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .markdown-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9em;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.dark .markdown-body pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #e2e8f0;
+}
+
+.dark .markdown-body blockquote {
+  border-left: 3px solid rgba(34, 211, 238, 0.5);
+  padding-left: 1em;
+  margin-left: 0;
+  margin-bottom: 0.75em;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+}
+
+.dark .markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75em;
+  font-size: 0.9em;
+}
+
+.dark .markdown-body th,
+.dark .markdown-body td {
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.dark .markdown-body th {
+  background-color: rgba(255, 255, 255, 0.05);
+  font-weight: 600;
+}
+
+.dark .markdown-body tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* AI Chat Markdown Styles - Light */
+.light .markdown-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #1E293B;
+}
+
+.light .markdown-body p {
+  margin-bottom: 0.75em;
+}
+
+.light .markdown-body ul,
+.light .markdown-body ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.light .markdown-body ul {
+  list-style-type: disc;
+}
+
+.light .markdown-body ol {
+  list-style-type: decimal;
+}
+
+.light .markdown-body li {
+  margin-bottom: 0.25em;
+}
+
+.light .markdown-body pre {
+  background-color: #F1F5F9;
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 0.75em;
+  border: 1px solid #E2E8F0;
+}
+
+.light .markdown-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.9em;
+  background-color: #E2E8F0;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.light .markdown-body pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #1E293B;
+}
+
+.light .markdown-body blockquote {
+  border-left: 3px solid #3B82F6;
+  padding-left: 1em;
+  margin-left: 0;
+  margin-bottom: 0.75em;
+  color: #64748B;
+  font-style: italic;
+}
+
+.light .markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75em;
+  font-size: 0.9em;
+}
+
+.light .markdown-body th,
+.light .markdown-body td {
+  padding: 8px;
+  border: 1px solid #E2E8F0;
+  text-align: left;
+}
+
+.light .markdown-body th {
+  background-color: #F8FAFC;
+  font-weight: 600;
+}
+
+.light .markdown-body tr:nth-child(even) {
+  background-color: #F8FAFC;
+}
+
+/* Animation */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}

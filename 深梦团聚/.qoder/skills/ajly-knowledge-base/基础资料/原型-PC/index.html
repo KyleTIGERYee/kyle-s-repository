@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安居乐寓 - 自助看房管理</title>
+    <!-- 引入 Vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- 引入 Element UI 样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入 Element UI 组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            background-color: #f0f2f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #app {
+            height: 100%;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background-color: #304156;
+            height: 100%;
+            overflow-y: auto;
+            color: #fff;
+        }
+        
+        .logo-area {
+            height: 50px;
+            line-height: 50px;
+            background-color: #2b3649;
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .el-menu {
+            border-right: none;
+        }
+
+        /* 顶部导航栏样式 */
+        .header {
+            background-color: #fff;
+            box-shadow: 0 1px 4px rgba(0,21,41,.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .main-container {
+            padding: 20px;
+            height: calc(100vh - 60px); 
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        /* 内容卡片样式 */
+        .content-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 4px;
+        }
+
+        .table-action-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .pagination-container {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        /* 状态点样式 */
+        .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .status-dot.waiting { background-color: #E6A23C; }
+        .status-dot.done { background-color: #67C23A; }
+        .status-dot.expired { background-color: #909399; }
+
+        /* 弹窗样式调整 */
+        .dialog-pagination {
+            margin-top: 15px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-container style="height: 100%;">
+            <!-- 左侧菜单栏 -->
+            <el-aside width="220px" class="sidebar">
+                <div class="logo-area">安居乐寓</div>
+                <el-menu
+                    :default-active="activeMenu"
+                    background-color="#304156"
+                    text-color="#bfcbd9"
+                    active-text-color="#409EFF"
+                    :unique-opened="true"
+                    :default-openeds="['marketing']"
+                >
+                    <el-menu-item index="1">
+                        <i class="el-icon-house"></i>
+                        <span slot="title">租赁管理</span>
+                    </el-menu-item>
+                    <el-menu-item index="2">
+                        <i class="el-icon-document"></i>
+                        <span slot="title">合同管理</span>
+                    </el-menu-item>
+                    <el-menu-item index="3">
+                        <i class="el-icon-money"></i>
+                        <span slot="title">财务管理</span>
+                    </el-menu-item>
+                    
+                    <!-- 营销推广菜单组 -->
+                    <el-submenu index="marketing">
+                        <template slot="title">
+                            <i class="el-icon-present"></i>
+                            <span>营销推广</span>
+                        </template>
+                        <el-menu-item index="4-1">房源推广</el-menu-item>
+                        <el-menu-item index="4-2">出租通</el-menu-item>
+                        <el-menu-item index="4-3">微信发房</el-menu-item>
+                        <el-menu-item index="4-4">营销活动</el-menu-item>
+                        <el-menu-item index="4-5">深梦领航</el-menu-item>
+                        <el-menu-item index="4-6">大学生认证</el-menu-item>
+                        <!-- 新增菜单 -->
+                        <el-menu-item index="self-viewing">自助看房</el-menu-item>
+                    </el-submenu>
+
+                    <el-menu-item index="5">
+                        <i class="el-icon-data-line"></i>
+                        <span slot="title">统计报表</span>
+                    </el-menu-item>
+                    <el-menu-item index="6">
+                        <i class="el-icon-setting"></i>
+                        <span slot="title">系统设置</span>
+                    </el-menu-item>
+                </el-menu>
+            </el-aside>
+
+            <!-- 右侧主体 -->
+            <el-container>
+                <el-header class="header" height="50px">
+                    <div style="font-size: 14px; color: #666;">
+                        <i class="el-icon-s-fold" style="font-size: 20px; vertical-align: middle; margin-right: 10px;"></i>
+                        首页 / 营销推广 / 自助看房
+                    </div>
+                    <div style="font-size: 14px;">
+                        <i class="el-icon-user"></i> 管理员
+                    </div>
+                </el-header>
+
+                <el-main class="main-container">
+                    <div class="content-card">
+                        <!-- 查询条件区域 -->
+                        <el-form :inline="true" :model="searchForm" size="small" class="demo-form-inline">
+                            <el-form-item label="战区">
+                                <el-select v-model="searchForm.zone" filterable placeholder="请选择或搜索战区" style="width: 150px;">
+                                    <el-option label="一战区" value="1"></el-option>
+                                    <el-option label="二战区" value="2"></el-option>
+                                    <el-option label="三战区" value="3"></el-option>
+                                    <el-option label="四战区" value="4"></el-option>
+                                    <el-option label="五战区" value="5"></el-option>
+                                    <el-option label="六战区" value="6"></el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="门店">
+                                <el-select v-model="searchForm.store" filterable placeholder="请选择或搜索门店" style="width: 150px;">
+                                    <el-option label="科技园店" value="kjy"></el-option>
+                                    <el-option label="西丽店" value="xl"></el-option>
+                                    <el-option label="宝安中心店" value="bazx"></el-option>
+                                    <el-option label="民治店" value="mz"></el-option>
+                                    <el-option label="龙华店" value="lh"></el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="物业地址">
+                                <el-select v-model="searchForm.address" filterable placeholder="请选择或搜索地址" style="width: 200px;">
+                                    <el-option v-for="item in addressOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" icon="el-icon-search" @click="handleSearch">查询</el-button>
+                                <el-button icon="el-icon-refresh-left" @click="handleReset">重置</el-button>
+                            </el-form-item>
+                        </el-form>
+
+                        <!-- 功能按钮区域 -->
+                        <div class="table-action-bar">
+                            <el-button size="small" icon="el-icon-setting" @click="openPreferenceDialog">偏好设置</el-button>
+                            <el-button size="small" type="primary" plain @click="handleBuildingSettings">楼栋设置</el-button>
+                            <el-button size="small" icon="el-icon-download">导出</el-button>
+                        </div>
+
+                        <!-- 列表区域 -->
+                        <el-table :data="tableData" border style="width: 100%" v-loading="loading">
+                            <el-table-column prop="zone" label="战区" width="100"></el-table-column>
+                            <el-table-column prop="store" label="门店" width="120"></el-table-column>
+                            <el-table-column prop="address" label="物业地址" min-width="180" show-overflow-tooltip></el-table-column>
+                            
+                            <el-table-column label="房间号" min-width="120">
+                                <template slot-scope="scope">
+                                    <el-tag 
+                                        v-for="(room, index) in scope.row.rooms" 
+                                        :key="index" 
+                                        size="mini" 
+                                        style="margin-right: 5px; margin-bottom: 2px;">
+                                        {{ room }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                            
+                            <el-table-column prop="viewerName" label="看房人姓名" width="100"></el-table-column>
+                            
+                            <!-- 手机号列 - 修改部分 -->
+                            <el-table-column label="看房人手机号" width="150">
+                                <template slot-scope="scope">
+                                    <span>
+                                        {{ scope.row.showPhone ? scope.row.viewerPhone : scope.row.viewerPhone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') }}
+                                    </span>
+                                    <i 
+                                        class="el-icon-view" 
+                                        :style="{ color: scope.row.showPhone ? '#409EFF' : '#909399', cursor: 'pointer', marginLeft: '5px' }"
+                                        @click="handleTogglePhone(scope.row)"
+                                        title="点击查看完整号码">
+                                    </i>
+                                </template>
+                            </el-table-column>
+                            
+                            <el-table-column prop="viewingTime" label="看房时间段" width="220"></el-table-column>
+                            
+                            <el-table-column label="看房状态" width="100">
+                                <template slot-scope="scope">
+                                    <el-tag :type="getStatusType(scope.row.status)" size="small" effect="plain">
+                                        {{ scope.row.status }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                            
+                            <el-table-column label="看房评价" width="100">
+                                <template slot-scope="scope">
+                                    <span v-if="scope.row.status === '已看房'">
+                                        <i class="el-icon-thumb" :class="scope.row.evaluation === '满意' ? 'el-icon-success' : 'el-icon-error'" 
+                                           :style="{color: scope.row.evaluation === '满意' ? '#67C23A' : '#F56C6C'}">
+                                        </i>
+                                        {{ scope.row.evaluation }}
+                                    </span>
+                                    <span v-else style="color: #ccc;">-</span>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+
+                        <!-- 分页 -->
+                        <div class="pagination-container">
+                            <el-pagination
+                                background
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                :current-page="pagination.currentPage"
+                                :page-sizes="[10, 20, 50, 100]"
+                                :page-size="pagination.pageSize"
+                                layout="total, sizes, prev, pager, next, jumper"
+                                :total="pagination.total">
+                            </el-pagination>
+                        </div>
+                    </div>
+                </el-main>
+            </el-container>
+        </el-container>
+
+        <!-- 楼栋设置弹窗 -->
+        <el-dialog title="楼栋设置" :visible.sync="dialogVisible" width="700px">
+            <!-- 弹窗内的查询 -->
+            <el-form :inline="true" :model="dialogSearchForm" size="small" style="margin-bottom: 10px;">
+                <el-form-item label="战区">
+                    <el-select v-model="dialogSearchForm.zone" filterable placeholder="请选择或搜索" style="width: 120px;">
+                        <el-option label="一战区" value="1"></el-option>
+                        <el-option label="二战区" value="2"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="门店">
+                    <el-select v-model="dialogSearchForm.store" filterable placeholder="请选择或搜索" style="width: 120px;">
+                        <el-option label="科技园店" value="kjy"></el-option>
+                        <el-option label="西丽店" value="xl"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="handleDialogSearch">查询</el-button>
+                    <el-button icon="el-icon-download" @click="handleDialogExport">导出</el-button>
+                </el-form-item>
+            </el-form>
+
+            <!-- 弹窗内的列表（支持勾选） -->
+            <el-table 
+                ref="buildingTable"
+                :data="buildingList" 
+                border 
+                height="300"
+                style="width: 100%" 
+                v-loading="dialogLoading"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="55" align="center"></el-table-column>
+                <el-table-column prop="zone" label="战区" width="100"></el-table-column>
+                <el-table-column prop="store" label="门店" width="120"></el-table-column>
+                <el-table-column prop="address" label="物业地址" show-overflow-tooltip></el-table-column>
+            </el-table>
+
+            <!-- 弹窗分页 -->
+            <div class="dialog-pagination">
+                <el-pagination
+                    small
+                    layout="prev, pager, next"
+                    :total="dialogPagination.total"
+                    :page-size="dialogPagination.pageSize"
+                    @current-change="handleDialogPageChange">
+                </el-pagination>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button 
+                    type="primary" 
+                    @click="saveBuildingSettings" 
+                    :disabled="selectedBuildings.length === 0">
+                    设置自助看房楼栋
+                </el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 偏好设置弹窗 -->
+        <el-dialog title="偏好设置" :visible.sync="preferenceVisible" width="500px">
+            <el-form :model="preferenceForm" label-width="120px" size="small">
+                <el-form-item label="预约限制">
+                    <span style="color: #606266;">同一楼栋</span>
+                    <el-input-number 
+                        v-model="preferenceForm.days" 
+                        :min="0" 
+                        :precision="0"
+                        :max="365" 
+                        style="width: 100px; margin: 0 5px;">
+                    </el-input-number>
+                    <span style="color: #606266;">天内不可以重复预约自助看房</span>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="preferenceVisible = false">取 消</el-button>
+                <el-button type="primary" @click="savePreferences">保 存</el-button>
+            </span>
+        </el-dialog>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    activeMenu: 'self-viewing',
+                    loading: false,
+                    
+                    // 偏好设置相关 (新增)
+                    preferenceVisible: false,
+                    preferenceForm: {
+                        days: 7 // 默认7天
+                    },
+
+                    // 主页面搜索表单
+                    searchForm: {
+                        zone: '',
+                        store: '',
+                        address: ''
+                    },
+                    // 模拟地址下拉选项
+                    addressOptions: [
+                        { value: '南山区科技园北区A栋', label: '南山区科技园北区A栋' },
+                        { value: '南山区西丽街道B栋', label: '南山区西丽街道B栋' },
+                        { value: '宝安区中心路C栋', label: '宝安区中心路C栋' },
+                        { value: '龙华区民治大道D栋', label: '龙华区民治大道D栋' },
+                        { value: '南山区西丽留仙洞E栋', label: '南山区西丽留仙洞E栋' }
+                    ],
+                    // 分页配置
+                    pagination: {
+                        currentPage: 1,
+                        pageSize: 10,
+                        total: 100
+                    },
+                    // 模拟主列表数据 - 增加了 showPhone 字段
+                    tableData: [
+                        {
+                            zone: '一战区',
+                            store: '科技园店',
+                            address: '深圳市南山区科技园北区A栋',
+                            rooms: ['101', '102'],
+                            viewerName: '张三',
+                            viewerPhone: '13800138000',
+                            showPhone: false,
+                            viewingTime: '2025-11-23 10:00-12:00',
+                            status: '待看房',
+                            evaluation: ''
+                        },
+                        {
+                            zone: '二战区',
+                            store: '西丽店',
+                            address: '深圳市南山区西丽街道B栋',
+                            rooms: ['305'],
+                            viewerName: '李四',
+                            viewerPhone: '13912345678',
+                            showPhone: false,
+                            viewingTime: '2025-11-22 14:00-16:00',
+                            status: '已看房',
+                            evaluation: '满意'
+                        },
+                        {
+                            zone: '一战区',
+                            store: '宝安中心店',
+                            address: '深圳市宝安区中心路C栋',
+                            rooms: ['808', '809', '810'],
+                            viewerName: '王五',
+                            viewerPhone: '13788889999',
+                            showPhone: false,
+                            viewingTime: '2025-11-20 09:00-11:00',
+                            status: '已看房',
+                            evaluation: '不满意'
+                        },
+                        {
+                            zone: '三战区',
+                            store: '民治店',
+                            address: '深圳市龙华区民治大道D栋',
+                            rooms: ['202'],
+                            viewerName: '赵六',
+                            viewerPhone: '13666666666',
+                            showPhone: false,
+                            viewingTime: '2025-11-19 10:00-12:00',
+                            status: '已过期',
+                            evaluation: ''
+                        },
+                        {
+                            zone: '二战区',
+                            store: '西丽店',
+                            address: '深圳市南山区西丽留仙洞E栋',
+                            rooms: ['501'],
+                            viewerName: '钱七',
+                            viewerPhone: '13555555555',
+                            showPhone: false,
+                            viewingTime: '2025-11-25 15:00-17:00',
+                            status: '待看房',
+                            evaluation: ''
+                        }
+                    ],
+                    
+                    // 弹窗相关
+                    dialogVisible: false,
+                    dialogLoading: false,
+                    dialogSearchForm: {
+                        zone: '',
+                        store: ''
+                    },
+                    dialogPagination: {
+                        currentPage: 1,
+                        pageSize: 5,
+                        total: 50 // 模拟数据总量
+                    },
+                    selectedBuildings: [], // 已勾选的楼栋
+                    // 模拟楼栋列表数据
+                    buildingList: [
+                        { id: 1, zone: '一战区', store: '科技园店', address: '南山区科苑路15号科兴科学园A栋' },
+                        { id: 2, zone: '一战区', store: '科技园店', address: '南山区科苑路15号科兴科学园B栋' },
+                        { id: 3, zone: '二战区', store: '西丽店', address: '南山区打石二路万科云城1期' },
+                        { id: 4, zone: '二战区', store: '西丽店', address: '南山区打石二路万科云城2期' },
+                        { id: 5, zone: '三战区', store: '民治店', address: '龙华区民治大道优城北区' },
+                    ]
+                };
+            },
+            methods: {
+                // 主页面查询
+                handleSearch() {
+                    this.loading = true;
+                    setTimeout(() => {
+                        this.loading = false;
+                    }, 500);
+                },
+                // 重置
+                handleReset() {
+                    this.searchForm = { zone: '', store: '', address: '' };
+                    this.handleSearch();
+                },
+                
+                // 处理手机号显隐切换
+                handleTogglePhone(row) {
+                    row.showPhone = !row.showPhone;
+                },
+
+                // 状态标签颜色处理
+                getStatusType(status) {
+                    if (status === '已看房') return 'success';
+                    if (status === '待看房') return 'warning';
+                    return 'info'; // 已过期
+                },
+                // 分页处理
+                handleSizeChange(val) {
+                    console.log(`每页 ${val} 条`);
+                },
+                handleCurrentChange(val) {
+                    console.log(`当前页: ${val}`);
+                },
+                
+                // 打开楼栋设置弹窗
+                handleBuildingSettings() {
+                    this.dialogVisible = true;
+                    this.selectedBuildings = []; // 打开时清空
+                    if(this.$refs.buildingTable) {
+                        this.$refs.buildingTable.clearSelection();
+                    }
+                },
+                // 弹窗内查询
+                handleDialogSearch() {
+                    this.dialogLoading = true;
+                    setTimeout(() => {
+                        this.dialogLoading = false;
+                    }, 500);
+                },
+                // 弹窗内导出 (新增)
+                handleDialogExport() {
+                    this.$message.success('楼栋数据导出成功');
+                },
+                // 弹窗内分页变化
+                handleDialogPageChange(val) {
+                    this.dialogPagination.currentPage = val;
+                    console.log(`弹窗切换到第 ${val} 页`);
+                },
+                // 弹窗内勾选变化
+                handleSelectionChange(val) {
+                    this.selectedBuildings = val;
+                },
+                // 保存设置
+                saveBuildingSettings() {
+                    this.$confirm(`确认设置这 ${this.selectedBuildings.length} 个楼栋为自助看房楼栋吗？`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        this.$message({
+                            type: 'success',
+                            message: '设置成功!'
+                        });
+                        this.dialogVisible = false;
+                    }).catch(() => {});
+                },
+
+                // 偏好设置相关方法 (新增)
+                openPreferenceDialog() {
+                    this.preferenceVisible = true;
+                },
+                savePreferences() {
+                    this.$message({
+                        type: 'success',
+                        message: `设置成功：同一楼栋 ${this.preferenceForm.days} 天内不可重复预约`
+                    });
+                    this.preferenceVisible = false;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

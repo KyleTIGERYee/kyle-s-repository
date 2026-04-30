@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第3课：复杂工作流</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Comic+Neue:wght@300;400;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-background text-text-primary overflow-hidden">
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+    
+    <div id="presentation" class="relative w-full h-screen">
+        <div id="slides-container" class="relative w-full h-full">
+            
+            <!-- Slide 1: 封面页 -->
+            <section class="slide active" data-index="0">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center items-center px-12 text-center">
+                    <span class="clay-badge mb-8">第2章 工作流</span>
+                    <h1 class="font-display text-hero font-bold text-primary mb-6">复杂工作流</h1>
+                    <p class="font-body text-hero-sub text-text-secondary mb-12">完整安居乐寓AI找房助手工作流实现</p>
+                    <div class="grid grid-cols-4 gap-4 max-w-4xl">
+                        <div class="interactive-box p-4 text-center">
+                            <div class="text-label text-primary font-semibold">多意图路由</div>
+                            <div class="text-body text-text-muted text-sm mt-1">4个分支</div>
+                        </div>
+                        <div class="interactive-box p-4 text-center">
+                            <div class="text-label text-primary font-semibold">状态管理</div>
+                            <div class="text-body text-text-muted text-sm mt-1">对话变量</div>
+                        </div>
+                        <div class="interactive-box p-4 text-center">
+                            <div class="text-label text-primary font-semibold">API集成</div>
+                            <div class="text-body text-text-muted text-sm mt-1">搜房+管家</div>
+                        </div>
+                        <div class="interactive-box p-4 text-center">
+                            <div class="text-label text-primary font-semibold">空结果处理</div>
+                            <div class="text-body text-text-muted text-sm mt-1">Recovery</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 2: 课程导入：场景示例 -->
+            <section class="slide" data-index="1">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">课程导入</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">从简单到复杂</h2>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-subtitle font-semibold text-purple-500">多意图路由</h3>
+                            </div>
+                            <p class="text-body text-text-secondary mb-4">用户说"帮我找宝安区的房子，我想约第一套看房"</p>
+                            <div class="bg-purple-500/10 rounded-lg p-3">
+                                <p class="text-body text-text-muted text-sm">包含两个意图：search_house + find_butler</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-subtitle font-semibold text-blue-500">状态管理</h3>
+                            </div>
+                            <p class="text-body text-text-secondary mb-4">用户说"太远了，换个福田的吧"</p>
+                            <div class="bg-blue-500/10 rounded-lg p-3">
+                                <p class="text-body text-text-muted text-sm">需要理解这是在修改之前的搜索区域参数</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-subtitle font-semibold text-orange-500">空结果处理</h3>
+                            </div>
+                            <p class="text-body text-text-secondary mb-4">搜索条件过于苛刻没有房源时</p>
+                            <div class="bg-orange-500/10 rounded-lg p-3">
+                                <p class="text-body text-text-muted text-sm">不能简单说"没有"，应智能推荐其他方案</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 3: 本节核心内容 -->
+            <section class="slide" data-index="2">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">课程导入</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">本节课核心内容</h2>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="interactive-box text-center p-4">
+                            <div class="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                                <span class="text-2xl font-bold text-purple-500">1</span>
+                            </div>
+                            <h3 class="text-label font-semibold text-purple-500 mb-2">多意图完整路由</h3>
+                            <p class="text-body text-text-muted">4分支路由</p>
+                            <p class="text-body text-text-muted">参数提取</p>
+                            <p class="text-body text-text-muted">思维链推理</p>
+                        </div>
+                        <div class="interactive-box text-center p-4">
+                            <div class="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
+                                <span class="text-2xl font-bold text-blue-500">2</span>
+                            </div>
+                            <h3 class="text-label font-semibold text-blue-500 mb-2">对话状态管理</h3>
+                            <p class="text-body text-text-muted">参数更新</p>
+                            <p class="text-body text-text-muted">上下文保持</p>
+                            <p class="text-body text-text-muted">历史记忆</p>
+                        </div>
+                        <div class="interactive-box text-center p-4">
+                            <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                                <span class="text-2xl font-bold text-green-500">3</span>
+                            </div>
+                            <h3 class="text-label font-semibold text-green-500 mb-2">HTTP API集成</h3>
+                            <p class="text-body text-text-muted">搜房API</p>
+                            <p class="text-body text-text-muted">管家API</p>
+                            <p class="text-body text-text-muted">结果解析</p>
+                        </div>
+                        <div class="interactive-box text-center p-4">
+                            <div class="w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-4">
+                                <span class="text-2xl font-bold text-orange-500">4</span>
+                            </div>
+                            <h3 class="text-label font-semibold text-orange-500 mb-2">空结果处理</h3>
+                            <p class="text-body text-text-muted">原因分析</p>
+                            <p class="text-body text-text-muted">方案推荐</p>
+                            <p class="text-body text-text-muted">用户引导</p>
+                        </div>
+                        <div class="interactive-box text-center p-4">
+                            <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+                                <span class="text-2xl font-bold text-red-500">5</span>
+                            </div>
+                            <h3 class="text-label font-semibold text-red-500 mb-2">错误处理</h3>
+                            <p class="text-body text-text-muted">API超时</p>
+                            <p class="text-body text-text-muted">格式错误</p>
+                            <p class="text-body text-text-muted">降级处理</p>
+                        </div>
+                        <div class="interactive-box text-center p-4">
+                            <div class="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center mx-auto mb-4">
+                                <span class="text-2xl font-bold text-indigo-500">6</span>
+                            </div>
+                            <h3 class="text-label font-semibold text-indigo-500 mb-2">综合实战</h3>
+                            <p class="text-body text-text-muted">完整工作流</p>
+                            <p class="text-body text-text-muted">还原AI找房助手</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: 四意图分类 -->
+            <section class="slide" data-index="3">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">2.1 多意图路由</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">四意图分类体系</h2>
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="intent-card interactive-box text-center p-6 cursor-pointer" data-intent="search">
+                            <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-subtitle font-semibold text-green-500 mb-2">search_house</h3>
+                            <p class="text-body text-text-muted">找房子</p>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <p class="text-label text-text-muted">包含参数</p>
+                                <p class="text-body text-text-muted text-sm">area、budget、room_type、facility</p>
+                            </div>
+                        </div>
+                        <div class="intent-card interactive-box text-center p-6 cursor-pointer" data-intent="query">
+                            <div class="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-subtitle font-semibold text-blue-500 mb-2">query_kb</h3>
+                            <p class="text-body text-text-muted">知识咨询</p>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <p class="text-body text-text-muted text-sm">检索知识库</p>
+                            </div>
+                        </div>
+                        <div class="intent-card interactive-box text-center p-6 cursor-pointer" data-intent="butler">
+                            <div class="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-subtitle font-semibold text-purple-500 mb-2">find_butler</h3>
+                            <p class="text-body text-text-muted">找管家/预约看房</p>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <p class="text-label text-text-muted">包含参数</p>
+                                <p class="text-body text-text-muted text-sm">storeNames</p>
+                            </div>
+                        </div>
+                        <div class="intent-card interactive-box text-center p-6 cursor-pointer" data-intent="chat">
+                            <div class="w-16 h-16 rounded-full bg-gray-500/20 flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-subtitle font-semibold text-gray-500 mb-2">chat</h3>
+                            <p class="text-body text-text-muted">闲聊</p>
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <p class="text-body text-text-muted text-sm">LLM回复</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="interactive-box bg-primary/5">
+                        <p class="text-body text-text-secondary">基于Dify项目"AI找房助手"的设计，我们使用<strong class="text-primary">4个意图分类</strong>来覆盖用户的不同需求</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 5: 参数提取 -->
+            <section class="slide" data-index="4">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">2.2 意图识别进阶</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">参数提取：思维链提示词</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold mb-4 text-primary">思维链提示词设计</h3>
+                            <div class="code-block text-sm">
+                                <p><span class="code-comment"># 在输出JSON前，必须先在thought字段进行推理</span></p>
+                                <p class="mt-3"><span class="code-function">1. 分析意图与场景辨析</span></p>
+                                <p>   - "帮我找房" → <span class="code-string">search_house</span></p>
+                                <p>   - "我要预约看房" → <span class="code-string">find_butler</span></p>
+                                <p>   - "水费怎么算" → <span class="code-string">query_kb</span></p>
+                                <p class="mt-3"><span class="code-function">2. 参数提取</span></p>
+                                <p>   - 区域：宝安区、龙华区、南山区...</p>
+                                <p>   - 预算：1000、2000、3000...</p>
+                                <p>   - 户型：单间、一房一厅、两房一厅...</p>
+                                <p>   - 门店：西乡永丰店、民治白石龙店...</p>
+                                <p class="mt-3"><span class="code-function">3. 上下文确认</span></p>
+                                <p>   - 用户说"好" → 回溯上一轮AI建议</p>
+                                <p>   - 用户说"第一套" → 提取具体门店</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold mb-4 text-primary">参数类型说明</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3 p-3 bg-green-500/10 rounded-lg">
+                                    <span class="text-green-500 font-bold">区域</span>
+                                    <span class="text-body text-text-muted">宝安区、龙华区、南山区、福田区、罗湖区、盐田区</span>
+                                </div>
+                                <div class="flex items-start gap-3 p-3 bg-blue-500/10 rounded-lg">
+                                    <span class="text-blue-500 font-bold">预算</span>
+                                    <span class="text-body text-text-muted">1000-10000元/月</span>
+                                </div>
+                                <div class="flex items-start gap-3 p-3 bg-purple-500/10 rounded-lg">
+                                    <span class="text-purple-500 font-bold">户型</span>
+                                    <span class="text-body text-text-muted">单间、一房一厅、两房一厅、三房一厅</span>
+                                </div>
+                                <div class="flex items-start gap-3 p-3 bg-orange-500/10 rounded-lg">
+                                    <span class="text-orange-500 font-bold">门店</span>
+                                    <span class="text-body text-text-muted">西乡永丰店、民治白石龙店、南山科苑店等</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 6: 工作流分支 -->
+            <section class="slide" data-index="5">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">2.3 多分支路由</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">工作流中的多分支路由</h2>
+                    <div class="flex justify-center">
+                        <svg viewBox="0 0 1000 500" class="w-full max-w-6xl">
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#4F46E5" />
+                                </marker>
+                                <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#22C55E" />
+                                </marker>
+                                <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#3B82F6" />
+                                </marker>
+                                <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#8B5CF6" />
+                                </marker>
+                                <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#6B7280" />
+                                </marker>
+                                <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#EF4444" />
+                                </marker>
+                            </defs>
+                            
+                            <!-- Agent Brain -->
+                            <rect x="400" y="30" width="200" height="60" rx="30" fill="#4F46E5" stroke="#4F46E5" stroke-width="2"/>
+                            <text x="500" y="65" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Agent Brain (LLM)</text>
+                            <text x="500" y="85" text-anchor="middle" fill="white" font-size="12">意图识别 + 参数提取 + 思维链</text>
+                            
+                            <!-- 主连接线 -->
+                            <path d="M 500 90 L 500 120" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <path d="M 500 120 L 300 120" stroke="#4F46E5" stroke-width="2" fill="none"/>
+                            <path d="M 500 120 L 500 120" stroke="#4F46E5" stroke-width="2" fill="none"/>
+                            <path d="M 500 120 L 700 120" stroke="#4F46E5" stroke-width="2" fill="none"/>
+                            
+                            <!-- 分支连接线 -->
+                            <path d="M 300 120 L 300 150" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <path d="M 500 120 L 500 150" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <path d="M 700 120 L 700 150" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            
+                            <!-- 三个主要分支 -->
+                            <rect x="230" y="150" width="140" height="50" rx="10" fill="#22C55E" stroke="#22C55E"/>
+                            <text x="300" y="180" text-anchor="middle" fill="white" font-size="14" font-weight="bold">search_house</text>
+                            <text x="300" y="200" text-anchor="middle" fill="white" font-size="12">分支</text>
+                            
+                            <rect x="430" y="150" width="140" height="50" rx="10" fill="#3B82F6" stroke="#3B82F6"/>
+                            <text x="500" y="180" text-anchor="middle" fill="white" font-size="14" font-weight="bold">query_kb</text>
+                            <text x="500" y="200" text-anchor="middle" fill="white" font-size="12">分支</text>
+                            
+                            <rect x="630" y="150" width="140" height="50" rx="10" fill="#8B5CF6" stroke="#8B5CF6"/>
+                            <text x="700" y="180" text-anchor="middle" fill="white" font-size="14" font-weight="bold">find_butler</text>
+                            <text x="700" y="200" text-anchor="middle" fill="white" font-size="12">分支</text>
+                            
+                            <!-- chat分支 -->
+                            <path d="M 500 90 L 500 300" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrowGray)"/>
+                            <rect x="430" y="300" width="140" height="50" rx="10" fill="#6B7280" stroke="#6B7280"/>
+                            <text x="500" y="330" text-anchor="middle" fill="white" font-size="14" font-weight="bold">chat</text>
+                            <text x="500" y="350" text-anchor="middle" fill="white" font-size="12">分支</text>
+                            
+                            <!-- 二级处理 -->
+                            <path d="M 300 200 L 300 230" stroke="#22C55E" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+                            <path d="M 500 200 L 500 230" stroke="#3B82F6" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+                            <path d="M 700 200 L 700 230" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrowPurple)"/>
+                            
+                            <rect x="200" y="230" width="200" height="40" rx="8" fill="#1E1E3F" stroke="#22C55E" stroke-width="2"/>
+                            <text x="300" y="255" text-anchor="middle" fill="#22C55E" font-size="13">HTTP: 搜房API</text>
+                            
+                            <rect x="400" y="230" width="200" height="40" rx="8" fill="#1E1E3F" stroke="#3B82F6" stroke-width="2"/>
+                            <text x="500" y="255" text-anchor="middle" fill="#3B82F6" font-size="13">知识库检索</text>
+                            
+                            <rect x="600" y="230" width="200" height="40" rx="8" fill="#1E1E3F" stroke="#8B5CF6" stroke-width="2"/>
+                            <text x="700" y="255" text-anchor="middle" fill="#8B5CF6" font-size="13">HTTP: 管家API</text>
+                            
+                            <!-- 三级处理 -->
+                            <path d="M 300 270 L 300 300" stroke="#22C55E" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+                            <path d="M 500 270 L 500 300" stroke="#3B82F6" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+                            <path d="M 700 270 L 700 300" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrowPurple)"/>
+                            
+                            <rect x="200" y="300" width="200" height="40" rx="8" fill="#1E1E3F" stroke="#22C55E" stroke-width="2"/>
+                            <text x="300" y="325" text-anchor="middle" fill="#22C55E" font-size="13">数据校验</text>
+                            
+                            <rect x="400" y="300" width="200" height="40" rx="8" fill="#1E1E3F" stroke="#3B82F6" stroke-width="2"/>
+                            <text x="500" y="325" text-anchor="middle" fill="#3B82F6" font-size="13">LLM生成回答</text>
+                            
+                            <rect x="600" y="300" width="200" height="40" rx="8" fill="#1E1E3F" stroke="#8B5CF6" stroke-width="2"/>
+                            <text x="700" y="325" text-anchor="middle" fill="#8B5CF6" font-size="13">管家名片生成</text>
+                            
+                            <!-- 结果判断 -->
+                            <path d="M 300 340 L 300 370" stroke="#22C55E" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+                            
+                            <rect x="230" y="370" width="140" height="40" rx="8" fill="#F59E0B" stroke="#F59E0B"/>
+                            <text x="300" y="395" text-anchor="middle" fill="white" font-size="13" font-weight="bold">结果判断</text>
+                            
+                            <!-- 结果分支 -->
+                            <path d="M 230 390 L 150 390 L 150 420" stroke="#22C55E" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+                            <path d="M 370 390 L 450 390 L 450 420" stroke="#EF4444" stroke-width="2" fill="none" marker-end="url(#arrowRed)"/>
+                            
+                            <rect x="100" y="420" width="100" height="40" rx="8" fill="#22C55E" stroke="#22C55E"/>
+                            <text x="150" y="445" text-anchor="middle" fill="white" font-size="13">有结果</text>
+                            <text x="150" y="465" text-anchor="middle" fill="white" font-size="10">直接回复</text>
+                            
+                            <rect x="400" y="420" width="100" height="40" rx="8" fill="#EF4444" stroke="#EF4444"/>
+                            <text x="450" y="445" text-anchor="middle" fill="white" font-size="13">无结果</text>
+                            <text x="450" y="465" text-anchor="middle" fill="white" font-size="10">Recovery</text>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: 对话状态管理 -->
+            <section class="slide" data-index="6">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">3.1 对话状态管理</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">为什么需要状态管理</h2>
+                    <div class="interactive-box overflow-auto">
+                        <table class="w-full text-center">
+                            <thead>
+                                <tr class="border-b-2 border-primary/20">
+                                    <th class="py-4 px-4 text-label text-primary font-bold">对话轮次</th>
+                                    <th class="py-4 px-4 text-label text-primary font-bold">用户输入</th>
+                                    <th class="py-4 px-4 text-label text-primary font-bold">提取参数</th>
+                                    <th class="py-4 px-4 text-label text-primary font-bold">状态更新</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-4"><span class="bg-purple-500/20 text-purple-500 px-3 py-1 rounded-full text-body">第1轮</span></td>
+                                    <td class="py-4 px-4 text-body text-text-secondary">"我想在宝安区租房"</td>
+                                    <td class="py-4 px-4"><code class="bg-green-100 text-green-700 px-2 py-1 rounded">area: 宝安区</code></td>
+                                    <td class="py-4 px-4"><code class="bg-blue-100 text-blue-700 px-2 py-1 rounded">{area: 宝安区}</code></td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-4"><span class="bg-purple-500/20 text-purple-500 px-3 py-1 rounded-full text-body">第2轮</span></td>
+                                    <td class="py-4 px-4 text-body text-text-secondary">"预算2000左右"</td>
+                                    <td class="py-4 px-4"><code class="bg-green-100 text-green-700 px-2 py-1 rounded">budget: 2000</code></td>
+                                    <td class="py-4 px-4"><code class="bg-blue-100 text-blue-700 px-2 py-1 rounded">{area, budget}</code></td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 px-4"><span class="bg-purple-500/20 text-purple-500 px-3 py-1 rounded-full text-body">第3轮</span></td>
+                                    <td class="py-4 px-4 text-body text-text-secondary">"有没有一房一厅"</td>
+                                    <td class="py-4 px-4"><code class="bg-green-100 text-green-700 px-2 py-1 rounded">room_type: 一房一厅</code></td>
+                                    <td class="py-4 px-4"><code class="bg-blue-100 text-blue-700 px-2 py-1 rounded">{area, budget, room_type}</code></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-4"><span class="bg-purple-500/20 text-purple-500 px-3 py-1 rounded-full text-body">第4轮</span></td>
+                                    <td class="py-4 px-4 text-body text-text-secondary">"太远了，换个福田的吧"</td>
+                                    <td class="py-4 px-4"><code class="bg-green-100 text-green-700 px-2 py-1 rounded">area: 福田区</code></td>
+                                    <td class="py-4 px-4"><code class="bg-blue-100 text-blue-700 px-2 py-1 rounded">{area: 福田, budget, room_type}</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-body text-text-muted mt-6 text-center">在多轮对话中，需要记住用户之前提供的信息，实现参数的<strong class="text-primary">累积和更新</strong></p>
+                </div>
+            </section>
+
+            <!-- Slide 8: 代码实现 -->
+            <section class="slide" data-index="7">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">3.3 代码节点实现</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-6">状态管理代码</h2>
+                    <div class="code-block text-sm overflow-auto h-[70vh]">
+                        <p><span class="code-keyword">import</span> json</p>
+                        <p class="mt-2"><span class="code-keyword">def</span> <span class="code-function">main</span>(router_output, current_state_str):</p>
+                        <p>    <span class="code-comment"># 1. 解析LLM输出</span></p>
+                        <p>    router_data = {}</p>
+                        <p>    <span class="code-keyword">try</span>:</p>
+                        <p>        <span class="code-keyword">if</span> isinstance(router_output, dict):</p>
+                        <p>            router_data = router_output</p>
+                        <p>        <span class="code-keyword">else</span>:</p>
+                        <p>            raw_text = str(router_output)</p>
+                        <p>            start_idx = raw_text.find(<span class="code-string">'{'</span>)</p>
+                        <p>            end_idx = raw_text.rfind(<span class="code-string">'}'</span>)</p>
+                        <p>            <span class="code-keyword">if</span> start_idx != -1 <span class="code-keyword">and</span> end_idx != -1:</p>
+                        <p>                json_str = raw_text[start_idx:end_idx+1]</p>
+                        <p>                router_data = json.loads(json_str)</p>
+                        <p>    <span class="code-keyword">except</span> Exception <span class="code-keyword">as</span> e:</p>
+                        <p>        router_data = {<span class="code-string">"intent"</span>: <span class="code-string">"chat"</span>, <span class="code-string">"params_update"</span>: {}}</p>
+                        <p class="mt-2">    <span class="code-comment"># 2. 提取数据</span></p>
+                        <p>    intent = router_data.get(<span class="code-string">"intent"</span>, <span class="code-string">"chat"</span>)</p>
+                        <p>    new_params = router_data.get(<span class="code-string">"params_update"</span>, {})</p>
+                        <p class="mt-2">    <span class="code-comment"># 3. 读取旧状态</span></p>
+                        <p>    state = {}</p>
+                        <p>    <span class="code-keyword">if</span> current_state_str:</p>
+                        <p>        <span class="code-keyword">try</span>:</p>
+                        <p>            state = json.loads(str(current_state_str))</p>
+                        <p>        <span class="code-keyword">except</span>:</p>
+                        <p>            state = {}</p>
+                        <p class="mt-2">    <span class="code-comment"># 4. 智能合并逻辑</span></p>
+                        <p>    <span class="code-comment"># 如果切换了区域(area)，则清空门店(storeNames)</span></p>
+                        <p>    <span class="code-keyword">if</span> new_params.get(<span class="code-string">"area"</span>) <span class="code-keyword">and</span> new_params[<span class="code-string">"area"</span>] != state.get(<span class="code-string">"area"</span>):</p>
+                        <p>        state[<span class="code-string">"storeNames"</span>] = <span class="code-string">""</span></p>
+                        <p>        state[<span class="code-string">"address"</span>] = <span class="code-string">""</span></p>
+                        <p class="mt-2">    <span class="code-comment"># 更新参数</span></p>
+                        <p>    <span class="code-keyword">for</span> key, value <span class="code-keyword">in</span> new_params.items():</p>
+                        <p>        <span class="code-keyword">if</span> value <span class="code-keyword">is not None</span> <span class="code-keyword">and</span> str(value) != <span class="code-string">""</span>:</p>
+                        <p>            state[key] = value</p>
+                        <p class="mt-2">    <span class="code-comment"># 5. 准备API Payload</span></p>
+                        <p>    api_payload = state.copy()</p>
+                        <p>    <span class="code-keyword">if</span> intent == <span class="code-string">"search_house"</span>:</p>
+                        <p>        <span class="code-keyword">if</span> <span class="code-string">"minPrice"</span> <span class="code-keyword">not in</span> api_payload:</p>
+                        <p>            api_payload[<span class="code-string">"minPrice"</span>] = <span class="code-string">"0"</span></p>
+                        <p>        <span class="code-keyword">if</span> <span class="code-string">"maxPrice"</span> <span class="code-keyword">not in</span> api_payload:</p>
+                        <p>            api_payload[<span class="code-string">"maxPrice"</span>] = <span class="code-string">"10000"</span></p>
+                        <p class="mt-2">    <span class="code-comment"># 6. 返回结果</span></p>
+                        <p>    <span class="code-keyword">return</span> {</p>
+                        <p>        <span class="code-string">"intent"</span>: intent,</p>
+                        <p>        <span class="code-string">"new_state_str"</span>: json.dumps(state, ensure_ascii=<span class="code-keyword">False</span>),</p>
+                        <p>        <span class="code-string">"area"</span>: state.get(<span class="code-string">""</span>, <span class="code-string">""</span>),</p>
+                        <p>        <span class="code-string">"budget"</span>: state.get(<span class="code-string">""</span>, <span class="code-string">""</span>),</p>
+                        <p>        <span class="code-string">"room_type"</span>: state.get(<span class="code-string">""</span>, <span class="code-string">""</span>)</p>
+                        <p>    }</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: 搜房API -->
+            <section class="slide" data-index="8">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">4.1 HTTP请求</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">搜房API调用</h2>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold mb-4 text-green-500">API配置</h3>
+                            <div class="code-block text-sm">
+                                <p><span class="code-property">节点名称:</span> API搜房</p>
+                                <p><span class="code-property">类型:</span> http-request</p>
+                                <p><span class="code-property">URL:</span> <span class="code-string">https://uat-weapp.szajly.com/api/...</span></p>
+                                <p><span class="code-property">Method:</span> <span class="code-keyword">POST</span></p>
+                                <p class="mt-2"><span class="code-comment"># Headers</span></p>
+                                <p>applet-token: <span class="code-string">{{start_node.token}}</span></p>
+                                <p>wxMiniAppId: <span class="code-string">{{start_node.wxMiniAppId}}</span></p>
+                                <p class="mt-2"><span class="code-comment"># Body</span></p>
+                                <p>{</p>
+                                <p>  <span class="code-string">"area"</span>: <span class="code-string">"{{agent_parser.area}}"</span>,</p>
+                                <p>  <span class="code-string">"layoutName"</span>: <span class="code-string">"{{agent_parser.layoutName}}"</span>,</p>
+                                <p>  <span class="code-string">"minPrice"</span>: <span class="code-string">"{{agent_parser.minPrice}}"</span>,</p>
+                                <p>  <span class="code-string">"maxPrice"</span>: <span class="code-string">"{{agent_parser.maxPrice}}"</span></p>
+                                <p>}</p>
+                                <p class="mt-2"><span class="code-property">错误处理:</span> fail-branch</p>
+                                <p><span class="code-property">重试配置:</span> 启用（最大重试3次）</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold mb-4 text-blue-500">API结果解析</h3>
+                            <div class="code-block text-sm">
+                                <p><span class="code-keyword">def</span> <span class="code-function">main</span>(response_data):</p>
+                                <p>    data_dict = json.loads(response_data)</p>
+                                <p>    store_list = data_dict.get(<span class="code-string">'data'</span>).get(<span class="code-string">'list'</span>, [])</p>
+                                <p class="mt-2">    <span class="code-keyword">if not</span> store_list:</p>
+                                <p>        <span class="code-keyword">return</span> {<span class="code-string">"result"</span>: <span class="code-string">"暂无匹配房源"</span>}</p>
+                                <p class="mt-2">    actual_display_list = store_list[:<span class="code-number">3</span>]</p>
+                                <p>    output_parts = [<span class="code-string">"为您精选..."</span>]</p>
+                                <p class="mt-2">    <span class="code-keyword">for</span> i, store <span class="code-keyword">in</span> enumerate(actual_display_list):</p>
+                                <p>        store_name = store.get(<span class="code-string">"storeName"</span>)</p>
+                                <p>        price = store.get(<span class="code-string">"layoutList"</span>)[<span class="code-number">0</span>].get(<span class="code-string">"price"</span>)</p>
+                                <p>        output_parts.append(<span class="code-string">f"{i+1}. {store_name}..."</span>)</p>
+                                <p class="mt-2">    <span class="code-keyword">return</span> {<span class="code-string">"result"</span>: <span class="code-string">"\n".join(output_parts)"</span>}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 10: 管家API -->
+            <section class="slide" data-index="9">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">4.2 HTTP请求</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">管家API调用</h2>
+                    <div class="max-w-3xl mx-auto">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold mb-4 text-purple-500">API配置</h3>
+                            <div class="code-block text-sm">
+                                <p><span class="code-property">节点名称:</span> API管家</p>
+                                <p><span class="code-property">类型:</span> http-request</p>
+                                <p><span class="code-property">URL:</span> <span class="code-string">https://uat-weapp.szajly.com/api/wechat/ai/recommend/butler</span></p>
+                                <p><span class="code-property">Method:</span> <span class="code-keyword">POST</span></p>
+                                <p class="mt-2"><span class="code-comment"># Headers</span></p>
+                                <p>applet-token: <span class="code-string">{{start_node.token}}</span></p>
+                                <p>wxMiniAppId: <span class="code-string">{{start_node.wxMiniAppId}}</span></p>
+                                <p class="mt-2"><span class="code-comment"># Body</span></p>
+                                <p>{</p>
+                                <p>  <span class="code-string">"storeNames"</span>: <span class="code-string">"{{agent_parser.storeNames}}"</span></p>
+                                <p>}</p>
+                                <p class="mt-2"><span class="code-property">错误处理:</span> fail-branch</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 interactive-box bg-purple-500/10">
+                            <h3 class="text-subtitle font-semibold mb-4 text-purple-500">功能说明</h3>
+                            <ul class="space-y-2 text-body text-text-secondary">
+                                <li class="flex items-center gap-2"><span class="text-purple-500">✓</span> 根据门店名称推荐对应管家</li>
+                                <li class="flex items-center gap-2"><span class="text-purple-500">✓</span> 返回管家名片信息（姓名、电话、门店）</li>
+                                <li class="flex items-center gap-2"><span class="text-purple-500">✓</span> 支持预约看房功能</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: 空结果处理 -->
+            <section class="slide" data-index="10">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">5. 空结果处理</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">Recovery机制</h2>
+                    <div class="flex justify-center items-center gap-4 mb-8">
+                        <div class="interactive-box text-center p-6 bg-red-50">
+                            <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                            <p class="text-body text-text-muted">搜索结果为空</p>
+                        </div>
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                        <div class="interactive-box text-center p-6 bg-orange-50">
+                            <div class="w-16 h-16 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                            </div>
+                            <p class="text-body text-text-muted">Search Analyst</p>
+                            <p class="text-label text-text-muted">LLM分析原因</p>
+                        </div>
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                        <div class="interactive-box text-center p-6 bg-yellow-50">
+                            <div class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                            <p class="text-body text-text-muted">原因诊断</p>
+                            <p class="text-label text-text-muted">位置/预算/户型</p>
+                        </div>
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                        <div class="interactive-box text-center p-6 bg-green-50">
+                            <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-2">
+                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                </svg>
+                            </div>
+                            <p class="text-body text-text-muted">Recovery Agent</p>
+                            <p class="text-label text-text-muted">生成回复</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="interactive-box text-center p-4">
+                            <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-body">location_saturated</span>
+                            <p class="text-body text-text-muted mt-2">→ 建议换区域</p>
+                        </div>
+                        <div class="interactive-box text-center p-4">
+                            <span class="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-body">budget_too_low</span>
+                            <p class="text-body text-text-muted mt-2">→ 建议加预算</p>
+                        </div>
+                        <div class="interactive-box text-center p-4">
+                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-body">layout_mismatch</span>
+                            <p class="text-body text-text-muted mt-2">→ 建议换户型</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 12: 综合实战 -->
+            <section class="slide" data-index="11">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">6. 综合实战</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">完整工作流架构</h2>
+                    <div class="interactive-box">
+                        <svg viewBox="0 0 1000 450" class="w-full">
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#4F46E5" />
+                                </marker>
+                                <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#22C55E" />
+                                </marker>
+                                <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#3B82F6" />
+                                </marker>
+                                <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#8B5CF6" />
+                                </marker>
+                                <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#6B7280" />
+                                </marker>
+                                <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#EF4444" />
+                                </marker>
+                            </defs>
+                            
+                            <!-- Agent Brain -->
+                            <rect x="400" y="30" width="200" height="60" rx="30" fill="#4F46E5" stroke="#4F46E5" stroke-width="2"/>
+                            <text x="500" y="65" text-anchor="middle" fill="white" font-size="16" font-weight="bold">Agent Brain (LLM)</text>
+                            <text x="500" y="85" text-anchor="middle" fill="white" font-size="12">意图识别 + 参数提取 + 思维链</text>
+                            
+                            <!-- 主连接线 -->
+                            <path d="M 500 90 L 500 120" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <path d="M 500 120 L 250 120" stroke="#4F46E5" stroke-width="2" fill="none"/>
+                            <path d="M 500 120 L 400 120" stroke="#4F46E5" stroke-width="2" fill="none"/>
+                            <path d="M 500 120 L 600 120" stroke="#4F46E5" stroke-width="2" fill="none"/>
+                            <path d="M 500 120 L 750 120" stroke="#4F46E5" stroke-width="2" fill="none"/>
+                            
+                            <!-- 分支连接线 -->
+                            <path d="M 250 120 L 250 150" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <path d="M 400 120 L 400 150" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <path d="M 600 120 L 600 150" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            <path d="M 750 120 L 750 150" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                            
+                            <!-- 四个分支 -->
+                            <rect x="180" y="150" width="140" height="50" rx="10" fill="#22C55E" stroke="#22C55E"/>
+                            <text x="250" y="180" text-anchor="middle" fill="white" font-size="14" font-weight="bold">search_house</text>
+                            <text x="250" y="200" text-anchor="middle" fill="white" font-size="12">分支</text>
+                            
+                            <rect x="330" y="150" width="140" height="50" rx="10" fill="#3B82F6" stroke="#3B82F6"/>
+                            <text x="400" y="180" text-anchor="middle" fill="white" font-size="14" font-weight="bold">query_kb</text>
+                            <text x="400" y="200" text-anchor="middle" fill="white" font-size="12">分支</text>
+                            
+                            <rect x="530" y="150" width="140" height="50" rx="10" fill="#8B5CF6" stroke="#8B5CF6"/>
+                            <text x="600" y="180" text-anchor="middle" fill="white" font-size="14" font-weight="bold">find_butler</text>
+                            <text x="600" y="200" text-anchor="middle" fill="white" font-size="12">分支</text>
+                            
+                            <rect x="680" y="150" width="140" height="50" rx="10" fill="#6B7280" stroke="#6B7280"/>
+                            <text x="750" y="180" text-anchor="middle" fill="white" font-size="14" font-weight="bold">chat</text>
+                            <text x="750" y="200" text-anchor="middle" fill="white" font-size="12">分支</text>
+                            
+                            <!-- 二级处理 -->
+                            <path d="M 250 200 L 250 230" stroke="#22C55E" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+                            <path d="M 400 200 L 400 230" stroke="#3B82F6" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+                            <path d="M 600 200 L 600 230" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrowPurple)"/>
+                            <path d="M 750 200 L 750 230" stroke="#6B7280" stroke-width="2" fill="none" marker-end="url(#arrowGray)"/>
+                            
+                            <rect x="180" y="230" width="140" height="40" rx="8" fill="#1E1E3F" stroke="#22C55E" stroke-width="2"/>
+                            <text x="250" y="255" text-anchor="middle" fill="#22C55E" font-size="12">HTTP: 搜房API</text>
+                            
+                            <rect x="330" y="230" width="140" height="40" rx="8" fill="#1E1E3F" stroke="#3B82F6" stroke-width="2"/>
+                            <text x="400" y="255" text-anchor="middle" fill="#3B82F6" font-size="12">知识库检索</text>
+                            
+                            <rect x="530" y="230" width="140" height="40" rx="8" fill="#1E1E3F" stroke="#8B5CF6" stroke-width="2"/>
+                            <text x="600" y="255" text-anchor="middle" fill="#8B5CF6" font-size="12">HTTP: 管家API</text>
+                            
+                            <rect x="680" y="230" width="140" height="40" rx="8" fill="#1E1E3F" stroke="#6B7280" stroke-width="2"/>
+                            <text x="750" y="255" text-anchor="middle" fill="#6B7280" font-size="12">LLM回复</text>
+                            
+                            <!-- 三级处理 -->
+                            <path d="M 250 270 L 250 300" stroke="#22C55E" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+                            <path d="M 400 270 L 400 300" stroke="#3B82F6" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"/>
+                            <path d="M 600 270 L 600 300" stroke="#8B5CF6" stroke-width="2" fill="none" marker-end="url(#arrowPurple)"/>
+                            
+                            <rect x="180" y="300" width="140" height="40" rx="8" fill="#1E1E3F" stroke="#22C55E" stroke-width="2"/>
+                            <text x="250" y="325" text-anchor="middle" fill="#22C55E" font-size="12">数据校验</text>
+                            
+                            <rect x="330" y="300" width="140" height="40" rx="8" fill="#1E1E3F" stroke="#3B82F6" stroke-width="2"/>
+                            <text x="400" y="325" text-anchor="middle" fill="#3B82F6" font-size="12">LLM生成回答</text>
+                            
+                            <rect x="530" y="300" width="140" height="40" rx="8" fill="#1E1E3F" stroke="#8B5CF6" stroke-width="2"/>
+                            <text x="600" y="325" text-anchor="middle" fill="#8B5CF6" font-size="12">管家名片生成</text>
+                            
+                            <!-- 结果判断 -->
+                            <path d="M 250 340 L 250 370" stroke="#22C55E" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+                            
+                            <rect x="180" y="370" width="140" height="40" rx="8" fill="#F59E0B" stroke="#F59E0B" stroke-width="2"/>
+                            <text x="250" y="395" text-anchor="middle" fill="white" font-size="13" font-weight="bold">结果判断</text>
+                            
+                            <!-- 结果分支 -->
+                            <path d="M 180 390 L 100 390 L 100 420" stroke="#22C55E" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+                            <path d="M 320 390 L 400 390 L 400 420" stroke="#EF4444" stroke-width="2" fill="none" marker-end="url(#arrowRed)"/>
+                            
+                            <rect x="50" y="420" width="100" height="40" rx="8" fill="#22C55E" stroke="#22C55E"/>
+                            <text x="100" y="445" text-anchor="middle" fill="white" font-size="13">有结果</text>
+                            <text x="100" y="465" text-anchor="middle" fill="white" font-size="10">直接回复</text>
+                            
+                            <rect x="350" y="420" width="100" height="40" rx="8" fill="#EF4444" stroke="#EF4444"/>
+                            <text x="400" y="445" text-anchor="middle" fill="white" font-size="13">无结果</text>
+                            <text x="400" y="465" text-anchor="middle" fill="white" font-size="10">Recovery</text>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 13: 课程总结 -->
+            <section class="slide" data-index="12">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">课程总结</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-8">核心知识点回顾</h2>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold">1</span>
+                                <h3 class="text-subtitle font-semibold text-green-500">多意图完整路由</h3>
+                            </div>
+                            <ul class="text-body text-text-muted space-y-1 ml-13">
+                                <li>• 4个意图分支（search/query/butler/chat）</li>
+                                <li>• 参数提取 + 思维链推理</li>
+                                <li>• 上下文理解</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">2</span>
+                                <h3 class="text-subtitle font-semibold text-blue-500">对话状态管理</h3>
+                            </div>
+                            <ul class="text-body text-text-muted space-y-1 ml-13">
+                                <li>• 对话变量保存搜索状态</li>
+                                <li>• 参数智能合并</li>
+                                <li>• 状态更新逻辑</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold">3</span>
+                                <h3 class="text-subtitle font-semibold text-purple-500">HTTP API集成</h3>
+                            </div>
+                            <ul class="text-body text-text-muted space-y-1 ml-13">
+                                <li>• 搜房API调用</li>
+                                <li>• 管家API调用</li>
+                                <li>• 结果解析</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">4</span>
+                                <h3 class="text-subtitle font-semibold text-orange-500">空结果处理（Recovery）</h3>
+                            </div>
+                            <ul class="text-body text-text-muted space-y-1 ml-13">
+                                <li>• 原因诊断</li>
+                                <li>• 方案建议</li>
+                                <li>• 用户引导</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box col-span-2">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center font-bold">5</span>
+                                <h3 class="text-subtitle font-semibold text-red-500">错误处理</h3>
+                            </div>
+                            <ul class="text-body text-text-muted space-y-1 ml-13">
+                                <li>• API超时重试</li>
+                                <li>• 降级处理</li>
+                                <li>• 友好提示</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 14: 课后作业（基础） -->
+            <section class="slide" data-index="13">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">课后作业</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-6">基础作业（必做）</h2>
+                    <div class="interactive-box mb-6">
+                        <h3 class="text-subtitle font-semibold text-green-500 mb-4">还原安居乐寓AI找房助手完整工作流</h3>
+                        <p class="text-body text-text-secondary mb-4">参考Dify项目，从零开始还原安居乐寓AI找房助手的完整工作流，包括多意图路由、状态管理、API集成和Recovery机制。</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="interactive-box">
+                            <h4 class="text-label font-semibold text-primary mb-2">1. 多意图路由</h4>
+                            <ul class="text-body text-text-muted text-sm">
+                                <li>• 创建Agent Brain节点</li>
+                                <li>• 实现4个意图分支</li>
+                                <li>• 配置条件分支节点</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h4 class="text-label font-semibold text-primary mb-2">2. 状态管理</h4>
+                            <ul class="text-body text-text-muted text-sm">
+                                <li>• 创建对话变量 search_state</li>
+                                <li>• 实现代码节点进行状态读写</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h4 class="text-label font-semibold text-primary mb-2">3. API集成</h4>
+                            <ul class="text-body text-text-muted text-sm">
+                                <li>• 配置搜房API</li>
+                                <li>• 配置管家API</li>
+                                <li>• 实现结果解析</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h4 class="text-label font-semibold text-primary mb-2">4. Recovery机制</h4>
+                            <ul class="text-body text-text-muted text-sm">
+                                <li>• 空结果分析节点</li>
+                                <li>• 智能建议生成</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="interactive-box bg-green-50">
+                        <h4 class="text-label font-semibold text-green-600 mb-2">测试用例</h4>
+                        <div class="grid grid-cols-5 gap-2 text-body text-text-muted text-sm">
+                            <div class="bg-white p-2 rounded">"我想在宝安区租房"</div>
+                            <div class="bg-white p-2 rounded">"水费怎么算"</div>
+                            <div class="bg-white p-2 rounded">"帮我预约看房"</div>
+                            <div class="bg-white p-2 rounded">"今天天气怎么样"</div>
+                            <div class="bg-white p-2 rounded">"南山区别墅"</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 15: 课后作业（进阶）选题一 -->
+            <section class="slide" data-index="14">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">进阶作业（选做）选题一</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-6">智能报修助手</h2>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-blue-500 mb-4">业务场景</h3>
+                            <p class="text-body text-text-secondary">租客通过AI助手提交报修申请、查询进度、获取维修知识。支持故障类型智能分类、紧急程度判断、维修知识库检索。</p>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-blue-500 mb-4">核心意图设计</h3>
+                            <div class="space-y-2 text-body text-text-muted">
+                                <p><code class="bg-blue-100 text-blue-700 px-2 py-1 rounded">submit_repair</code> 提交报修</p>
+                                <p><code class="bg-blue-100 text-blue-700 px-2 py-1 rounded">query_progress</code> 查询进度</p>
+                                <p><code class="bg-blue-100 text-blue-700 px-2 py-1 rounded">repair_guide</code> 维修指南</p>
+                                <p><code class="bg-blue-100 text-blue-700 px-2 py-1 rounded">chat</code> 闲聊</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-blue-500 mb-4">状态管理</h3>
+                            <ul class="text-body text-text-muted space-y-2">
+                                <li>• <strong>报修信息：</strong>房间号、故障类型、紧急程度</li>
+                                <li>• <strong>工单状态：</strong>待处理、处理中、已完成</li>
+                                <li>• <strong>使用对话变量保存</strong></li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-blue-500 mb-4">API集成</h3>
+                            <ul class="text-body text-text-muted space-y-2">
+                                <li>• <strong>提交工单API：</strong>创建报修工单</li>
+                                <li>• <strong>查询工单状态API：</strong>获取处理进度</li>
+                                <li>• <strong>维修知识库：</strong>常见故障解决方案</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-box bg-blue-50">
+                        <h3 class="text-subtitle font-semibold text-blue-500 mb-4">示例对话</h3>
+                        <div class="space-y-3 text-body text-text-secondary">
+                            <p><strong>用户：</strong>我房间空调不制冷了</p>
+                            <p><strong>助手：</strong>收到您的报修请求。请问您的房间号是多少？故障是完全没有冷风还是制冷效果差？</p>
+                            <p><strong>用户：</strong>302房，制冷效果差</p>
+                            <p><strong>助手：</strong>好的，已为您提交报修工单（工单号：BX20240115001）。维修师傅将在24小时内联系您，紧急程度：一般。如需加急请回复"加急"。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 16: 课后作业（进阶）选题二 -->
+            <section class="slide" data-index="15">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">进阶作业（选做）选题二</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-6">租客服务机器人</h2>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-purple-500 mb-4">业务场景</h3>
+                            <p class="text-body text-text-secondary">为租客提供缴费查询、合同咨询、入住办理、退租申请等全生命周期服务。支持账单明细查询、合同到期提醒、退租流程引导。</p>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-purple-500 mb-4">核心意图设计</h3>
+                            <div class="space-y-2 text-body text-text-muted">
+                                <p><code class="bg-purple-100 text-purple-700 px-2 py-1 rounded">query_bill</code> 查询账单</p>
+                                <p><code class="bg-purple-100 text-purple-700 px-2 py-1 rounded">contract_info</code> 合同咨询</p>
+                                <p><code class="bg-purple-100 text-purple-700 px-2 py-1 rounded">check_in</code> 入住办理</p>
+                                <p><code class="bg-purple-100 text-purple-700 px-2 py-1 rounded">check_out</code> 退租申请</p>
+                                <p><code class="bg-purple-100 text-purple-700 px-2 py-1 rounded">chat</code> 闲聊</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-purple-500 mb-4">状态管理</h3>
+                            <ul class="text-body text-text-muted space-y-2">
+                                <li>• <strong>租客信息：</strong>姓名、房间号、联系方式</li>
+                                <li>• <strong>合同状态：</strong>合同开始/结束日期、续租状态</li>
+                                <li>• <strong>账单记录：</strong>历史账单、缴费记录</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-purple-500 mb-4">API集成</h3>
+                            <ul class="text-body text-text-muted space-y-2">
+                                <li>• <strong>缴费系统API：</strong>查询账单、生成缴费码</li>
+                                <li>• <strong>合同系统API：</strong>查询合同信息、到期提醒</li>
+                                <li>• <strong>入住/退租API：</strong>办理入住、提交退租申请</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-box bg-purple-50">
+                        <h3 class="text-subtitle font-semibold text-purple-500 mb-4">示例对话</h3>
+                        <div class="space-y-3 text-body text-text-secondary">
+                            <p><strong>用户：</strong>我这个月房租多少</p>
+                            <p><strong>助手：</strong>您好，您的房间是302房，本月账单如下：<br/>- 房租：2500元<br/>- 水费：45元<br/>- 电费：120元<br/>- 合计：2665元<br/>缴费截止日期：1月25日。需要帮您生成缴费码吗？</p>
+                            <p><strong>用户：</strong>我的合同什么时候到期</p>
+                            <p><strong>助手：</strong>您的租赁合同将于2024年6月30日到期，距今还有5个月。如需续租，建议提前1个月联系管家办理。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 17: 课后作业（进阶）选题三 -->
+            <section class="slide" data-index="16">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">进阶作业（选做）选题三</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-6">深梦扬帆活动助手</h2>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-green-500 mb-4">业务场景</h3>
+                            <p class="text-body text-text-secondary">为2026年毕业生提供深梦扬帆公益活动咨询、报名引导、状态查询等全流程服务。支持毕业时间自动校验、活动权益说明、报名进度跟踪。</p>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-green-500 mb-4">核心意图设计</h3>
+                            <div class="space-y-2 text-body text-text-muted">
+                                <p><code class="bg-green-100 text-green-700 px-2 py-1 rounded">activity_intro</code> 活动介绍</p>
+                                <p><code class="bg-green-100 text-green-700 px-2 py-1 rounded">eligibility_check</code> 资格查询</p>
+                                <p><code class="bg-green-100 text-green-700 px-2 py-1 rounded">submit_apply</code> 报名申请</p>
+                                <p><code class="bg-green-100 text-green-700 px-2 py-1 rounded">query_status</code> 状态查询</p>
+                                <p><code class="bg-green-100 text-green-700 px-2 py-1 rounded">process_query</code> 流程咨询</p>
+                                <p><code class="bg-green-100 text-green-700 px-2 py-1 rounded">chat</code> 闲聊</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-green-500 mb-4">状态管理</h3>
+                            <ul class="text-body text-text-muted space-y-2">
+                                <li>• <strong>用户信息：</strong>姓名、电话、学历、毕业时间</li>
+                                <li>• <strong>报名状态：</strong>未确认/已确认/已取消</li>
+                                <li>• <strong>排房状态：</strong>不可排房→可排房→已排房→已入住</li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-green-500 mb-4">功能要点</h3>
+                            <ul class="text-body text-text-muted space-y-2">
+                                <li>• <strong>活动房源展示：</strong>按门店展示剩余房源</li>
+                                <li>• <strong>报名表单：</strong>填写姓名、联系方式，勾选授权</li>
+                                <li>• <strong>入住确认：</strong>入住前5天通知确认</li>
+                                <li>• <strong>排房状态查询：</strong>实时查询排房进度</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-box bg-green-50">
+                        <h3 class="text-subtitle font-semibold text-green-500 mb-4">示例对话</h3>
+                        <div class="space-y-2 text-body text-text-secondary text-sm">
+                            <p><strong>用户：</strong>深梦扬帆是什么活动</p>
+                            <p><strong>助手：</strong>深梦扬帆是安居乐寓推出的公益活动，为2026年毕业生提供15天免费住宿！主要权益：① 15天免费住 ② 188元无门槛租金券</p>
+                            <p><strong>用户：</strong>我是2026年毕业的，可以参加吗</p>
+                            <p><strong>助手：</strong>可以的！活动对象为2026年1月1日至12月31日期间获得大专、本科及以上学历的毕业生。报名条件：1.提前5天选择门店 2.学信网验证 3.资格审核通过后预约入住</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 18: 课后作业（进阶）通用要求 -->
+            <section class="slide" data-index="17">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">进阶作业（选做）通用要求</span>
+                    <h2 class="font-display text-title font-bold text-primary mb-6">作业要求与提交内容</h2>
+                    
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-primary mb-4">通用要求</h3>
+                            <div class="space-y-3 text-body text-text-muted">
+                                <div class="flex items-start gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">1</span>
+                                    <p><strong>意图设计：</strong>至少包含4个意图分支</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">2</span>
+                                    <p><strong>状态管理：</strong>使用对话变量保存关键信息</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">3</span>
+                                    <p><strong>知识库：</strong>配置相关业务知识库（可用模拟数据）</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">4</span>
+                                    <p><strong>测试验证：</strong>每个意图至少设计1个测试用例</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-semibold text-primary mb-4">提交内容</h3>
+                            <div class="space-y-3 text-body text-text-muted">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <p>Dify项目链接和项目名称</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <p>完整工作流截图</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <p>意图设计说明文档（包含意图定义、参数提取规则）</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <p>知识库配置截图（如有）</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <p>测试用例及运行结果截图</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary">✓</span>
+                                    <p>项目设计思路说明（300字以内）</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-box bg-yellow-50">
+                        <h3 class="text-subtitle font-semibold text-yellow-600 mb-4">学习建议</h3>
+                        <div class="grid grid-cols-2 gap-4 text-body text-text-secondary text-sm">
+                            <ul class="space-y-2">
+                                <li>• 先完成基础作业，确保掌握完整工作流</li>
+                                <li>• 选择自己熟悉的业务场景</li>
+                                <li>• 每完成一个节点就进行测试</li>
+                            </ul>
+                            <ul class="space-y-2">
+                                <li>• 多测试异常输入情况</li>
+                                <li>• 善用Dify调试模式查看节点输入输出</li>
+                                <li>• 从简单意图开始，逐步扩展功能</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+        
+        <!-- 导航控制 -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4 z-10">
+            <button id="prevBtn" class="nav-btn" disabled>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div id="dotsContainer" class="flex gap-2"></div>
+            <button id="nextBtn" class="nav-btn">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- 进度条 -->
+        <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-200">
+            <div id="progressBar" class="h-full" style="width: 6.67%"></div>
+        </div>
+        
+        <!-- 页码 -->
+        <div class="absolute top-8 right-8 text-label text-text-muted z-10">
+            <span id="currentSlide">1</span> / <span id="totalSlides">15</span>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

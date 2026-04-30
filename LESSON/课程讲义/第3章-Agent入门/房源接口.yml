@@ -1,0 +1,344 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 房源接口
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1770618049326-source-1770708201798-target
+      selected: false
+      source: '1770618049326'
+      sourceHandle: source
+      target: '1770708201798'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1770708201798-source-1770694725506-target
+      source: '1770708201798'
+      sourceHandle: source
+      target: '1770694725506'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: http-request
+      id: 1770607331120-source-1770618049326-target
+      source: '1770607331120'
+      sourceHandle: source
+      target: '1770618049326'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: wxMiniAppId
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: wxMiniAppId
+        - default: ''
+          hint: ''
+          label: token
+          max_length: 256
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: token
+        - default: ''
+          hint: ''
+          label: lat
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: lat
+        - default: ''
+          hint: ''
+          label: lng
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: lng
+        - default: ''
+          hint: ''
+          label: storeNames
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: storeNames
+        - default: ''
+          hint: ''
+          label: area
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: area
+        - default: ''
+          hint: ''
+          label: address
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: address
+        - default: ''
+          hint: ''
+          label: distance
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: distance
+        - default: ''
+          hint: ''
+          label: layoutName
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: layoutName
+        - default: ''
+          hint: ''
+          label: maxPrice
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: maxPrice
+        - default: ''
+          hint: ''
+          label: minPrice
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: minPrice
+      height: 367
+      id: '1770607331120'
+      position:
+        x: 569.4074684715328
+        y: 139.34168688489953
+      positionAbsolute:
+        x: 569.4074684715328
+        y: 139.34168688489953
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: key-value-157
+            key: ''
+            type: text
+            value: "{\n  \"area\": \"{{#1770607331120.area#}}\",\n  \"layoutName\"\
+              : \"{{#1770607331120.layoutName#}}\",\n  \"minPrice\": \"{{#1770607331120.minPrice#}}\"\
+              ,\n  \"maxPrice\": \"{{#1770607331120.maxPrice#}}\",\n  \"address\"\
+              : \"{{#1770607331120.address#}}\",\n  \"storeNames\": \"{{#1770607331120.storeNames#}}\"\
+              ,\n  \"distance\": \"{{#1770607331120.distance#}}\",\n  \"lng\": \"\
+              {{#1770607331120.lng#}}\",\n  \"lat\": \"{{#1770607331120.lat#}}\"\n\
+              }"
+          type: json
+        headers: 'applet-token:{{#1770607331120.token#}}
+
+          wxMiniAppId:{{#1770607331120.wxMiniAppId#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: true
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: HTTP 请求
+        type: http-request
+        url: https://uat-weapp.szajly.com/api/wechat/ai/searchHouse
+        variables: []
+      height: 151
+      id: '1770618049326'
+      position:
+        x: 925.099348854076
+        y: 249.27508765425893
+      positionAbsolute:
+        x: 925.099348854076
+        y: 249.27508765425893
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        outputs:
+        - value_selector:
+          - '1770708201798'
+          - result
+          value_type: string
+          variable: result
+        selected: false
+        title: 输出
+        type: end
+      height: 86
+      id: '1770694725506'
+      position:
+        x: 1604.1993312294614
+        y: 322.68974589275064
+      positionAbsolute:
+        x: 1604.1993312294614
+        y: 322.68974589275064
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import json\n\ndef main(arg1):\n    # 1. 基础解析\n    try:\n        data_obj\
+          \ = json.loads(arg1) if isinstance(arg1, str) else arg1\n    except Exception\
+          \ as e:\n        return {\"result\": f\"❌ **JSON 解析异常**：{str(e)}\"}\n\n\
+          \    # 2. 报错兜底逻辑\n    code = data_obj.get(\"code\")\n    msg = data_obj.get(\"\
+          msg\") or data_obj.get(\"message\") or \"未知错误\"\n\n    if code != 200:\n\
+          \        return {\"result\": f\"⚠️ **查询失败**\\n\\n> **错误代码**：{code}\\n\\\
+          n> **提示信息**：{msg}\"}\n\n    # 3. 数据存在性校验\n    data = data_obj.get(\"data\"\
+          , {})\n    stores = data.get(\"list\", []) if data else []\n    \n    if\
+          \ not stores:\n        return {\"result\": f\"ℹ️ **暂无房源信息**\\n\\n> 没能找到匹配的房源，换个条件试试吧！\"\
+          }\n\n    # 4. 构建 MD 表格 (保留 roomId 用于链接生成)\n    header = [\"预览图\", \"门店名称\"\
+          , \"房间号\", \"价格(元)\", \"面积(㎡)\", \"户型\", \"距离地铁\", \"站点\", \"站距(m)\", \"\
+          roomId\"]\n    md_table = \"| \" + \" | \".join(header) + \" |\\n\"\n  \
+          \  md_table += \"| \" + \" | \".join([\"---\"] * len(header)) + \" |\\n\"\
+          \n\n    for store in stores:\n        s_name = store.get(\"storeName\",\
+          \ \"-\")\n        m_name = store.get(\"nearMetroName\", \"-\")\n       \
+          \ st_name = store.get(\"nearStationName\", \"-\")\n        st_dist = store.get(\"\
+          nearStationDistance\", \"-\")\n        \n        for room in store.get(\"\
+          layoutList\", []):\n            r_no = room.get(\"roomNumber\", \"-\")\n\
+          \            price = room.get(\"price\", \"-\")\n            space = room.get(\"\
+          insideSpace\", \"-\")\n            layout = room.get(\"layoutName\", \"\
+          -\")\n            pic = room.get(\"homePic\", \"\")\n            r_id =\
+          \ room.get(\"roomId\", \"\") # 核心字段：用于拼接链接\n            \n            img_md\
+          \ = f\"![预览]({pic})\" if pic else \"无图\"\n            \n            # 组装行数据\n\
+          \            row = [\n                img_md, s_name, r_no, str(price),\
+          \ str(space), \n                layout, m_name, st_name, str(st_dist), str(r_id)\n\
+          \            ]\n            md_table += \"| \" + \" | \".join(row) + \"\
+          \ |\\n\"\n\n    return {\"result\": md_table}"
+        code_language: python3
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 代码执行 2
+        type: code
+        variables:
+        - value_selector:
+          - '1770618049326'
+          - body
+          value_type: string
+          variable: arg1
+      height: 50
+      id: '1770708201798'
+      position:
+        x: 1273.1756539466937
+        y: 315.29314055371105
+      positionAbsolute:
+        x: 1273.1756539466937
+        y: 315.29314055371105
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    viewport:
+      x: -603.9657242001301
+      y: 182.1391370318683
+      zoom: 0.7502558276506779
+  rag_pipeline_variables: []

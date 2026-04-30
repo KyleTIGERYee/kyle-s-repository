@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>深圳安居 - 自助看房</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- 基础设置 --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        
+        /* 隐藏滚动条 */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 屏幕管理 */
+        .phone-container {
+            width: 100%; height: 100%; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; background: #fff;
+        }
+        .screen {
+            display: none; flex-direction: column; width: 100%; height: 100%;
+            background: #F9FAFB; position: absolute; top: 0; left: 0; overflow-y: auto; z-index: 1;
+        }
+        .screen.active { display: flex; z-index: 10; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 自定义组件样式 */
+        .checkbox-custom { transition: all 0.2s; }
+        .checkbox-custom.checked { background-color: #3B82F6; border-color: #3B82F6; color: white; }
+        
+        .price-text { font-family: "DIN Alternate", "Roboto", sans-serif; }
+        
+        /* 首页背景渐变模拟附件1 */
+        .home-bg-gradient {
+            background: linear-gradient(180deg, #E6F4FF 0%, #FFFFFF 40%, #F5F7FA 100%);
+        }
+        
+        /* 房间详情页位置卡片渐变 */
+        .location-card-gradient {
+            background: linear-gradient(90deg, #F0F7FF 0%, #E6F2FF 100%);
+        }
+
+        /* 底部导航栏阴影 */
+        .tab-bar-shadow {
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 管家名片背景 */
+        .butler-card-bg { background: linear-gradient(135deg, #E3F2FD 0%, #FFFFFF 100%); }
+        
+        /* 扫描动画 */
+        .scan-beam { animation: scan-line 2s linear infinite; }
+        @keyframes scan-line { 0% { top: 0; opacity: 0.5; } 50% { top: 100%; opacity: 1; } 100% { top: 0; opacity: 0.5; } }
+
+        /* 弹窗动画 */
+        .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out; }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tab样式 */
+        .tab-active { color: #2563EB; border-bottom: 2px solid #2563EB; }
+        .tab-inactive { color: #9CA3AF; border-bottom: 2px solid transparent; }
+    </style>
+</head>
+<body class="flex justify-center h-screen w-screen bg-gray-200">
+
+    <div class="phone-container max-w-[430px] shadow-2xl md:my-4 md:rounded-[40px] md:h-[95vh] md:border-[8px] md:border-gray-900">
+        
+        <!-- ================= 1. 首页 (Home) ================= -->
+        <div id="screen-home" class="screen active home-bg-gradient overflow-hidden">
+            <!-- Top Status Bar Placeholder -->
+            <div class="h-10 w-full flex items-end justify-between px-4 pb-2 z-20">
+                <div class="flex items-center gap-1 text-gray-800 font-bold text-sm">
+                    <i class="fas fa-map-marker-alt"></i> 龙华区观澜街道赤花路62号
+                </div>
+                <div class="flex gap-1 text-gray-800 text-xs">
+                    <i class="fas fa-ellipsis-h"></i>
+                    <i class="far fa-minus-square"></i>
+                    <i class="far fa-dot-circle"></i>
+                </div>
+            </div>
+
+            <!-- Banner & Illustration Area -->
+            <div class="relative w-full px-4 pt-2 pb-6">
+                <!-- Main Title Img Placeholder -->
+                <div class="mb-4">
+                    <h1 class="text-4xl font-extrabold text-blue-500 tracking-tighter" style="text-shadow: 2px 2px 0px #fff;">深圳喊你来追梦</h1>
+                    <h2 class="text-3xl font-extrabold text-[#8BC34A] tracking-tighter mt-1" style="text-shadow: 2px 2px 0px #fff;">安居点亮第一站</h2>
+                    <div class="flex gap-2 mt-2">
+                        <span class="bg-[#D88C57] text-white text-[10px] px-2 py-0.5 rounded-full">临近地铁</span>
+                        <span class="bg-[#D88C57] text-white text-[10px] px-2 py-0.5 rounded-full">拎包入住</span>
+                        <span class="bg-[#D88C57] text-white text-[10px] px-2 py-0.5 rounded-full">家具齐备</span>
+                    </div>
+                </div>
+                
+                <!-- Character Illustration Placeholder -->
+                <div class="absolute top-10 right-0 w-40 h-40 bg-contain bg-no-repeat" style="background-image: url('https://cdn-icons-png.flaticon.com/512/4662/4662927.png'); opacity: 0.9;"></div>
+            </div>
+
+            <!-- Search Box Card -->
+            <div class="mx-4 bg-white rounded-2xl shadow-lg p-4 relative z-10 -mt-2">
+                <div class="flex items-center mb-3">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                        <i class="fas fa-building text-blue-500"></i>
+                    </div>
+                    <span class="font-bold text-lg text-gray-800">你想住哪儿</span>
+                </div>
+                <div class="flex gap-2">
+                    <div class="flex-1 bg-gray-100 rounded-lg h-10 flex items-center px-3 text-gray-400 text-sm">
+                        <i class="fas fa-search mr-2"></i> 地铁站/门店
+                    </div>
+                    <button class="bg-blue-600 text-white px-6 rounded-lg font-bold text-sm shadow-md shadow-blue-200">搜索</button>
+                </div>
+            </div>
+
+            <!-- Icon Grid -->
+            <div class="grid grid-cols-5 gap-2 px-4 mt-6 text-center">
+                <div class="flex flex-col items-center gap-1">
+                    <img src="https://cdn-icons-png.flaticon.com/512/619/619153.png" class="w-10 h-10">
+                    <span class="text-[10px] font-bold text-gray-700">帮我找房</span>
+                </div>
+                <!-- 交互点：自助看房 -->
+                <div class="flex flex-col items-center gap-1 cursor-pointer active:scale-95 transition" onclick="gotoScreen('screen-list')">
+                    <div class="relative">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5653/5653966.png" class="w-10 h-10">
+                    </div>
+                    <span class="text-[10px] font-bold text-gray-700">自助看房</span>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2830/2830305.png" class="w-10 h-10">
+                    <span class="text-[10px] font-bold text-gray-700">商铺租赁</span>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3280/3280979.png" class="w-10 h-10">
+                    <span class="text-[10px] font-bold text-gray-700">大学生就业</span>
+                </div>
+                <div class="flex flex-col items-center gap-1">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3063/3063822.png" class="w-10 h-10">
+                    <span class="text-[10px] font-bold text-gray-700">企业合作</span>
+                </div>
+            </div>
+
+            <!-- Ad Banners -->
+            <div class="flex gap-3 px-4 mt-6">
+                <div class="flex-1 bg-blue-50 h-16 rounded-xl flex items-center justify-center text-blue-600 font-bold italic shadow-sm border border-blue-100">
+                    <i class="fas fa-sailboat mr-2"></i> 深梦扬帆
+                </div>
+                <div class="flex-1 bg-orange-50 h-16 rounded-xl flex items-center justify-center text-orange-600 font-bold italic shadow-sm border border-orange-100">
+                     <i class="fas fa-rocket mr-2"></i> 深梦启航
+                </div>
+            </div>
+
+            <!-- Today's Special -->
+            <div class="mt-6 bg-gradient-to-b from-[#FF7E5F] to-[#FF6B6B] pt-3 pb-6 rounded-t-3xl mx-2 shadow-inner">
+                <div class="flex justify-between items-center px-4 mb-3 text-white">
+                    <div class="flex items-baseline gap-2">
+                        <span class="font-bold text-lg italic">今日特惠</span>
+                        <span class="text-[10px] opacity-80">限时特惠·租金立减</span>
+                    </div>
+                    <span class="text-xs flex items-center">查看更多 <i class="fas fa-chevron-right text-[10px] ml-1"></i></span>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="flex gap-2 px-4 mb-3 overflow-x-auto hide-scrollbar">
+                    <span class="bg-white text-orange-500 text-xs font-bold px-3 py-1 rounded-full shadow-sm">龙华区</span>
+                    <span class="bg-white/30 text-white text-xs px-3 py-1 rounded-full">宝安区</span>
+                    <span class="bg-white/30 text-white text-xs px-3 py-1 rounded-full">福田区</span>
+                    <span class="bg-white/30 text-white text-xs px-3 py-1 rounded-full">龙岗区</span>
+                </div>
+
+                <!-- Horizontal Scroll Cards -->
+                <div class="flex gap-3 px-4 overflow-x-auto hide-scrollbar">
+                    <div class="w-32 bg-white rounded-lg p-1 flex-shrink-0">
+                        <div class="w-full h-20 bg-gray-200 rounded-md bg-cover bg-center mb-1" style="background-image: url('https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=200')"></div>
+                        <div class="px-1">
+                            <div class="font-bold text-gray-800 text-xs truncate">103</div>
+                            <div class="text-[8px] text-gray-400 truncate">大浪三合华侨1-145栋</div>
+                            <div class="text-red-500 text-xs font-bold mt-1">936<span class="text-[8px] font-normal text-gray-400">元/月起</span></div>
+                        </div>
+                    </div>
+                     <div class="w-32 bg-white rounded-lg p-1 flex-shrink-0">
+                        <div class="w-full h-20 bg-gray-200 rounded-md bg-cover bg-center mb-1" style="background-image: url('https://images.unsplash.com/photo-1554995207-c18c203602cb?w=200')"></div>
+                        <div class="px-1">
+                            <div class="font-bold text-gray-800 text-xs truncate">903</div>
+                            <div class="text-[8px] text-gray-400 truncate">弓村B8-5</div>
+                            <div class="text-red-500 text-xs font-bold mt-1">992<span class="text-[8px] font-normal text-gray-400">元/月起</span></div>
+                        </div>
+                    </div>
+                     <div class="w-32 bg-white rounded-lg p-1 flex-shrink-0">
+                        <div class="w-full h-20 bg-gray-200 rounded-md bg-cover bg-center mb-1" style="background-image: url('https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=200')"></div>
+                        <div class="px-1">
+                            <div class="font-bold text-gray-800 text-xs truncate">102</div>
+                            <div class="text-[8px] text-gray-400 truncate">大浪下早新村63栋</div>
+                            <div class="text-red-500 text-xs font-bold mt-1">1024<span class="text-[8px] font-normal text-gray-400">元/月起</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部Tab栏 -->
+            <div class="absolute bottom-0 w-full bg-white h-16 flex justify-around items-center tab-bar-shadow z-20 pb-2">
+                <div class="flex flex-col items-center text-blue-500">
+                    <i class="fas fa-home text-xl"></i>
+                    <span class="text-[10px] mt-1">房源</span>
+                </div>
+                <div class="flex flex-col items-center text-gray-400 relative -top-5">
+                    <div class="w-14 h-14 bg-gradient-to-tr from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg border-4 border-white text-white text-xl">
+                        AI
+                    </div>
+                    <span class="text-[10px] mt-1">AI找房</span>
+                </div>
+                <div class="flex flex-col items-center text-gray-400">
+                    <i class="fas fa-user text-xl"></i>
+                    <span class="text-[10px] mt-1">我的</span>
+                </div>
+            </div>
+
+            <!-- 交互点：左侧悬浮“我的看房” -->
+            <div onclick="gotoScreen('screen-my-viewing')" class="absolute bottom-24 left-4 w-14 h-14 bg-white rounded-full shadow-lg border border-gray-100 flex flex-col items-center justify-center cursor-pointer active:scale-90 transition z-50">
+                <span class="text-xs font-bold text-gray-800 leading-tight text-center">我的<br>看房</span>
+            </div>
+        </div>
+
+        <!-- ================= 2. 自助看房列表 ================= -->
+        <div id="screen-list" class="screen bg-white">
+            <!-- Header (修改：增加Home按钮) -->
+            <div class="h-12 bg-white flex items-center px-4 sticky top-0 z-30 border-b border-gray-50">
+                <div class="flex items-center gap-2 w-20">
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goBack()"><i class="fas fa-arrow-left text-gray-700"></i></div>
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goHome()"><i class="fas fa-home text-gray-700"></i></div>
+                </div>
+                <div class="flex-1 text-center font-bold text-lg">自助看房</div>
+                <div class="w-20"></div>
+            </div>
+
+            <!-- Top Actions -->
+            <div class="p-4 grid grid-cols-2 gap-3 bg-white">
+                <div onclick="gotoScreen('screen-my-viewing')" class="bg-blue-50 py-3 rounded-xl flex items-center justify-center gap-2 text-blue-700 font-bold cursor-pointer active:bg-blue-100">
+                    <i class="far fa-calendar-alt"></i> 我的看房
+                </div>
+                <div onclick="gotoScreen('screen-wishlist')" class="bg-orange-50 py-3 rounded-xl flex items-center justify-center gap-2 text-orange-600 font-bold cursor-pointer active:bg-orange-100">
+                    <i class="fas fa-heart"></i> 看房心愿单
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 text-sm text-gray-700 sticky top-12 z-20">
+                <div class="flex items-center gap-1 cursor-pointer">通勤 <i class="fas fa-caret-down text-xs text-gray-400"></i></div>
+                <div class="font-bold text-blue-600 cursor-pointer">距离最近</div>
+                <div class="cursor-pointer">价格最低</div>
+                <div class="flex items-center gap-1 cursor-pointer">更多 <i class="fas fa-caret-down text-xs text-gray-400"></i></div>
+            </div>
+
+            <!-- List Content -->
+            <div class="p-4 bg-gray-50 flex-1 overflow-y-auto">
+                <!-- Store 1 -->
+                <div onclick="openStoreDetail('坂田岗头店')" class="bg-white rounded-xl p-4 shadow-sm mb-3 cursor-pointer">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-bold text-gray-900">坂田岗头店</h3>
+                        <i class="fas fa-chevron-right text-blue-500 bg-blue-50 rounded-full w-5 h-5 flex items-center justify-center text-xs"></i>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded">押一付一</span>
+                        <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded">无中介费</span>
+                    </div>
+                    <div class="flex justify-between items-start text-xs text-gray-500 mb-3">
+                        <div class="flex items-start gap-1 leading-tight">
+                            <i class="fas fa-map-marker-alt mt-0.5"></i>
+                            <span>龙岗区安居乐寓中心围村二区-75栋</span>
+                        </div>
+                        <div class="whitespace-nowrap ml-2 text-right">
+                            <div class="scale-90 origin-right">距您</div>
+                            <div>7.17km</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-1">
+                        <div class="w-32 flex-shrink-0">
+                            <div class="w-32 h-24 bg-gray-200 rounded-lg bg-cover bg-center mb-1" style="background-image: url('https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=200')"></div>
+                            <div class="text-sm text-gray-800 truncate">舒适静谧开间</div>
+                            <div class="text-red-500 text-sm font-bold price-text">1216<span class="text-xs text-gray-500 font-normal">元/月起</span></div>
+                        </div>
+                        <div class="w-32 flex-shrink-0">
+                            <div class="w-32 h-24 bg-gray-200 rounded-lg bg-cover bg-center mb-1" style="background-image: url('https://images.unsplash.com/photo-1554995207-c18c203602cb?w=200')"></div>
+                            <div class="text-sm text-gray-800 truncate">舒适温馨阳台开间</div>
+                            <div class="text-red-500 text-sm font-bold price-text">1408<span class="text-xs text-gray-500 font-normal">元/月起</span></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Store 2 -->
+                <div onclick="openStoreDetail('龙华大浪店')" class="bg-white rounded-xl p-4 shadow-sm mb-3 cursor-pointer">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-bold text-gray-900">龙华大浪店</h3>
+                        <i class="fas fa-chevron-right text-blue-500 bg-blue-50 rounded-full w-5 h-5 flex items-center justify-center text-xs"></i>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded">近地铁</span>
+                        <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded">拎包入住</span>
+                    </div>
+                    <div class="flex justify-between items-start text-xs text-gray-500 mb-3">
+                        <div class="flex items-start gap-1 leading-tight">
+                            <i class="fas fa-map-marker-alt mt-0.5"></i>
+                            <span>龙华区大浪街道下早新村63栋</span>
+                        </div>
+                        <div class="whitespace-nowrap ml-2 text-right">
+                            <div class="scale-90 origin-right">距您</div>
+                            <div>12.5km</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-1">
+                        <div class="w-32 flex-shrink-0">
+                            <div class="w-32 h-24 bg-gray-200 rounded-lg bg-cover bg-center mb-1" style="background-image: url('https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=200')"></div>
+                            <div class="text-sm text-gray-800 truncate">大浪下早新村</div>
+                            <div class="text-red-500 text-sm font-bold price-text">1024<span class="text-xs text-gray-500 font-normal">元/月起</span></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Store 3 -->
+                <div onclick="openStoreDetail('宝安西乡店')" class="bg-white rounded-xl p-4 shadow-sm mb-3 cursor-pointer">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-lg font-bold text-gray-900">宝安西乡店</h3>
+                        <i class="fas fa-chevron-right text-blue-500 bg-blue-50 rounded-full w-5 h-5 flex items-center justify-center text-xs"></i>
+                    </div>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded">品牌公寓</span>
+                        <span class="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded">电梯房</span>
+                    </div>
+                    <div class="flex justify-between items-start text-xs text-gray-500 mb-3">
+                        <div class="flex items-start gap-1 leading-tight">
+                            <i class="fas fa-map-marker-alt mt-0.5"></i>
+                            <span>宝安区西乡街道固戍地铁站旁</span>
+                        </div>
+                        <div class="whitespace-nowrap ml-2 text-right">
+                            <div class="scale-90 origin-right">距您</div>
+                            <div>18.2km</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-1">
+                        <div class="w-32 flex-shrink-0">
+                            <div class="w-32 h-24 bg-gray-200 rounded-lg bg-cover bg-center mb-1" style="background-image: url('https://images.unsplash.com/photo-1512918760532-3ed465901d19?w=200')"></div>
+                            <div class="text-sm text-gray-800 truncate">西乡固戍大开间</div>
+                            <div class="text-red-500 text-sm font-bold price-text">1800<span class="text-xs text-gray-500 font-normal">元/月起</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 3. 门店详情页 ================= -->
+        <div id="screen-store-detail" class="screen bg-gray-100">
+            <!-- 头部图片 (修改：增加Home按钮) -->
+            <div class="relative h-60 w-full flex-shrink-0">
+                <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600" class="w-full h-full object-cover">
+                <div class="absolute top-0 left-0 w-full pt-10 px-4 flex justify-between items-center z-20">
+                    <div class="flex items-center gap-3">
+                        <div onclick="goBack()" class="w-8 h-8 rounded-full bg-black/20 backdrop-blur flex items-center justify-center cursor-pointer text-white">
+                            <i class="fas fa-chevron-left text-sm"></i>
+                        </div>
+                        <div onclick="goHome()" class="w-8 h-8 rounded-full bg-black/20 backdrop-blur flex items-center justify-center cursor-pointer text-white">
+                            <i class="fas fa-home text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 内容卡片 -->
+            <div class="relative -mt-6 px-3 pb-4 z-10 flex-1">
+                <div class="bg-white rounded-2xl p-4 shadow-sm mb-3">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-1">坂田岗头店</h1>
+                    <div class="text-red-500 text-xl font-bold price-text mb-3">¥1216 <span class="text-xs text-gray-500 font-normal">元/月起</span></div>
+                    <div class="bg-gray-50 p-2 rounded text-xs text-gray-600 mb-2">广东省深圳市龙岗区安居乐寓中心围村二区</div>
+                    <p class="text-xs text-gray-400 line-clamp-2">毗邻地铁10号线岗头站，交通便利...</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 shadow-sm min-h-[400px]">
+                    <h3 class="font-bold mb-4">房源列表</h3>
+                    
+                    <!-- Room 1 -->
+                     <div onclick="gotoScreen('screen-room-detail')" class="flex gap-3 py-3 border-b border-gray-50 cursor-pointer">
+                        <div class="w-28 h-20 bg-gray-200 rounded-lg bg-cover bg-center flex-shrink-0 relative overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=200')">
+                             <div class="absolute bottom-0 left-0 w-full bg-red-400 text-white text-[10px] text-center py-0.5">特惠</div>
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between">
+                            <h4 class="font-bold text-gray-900 text-base">优享静谧开间·102</h4>
+                            <div class="text-xs text-gray-500">一居室 · 27.27m²</div>
+                            <div class="text-red-500 font-bold price-text">¥976 <span class="text-xs text-gray-400">元/月起</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Room 2 -->
+                    <div onclick="gotoScreen('screen-room-detail')" class="flex gap-3 py-3 border-b border-gray-50 cursor-pointer">
+                        <div class="w-28 h-20 bg-gray-200 rounded-lg bg-cover bg-center flex-shrink-0 relative overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1554995207-c18c203602cb?w=200')">
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between">
+                            <h4 class="font-bold text-gray-900 text-base">温馨阳台大床房·205</h4>
+                            <div class="text-xs text-gray-500">一室一厅 · 35m²</div>
+                            <div class="text-red-500 font-bold price-text">¥1580 <span class="text-xs text-gray-400">元/月起</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Room 3 -->
+                    <div onclick="gotoScreen('screen-room-detail')" class="flex gap-3 py-3 border-b border-gray-50 cursor-pointer">
+                        <div class="w-28 h-20 bg-gray-200 rounded-lg bg-cover bg-center flex-shrink-0 relative overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=200')">
+                        </div>
+                        <div class="flex-1 flex flex-col justify-between">
+                            <h4 class="font-bold text-gray-900 text-base">精致Loft公寓·301</h4>
+                            <div class="text-xs text-gray-500">复式 · 40m²</div>
+                            <div class="text-red-500 font-bold price-text">¥2100 <span class="text-xs text-gray-400">元/月起</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 悬浮心愿单按钮 -->
+            <div onclick="gotoScreen('screen-wishlist')" class="absolute bottom-20 right-4 w-14 h-14 bg-white rounded-full shadow-lg border border-gray-100 flex flex-col items-center justify-center cursor-pointer z-50 active:scale-95 transition">
+                <span class="text-[10px] text-gray-800 font-bold leading-tight text-center">看房<br>心愿单</span>
+            </div>
+        </div>
+
+        <!-- ================= 4. 房间详情页 ================= -->
+        <div id="screen-room-detail" class="screen bg-white">
+            <!-- Video/Image Area (修改：增加Home按钮) -->
+            <div class="relative w-full h-64 bg-black flex items-center justify-center">
+                <!-- Placeholder Video Image -->
+                <img src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=600" class="w-full h-full object-cover opacity-80">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <i class="fas fa-play text-white text-4xl opacity-80 drop-shadow-lg"></i>
+                </div>
+                <!-- Top Bar -->
+                <div class="absolute top-0 w-full pt-10 px-4 flex justify-between items-center z-20">
+                     <div class="flex items-center gap-3">
+                        <div onclick="goBack()" class="w-8 h-8 rounded-full bg-black/20 backdrop-blur flex items-center justify-center cursor-pointer text-white">
+                            <i class="fas fa-chevron-left"></i>
+                        </div>
+                        <div onclick="goHome()" class="w-8 h-8 rounded-full bg-black/20 backdrop-blur flex items-center justify-center cursor-pointer text-white">
+                            <i class="fas fa-home"></i>
+                        </div>
+                    </div>
+                    <div class="px-3 py-1 bg-white/20 backdrop-blur rounded-full flex gap-3 text-white">
+                        <i class="fas fa-ellipsis-h text-xs"></i>
+                        <span class="w-[1px] h-3 bg-white/50"></span>
+                        <i class="far fa-dot-circle text-xs"></i>
+                    </div>
+                </div>
+                <div class="absolute bottom-4 left-4 flex gap-2">
+                    <span class="bg-blue-600 text-white text-xs px-2 py-0.5 rounded">视频</span>
+                    <span class="bg-black/40 text-white text-xs px-2 py-0.5 rounded">卧室</span>
+                </div>
+                <div class="absolute bottom-4 right-4 text-white text-xs font-bold tracking-widest">00:17</div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto pb-24 relative">
+                <div class="px-4 py-4">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-3">优享静谧开间·102</h1>
+                    
+                    <!-- 交互点：地理位置 -->
+                    <div onclick="openMap('screen-room-detail')" class="location-card-gradient p-3 rounded-lg flex items-center justify-between cursor-pointer active:opacity-80 transition mb-3 border border-blue-50">
+                        <div class="text-sm text-gray-800 w-3/4 leading-snug">广东省深圳市龙岗区安居乐寓中心围村二区-75栋</div>
+                        <div class="flex flex-col items-center">
+                            <span class="text-[10px] text-gray-400 mb-1 scale-90">距您7.17km</span>
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-md shadow-blue-200">
+                                <i class="fas fa-map-marker-alt text-white text-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-1 mb-4">
+                        <span class="text-gray-500 font-bold">租金:</span>
+                        <span class="text-red-500 text-2xl font-bold price-text">¥976</span>
+                        <span class="text-gray-500 text-sm">元/月起</span>
+                        <i class="far fa-question-circle text-gray-400 ml-1"></i>
+                    </div>
+
+                    <!-- Store Link -->
+                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg mb-4 cursor-pointer" onclick="gotoScreen('screen-store-detail')">
+                        <span class="font-bold text-gray-700">坂田岗头店</span>
+                        <span class="text-xs text-gray-400 flex items-center">查看更多 <i class="fas fa-chevron-right ml-1"></i></span>
+                    </div>
+
+                    <!-- Grid Info -->
+                    <div class="grid grid-cols-5 gap-2 bg-gray-50 rounded-lg p-4 mb-6 text-center">
+                        <div>
+                            <div class="text-xs text-gray-400 mb-1">楼层</div>
+                            <div class="text-sm font-bold text-gray-800">1/9层</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400 mb-1">阳台</div>
+                            <div class="text-sm font-bold text-gray-800">无</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400 mb-1">厨房</div>
+                            <div class="text-sm font-bold text-gray-800">有</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400 mb-1">电梯</div>
+                            <div class="text-sm font-bold text-gray-800">无</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-400 mb-1">朝向</div>
+                            <div class="text-sm font-bold text-gray-800">北</div>
+                        </div>
+                    </div>
+
+                    <!-- Facilities -->
+                    <div class="mb-8">
+                        <h3 class="font-bold text-gray-900 mb-4">房间配套</h3>
+                        <div class="grid grid-cols-5 gap-y-6 text-center">
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-border-all text-xl text-gray-600"></i>
+                                <span class="text-xs text-gray-500">操作台</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-soap text-xl text-gray-600"></i>
+                                <span class="text-xs text-gray-500">洗衣机</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-temperature-high text-xl text-gray-600"></i>
+                                <span class="text-xs text-gray-500">热水器</span>
+                            </div>
+                             <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-lock text-xl text-gray-600"></i>
+                                <span class="text-xs text-gray-500">智能门锁</span>
+                            </div>
+                             <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-bolt text-xl text-gray-600"></i>
+                                <span class="text-xs text-gray-500">智能电表</span>
+                            </div>
+                             <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-tint text-xl text-gray-600"></i>
+                                <span class="text-xs text-gray-500">智能水表</span>
+                            </div>
+                             <div class="flex flex-col items-center gap-2">
+                                <i class="fas fa-wifi text-xl text-gray-600"></i>
+                                <span class="text-xs text-gray-500">WI-FI</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 交互点：悬浮看房心愿单 -->
+                <div onclick="gotoScreen('screen-wishlist')" class="absolute top-[320px] right-4 w-14 h-14 bg-white rounded-full shadow-lg border border-gray-100 flex flex-col items-center justify-center cursor-pointer z-20 active:scale-95 transition">
+                    <span class="text-[10px] text-gray-800 font-bold leading-tight text-center">看房<br>心愿单</span>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="absolute bottom-0 w-full bg-white border-t border-gray-100 px-4 py-2 flex items-center gap-4 pb-6 z-30">
+                <div class="flex flex-col items-center text-gray-500 min-w-[40px]">
+                    <i class="fas fa-phone-alt text-lg mb-0.5"></i>
+                    <span class="text-[10px]">电话联系</span>
+                </div>
+                <div class="flex flex-col items-center text-gray-500 min-w-[40px]">
+                    <i class="far fa-heart text-lg mb-0.5"></i>
+                    <span class="text-[10px]">收藏</span>
+                </div>
+                <!-- 交互点：加入心愿单 -->
+                <button id="btnAddWish" onclick="addToWishlist()" class="flex-1 bg-[#F59E0B] text-white font-bold h-11 rounded-full shadow-sm active:opacity-90 transition">加入心愿单</button>
+                <button class="flex-1 bg-[#3B82F6] text-white font-bold h-11 rounded-full shadow-sm">管家微信</button>
+            </div>
+        </div>
+
+        <!-- ================= 5. 心愿单 (Wishlist) ================= -->
+        <div id="screen-wishlist" class="screen bg-white">
+            <!-- Header (修改：增加Home按钮) -->
+            <div class="h-12 bg-white flex items-center px-4 border-b border-gray-100 sticky top-0 z-20">
+                <div class="flex items-center gap-2 w-20">
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goBack()"><i class="fas fa-arrow-left text-gray-700"></i></div>
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goHome()"><i class="fas fa-home text-gray-700"></i></div>
+                </div>
+                <div class="flex-1 text-center font-bold">看房心愿单</div>
+                <div class="w-20"></div>
+            </div>
+
+            <div id="wishlist-container" class="p-4 pb-32 bg-gray-50 min-h-full">
+                <!-- JS 会渲染多个门店/楼栋数据 -->
+            </div>
+
+            <div class="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 p-4 pb-8 z-30 shadow-lg">
+                <p class="text-xs text-center text-gray-400 mb-2">勾选楼栋以进行预约</p>
+                <button id="btn-goto-apply" onclick="gotoApplyPage()" class="w-full h-12 bg-gray-200 text-gray-500 font-bold rounded-full transition-all">申请自助看房</button>
+            </div>
+        </div>
+
+        <!-- ================= 6. 申请页 (Apply) ================= -->
+        <div id="screen-apply" class="screen bg-white">
+            <!-- Header (修改：增加Home按钮) -->
+            <div class="h-12 bg-white flex items-center px-4 border-b border-gray-100">
+                <div class="flex items-center gap-2 w-20">
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goBack()"><i class="fas fa-arrow-left text-gray-700"></i></div>
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goHome()"><i class="fas fa-home text-gray-700"></i></div>
+                </div>
+                <div class="flex-1 text-center font-bold">填写申请</div>
+                <div class="w-20"></div>
+            </div>
+            <div class="p-4 overflow-y-auto pb-32">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-4">
+                    <h4 class="font-bold text-gray-800 mb-4">申请人信息</h4>
+                    <input type="text" id="apply-name" placeholder="真实姓名 (必填)" oninput="checkApplyForm()" class="w-full h-12 bg-gray-50 rounded-xl px-4 mb-3 border border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm">
+                    <input type="text" id="apply-id" placeholder="身份证号 (必填)" oninput="checkApplyForm()" class="w-full h-12 bg-gray-50 rounded-xl px-4 border border-transparent focus:bg-white focus:border-blue-500 outline-none text-sm">
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2 ml-1 text-sm">预约时间</h4>
+                <div id="apply-list-container" class="space-y-3"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 p-4 pb-8 z-30 shadow-lg">
+                <button id="btn-submit-apply" onclick="showWxAuthModal()" class="w-full h-12 bg-gray-200 text-gray-500 font-bold rounded-full transition-all">提交申请</button>
+            </div>
+        </div>
+
+        <!-- ================= 7. 我的看房 (Tabs) ================= -->
+        <div id="screen-my-viewing" class="screen bg-white">
+             <!-- Header (修改：增加Home按钮) -->
+             <div class="h-12 bg-white flex items-center px-4 border-b border-gray-100 sticky top-0 z-20">
+                <div class="flex items-center gap-2 w-20">
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goBack()"><i class="fas fa-arrow-left text-gray-700"></i></div>
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goHome()"><i class="fas fa-home text-gray-700"></i></div>
+                </div>
+                <div class="flex-1 text-center font-bold">我的看房</div>
+                <div class="w-20"></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex bg-white border-b border-gray-100 sticky top-12 z-20">
+                <div onclick="switchMyViewingTab('valid')" id="tab-valid" class="flex-1 text-center py-3 font-bold text-sm cursor-pointer tab-active">有效</div>
+                <div onclick="switchMyViewingTab('invalid')" id="tab-invalid" class="flex-1 text-center py-3 font-bold text-sm cursor-pointer tab-inactive">无效</div>
+            </div>
+
+            <div class="p-4 bg-gray-50 h-full overflow-y-auto pb-20">
+                
+                <!-- 有效 Tab 内容 -->
+                <div id="viewing-valid-content">
+                    <!-- 看房指引按钮 -->
+                    <div onclick="gotoScreen('screen-guide')" class="bg-blue-50 text-blue-600 rounded-xl p-3 mb-4 flex items-center justify-center cursor-pointer active:bg-blue-100 font-bold text-sm border border-blue-100 shadow-sm">
+                        <i class="far fa-hand-point-right mr-2"></i> 点我查看看房指引
+                    </div>
+
+                    <!-- 待看房 -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 relative overflow-hidden mb-4">
+                        <div class="absolute top-0 right-0 px-3 py-1 bg-orange-100 text-orange-600 text-xs font-bold rounded-bl-xl">待看房</div>
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">坂田岗头店</h3>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-gray-800">中心围中新7-10栋</span>
+                            <div onclick="openMap('screen-my-viewing')" class="text-blue-600 text-xs bg-blue-50 px-2 py-1 rounded-full cursor-pointer border border-blue-100"><i class="fas fa-map-marker-alt mr-1"></i>查看位置</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">预约时间: 2023-11-28 14:00-16:00</p>
+                        <button onclick="gotoScreen('screen-viewing-detail')" class="w-full h-10 border border-blue-500 text-blue-600 font-bold rounded-xl active:bg-blue-50">查看详情</button>
+                    </div>
+                </div>
+
+                <!-- 无效 Tab 内容 (隐藏) -->
+                <div id="viewing-invalid-content" class="hidden">
+                    <!-- 已看房 -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 relative overflow-hidden mb-4 opacity-80">
+                        <div class="absolute top-0 right-0 px-3 py-1 bg-gray-100 text-gray-500 text-xs font-bold rounded-bl-xl">已看房</div>
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">龙华大浪店</h3>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-gray-800">下早新村63栋</span>
+                            <div class="text-gray-400 text-xs bg-gray-50 px-2 py-1 rounded-full border border-gray-100"><i class="fas fa-map-marker-alt mr-1"></i>查看位置</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">预约时间: 2023-11-20 10:00-12:00</p>
+                        <button disabled class="w-full h-10 bg-gray-100 text-gray-400 font-bold rounded-xl cursor-not-allowed">查看详情</button>
+                    </div>
+
+                    <!-- 已过期 -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 relative overflow-hidden mb-4 opacity-60">
+                        <div class="absolute top-0 right-0 px-3 py-1 bg-gray-100 text-gray-400 text-xs font-bold rounded-bl-xl">已过期</div>
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">宝安西乡店</h3>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-gray-800">B栋</span>
+                             <div class="text-gray-400 text-xs bg-gray-50 px-2 py-1 rounded-full border border-gray-100"><i class="fas fa-map-marker-alt mr-1"></i>查看位置</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">预约时间: 2023-10-15 14:00-16:00</p>
+                        <button disabled class="w-full h-10 bg-gray-100 text-gray-400 font-bold rounded-xl cursor-not-allowed">查看详情</button>
+                    </div>
+
+                    <!-- 已失效 -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 relative overflow-hidden mb-4 opacity-60">
+                         <div class="absolute top-0 right-0 px-3 py-1 bg-gray-200 text-gray-500 text-xs font-bold rounded-bl-xl">已失效</div>
+                        <h3 class="font-bold text-lg text-gray-900 mb-3">福田梅林店</h3>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-gray-800">A栋</span>
+                             <div class="text-gray-400 text-xs bg-gray-50 px-2 py-1 rounded-full border border-gray-100"><i class="fas fa-map-marker-alt mr-1"></i>查看位置</div>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-4">预约时间: 2023-09-01 10:00-12:00</p>
+                         <button disabled class="w-full h-10 bg-gray-100 text-gray-400 font-bold rounded-xl cursor-not-allowed">查看详情</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= 8. 看房执行页 (内嵌调研 & 管家交互) ================= -->
+        <div id="screen-viewing-detail" class="screen bg-white">
+             <!-- Header (修改：增加Home按钮) -->
+             <div class="h-12 bg-white flex items-center px-4 border-b border-gray-100 sticky top-0 z-20">
+                <div class="flex items-center gap-2 w-20">
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goBack()"><i class="fas fa-arrow-left text-gray-700"></i></div>
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goHome()"><i class="fas fa-home text-gray-700"></i></div>
+                </div>
+                <div class="flex-1 text-center font-bold">看房进行中</div>
+                <div class="w-20"></div>
+            </div>
+            <div class="p-4 pb-32">
+                 <div class="bg-blue-50 p-4 rounded-xl flex gap-3 mb-6 border border-blue-100">
+                    <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                    <p class="text-sm text-blue-800">请到达 <span class="font-bold">中心围中新7-10栋</span> 楼下后，点击底部按钮开启楼栋门禁。</p>
+                </div>
+                
+                <!-- 内嵌式调研卡片 (默认隐藏) -->
+                <div id="embedded-survey" class="hidden bg-white rounded-2xl p-5 shadow-md border border-blue-100 mb-6 animate-fade-in">
+                    <h3 class="text-sm font-bold text-gray-900 mb-4 text-center">本次看房体验如何？</h3>
+                    <div class="flex gap-4">
+                        <button onclick="handleSurveyChoice(false)" class="flex-1 py-2 rounded-lg bg-gray-100 text-gray-600 text-xs font-bold active:bg-gray-200">不满意</button>
+                        <button onclick="handleSurveyChoice(true)" class="flex-1 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-200 active:bg-blue-700">满意</button>
+                    </div>
+                </div>
+
+                <!-- 管家名片 (默认隐藏，调研后显示) -->
+                <!-- 修改：按钮添加点击事件 showButlerWechat, showButlerPhone -->
+                <div id="butler-section" class="hidden animate-fade-in-up mb-6">
+                    <p class="text-xs text-center text-blue-500 mb-3 bg-blue-50 py-2 rounded-lg">已通知本栋管家，您也可以直接联系：</p>
+                    <div class="butler-card-bg rounded-2xl p-5 shadow-md border border-blue-100 relative">
+                        <h3 class="text-lg font-bold text-gray-900">李沁遥-安居乐寓坂田店</h3>
+                        <p class="text-xs text-gray-500 mb-4">值班管家 | 欢迎联系</p>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="showButlerWechat()" class="px-4 py-1.5 bg-[#2196F3] text-white text-xs font-bold rounded-full shadow-sm active:bg-blue-600">添加微信</button>
+                            <button onclick="showButlerPhone()" class="px-4 py-1.5 bg-[#2196F3] text-white text-xs font-bold rounded-full shadow-sm active:bg-blue-600">联系电话</button>
+                        </div>
+                    </div>
+                </div>
+
+                 <h4 class="font-bold text-gray-900 mb-3 ml-1">待看房间</h4>
+                
+                <!-- Room 1 (Normal) -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+                    <div class="flex gap-3 mb-4">
+                        <div class="w-14 h-14 bg-gray-200 rounded-lg bg-cover" style="background-image: url('https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=100')"></div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">701</h4>
+                            <p class="text-xs text-gray-500">一居室 | 27.27m²</p>
+                        </div>
+                    </div>
+                    <button onclick="handleDoorAction(this, 'door')" class="w-full h-10 bg-orange-50 text-orange-600 font-bold rounded-lg flex items-center justify-center gap-2 active:bg-orange-100 transition border border-orange-100">
+                        <span class="spinner hidden w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                        <span class="btn-text">开启房门</span>
+                    </button>
+                </div>
+
+                <!-- Room 2 (Normal) -->
+                 <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
+                    <div class="flex gap-3 mb-4">
+                        <div class="w-14 h-14 bg-gray-200 rounded-lg bg-cover" style="background-image: url('https://images.unsplash.com/photo-1554995207-c18c203602cb?w=100')"></div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">702</h4>
+                            <p class="text-xs text-gray-500">开间 | 22m²</p>
+                        </div>
+                    </div>
+                    <button onclick="handleDoorAction(this, 'door')" class="w-full h-10 bg-orange-50 text-orange-600 font-bold rounded-lg flex items-center justify-center gap-2 active:bg-orange-100 transition border border-orange-100">
+                        <span class="spinner hidden w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                        <span class="btn-text">开启房门</span>
+                    </button>
+                </div>
+
+                <!-- Room 3 (Rented - 已租) -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 opacity-60">
+                    <div class="flex gap-3 mb-4">
+                        <div class="w-14 h-14 bg-gray-200 rounded-lg bg-cover grayscale" style="background-image: url('https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=100')"></div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">705 <span class="text-[10px] bg-gray-200 text-gray-500 px-1 rounded ml-1">已出租</span></h4>
+                            <p class="text-xs text-gray-500">大单间 | 30m²</p>
+                        </div>
+                    </div>
+                    <button disabled class="w-full h-10 bg-gray-100 text-gray-400 font-bold rounded-lg flex items-center justify-center cursor-not-allowed border border-gray-100">
+                        已租
+                    </button>
+                </div>
+
+            </div>
+             <div class="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 p-4 pb-8 z-30 shadow-[0_-5px_20px_rgba(0,0,0,0.05)]">
+                <button onclick="handleDoorAction(this, 'gate')" class="w-full h-12 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 active:bg-blue-700 transition">
+                    <span class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span class="btn-text">开启楼栋门禁</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= 9. 地图页 ================= -->
+        <div id="screen-map" class="screen bg-white">
+            <!-- Header (修改：增加Home按钮) -->
+            <div class="h-12 bg-white flex items-center px-4 border-b border-gray-100">
+                <div class="flex items-center gap-2 w-20">
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goBack()"><i class="fas fa-arrow-left text-gray-700"></i></div>
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goHome()"><i class="fas fa-home text-gray-700"></i></div>
+                </div>
+                <div class="flex-1 text-center font-bold">位置详情</div>
+                <div class="w-20"></div>
+            </div>
+            <div class="flex-1 bg-gray-100 flex flex-col items-center justify-center text-gray-400">
+                <i class="fas fa-map-marked-alt text-4xl mb-2 text-gray-300"></i>
+                <p>地图组件区域</p>
+            </div>
+        </div>
+
+         <!-- ================= 10. 看房指引 ================= -->
+        <div id="screen-guide" class="screen bg-white">
+            <!-- Header (修改：增加Home按钮) -->
+            <div class="h-12 bg-white flex items-center px-4 border-b border-gray-100">
+                <div class="flex items-center gap-2 w-20">
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goBack()"><i class="fas fa-arrow-left text-gray-700"></i></div>
+                    <div class="w-8 h-8 flex items-center justify-center cursor-pointer" onclick="goHome()"><i class="fas fa-home text-gray-700"></i></div>
+                </div>
+                <div class="flex-1 text-center font-bold">看房指引</div>
+                <div class="w-20"></div>
+            </div>
+            <div class="p-8 flex flex-col items-center justify-center h-full text-gray-400">
+                <i class="far fa-file-alt text-4xl mb-4 text-gray-200"></i>
+                <p>看房指引内容（空白页）</p>
+            </div>
+        </div>
+
+        <!-- ================= 11. 人脸识别页 ================= -->
+        <div id="screen-face-auth" class="screen bg-black z-50 flex items-center justify-center" style="display: none;">
+             <div class="absolute top-10 left-4 z-20" onclick="gotoScreen('screen-viewing-detail')">
+                <i class="fas fa-times text-white text-2xl p-2"></i>
+            </div>
+            <div class="w-full flex flex-col items-center">
+                <h2 class="text-white font-bold text-xl mb-8">安全验证</h2>
+                <div class="relative w-64 h-64 rounded-full border-2 border-blue-500 overflow-hidden bg-gray-900">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" class="w-full h-full object-cover opacity-80 grayscale">
+                    <div class="absolute left-0 w-full h-1 bg-blue-400 scan-beam"></div>
+                </div>
+                <p class="text-gray-400 mt-6 text-sm">请正对屏幕，进行身份核验</p>
+                <button onclick="completeFaceAuth()" class="mt-10 px-6 py-2 bg-white/10 border border-white/20 rounded-full text-white font-bold text-sm">模拟识别成功</button>
+            </div>
+        </div>
+
+        <!-- ================= 12. 微信授权弹窗 ================= -->
+        <div id="modal-wx-auth" class="absolute inset-0 z-[60] hidden flex-col justify-end bg-black/50 backdrop-blur-sm">
+            <div class="bg-white rounded-t-2xl p-6 animate-slide-up pb-10">
+                <div class="flex items-center gap-3 mb-6">
+                     <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                        <i class="fas fa-home text-gray-500 text-xs"></i>
+                     </div>
+                     <span class="font-bold text-lg text-gray-900">安居乐寓申请</span>
+                </div>
+                
+                <div class="flex items-center justify-between mb-10 border-b border-gray-100 pb-4 px-1 pt-2">
+                    <span class="text-base text-gray-800">看房提醒通知</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" checked class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#07C160]"></div>
+                    </label>
+                </div>
+
+                <div class="flex gap-4">
+                    <button class="flex-1 bg-gray-100 py-3 rounded-lg font-bold text-gray-600 active:bg-gray-200" onclick="finishApply(false)">拒绝</button>
+                    <button class="flex-1 bg-[#07C160] py-3 rounded-lg font-bold text-white active:bg-[#06ad56]" onclick="finishApply(true)">同意</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ================= 13. 管家微信二维码弹窗 (新增) ================= -->
+        <div id="modal-butler-wechat" class="absolute inset-0 z-[70] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm" onclick="closeButlerModals()">
+             <div class="bg-white rounded-2xl p-6 w-[80%] max-w-[300px] flex flex-col items-center animate-fade-in text-center" onclick="event.stopPropagation()">
+                <div class="font-bold text-lg text-gray-900 mb-4">添加管家微信</div>
+                <div class="w-48 h-48 bg-gray-100 mb-4 rounded-lg flex items-center justify-center relative overflow-hidden">
+                    <!-- QR Code Placeholder -->
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=AnJuLeYu_Butler" class="w-full h-full object-cover">
+                </div>
+                <p class="text-xs text-gray-400 mb-4">扫一扫上面的二维码图案，加我微信</p>
+                <button class="w-full py-2.5 rounded-lg border border-gray-200 text-gray-600 font-bold active:bg-gray-50" onclick="closeButlerModals()">关闭</button>
+             </div>
+        </div>
+
+        <!-- ================= 14. 电话拨打 Action Sheet (新增 - iOS风格) ================= -->
+        <div id="modal-butler-phone" class="absolute inset-0 z-[70] hidden flex-col justify-end bg-black/40" onclick="closeButlerModals()">
+             <div class="p-4 pb-8 w-full animate-slide-up" onclick="event.stopPropagation()">
+                 <div class="bg-white/90 backdrop-blur rounded-xl overflow-hidden mb-3">
+                     <div class="py-4 text-center text-xs text-gray-400 border-b border-gray-200/50">即将拨打管家电话</div>
+                     <div class="py-4 text-center text-blue-600 font-bold text-lg active:bg-gray-100 cursor-pointer border-b border-gray-200/50"><a href="tel:13800138000">138-0013-8000</a></div>
+                 </div>
+                 <div class="bg-white rounded-xl py-4 text-center text-blue-600 font-bold text-lg active:bg-gray-100 cursor-pointer shadow-lg" onclick="closeButlerModals()">取消</div>
+             </div>
+        </div>
+
+
+        <!-- Toast -->
+        <div id="toast" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/80 text-white px-6 py-3 rounded-xl text-sm hidden z-[100]">操作成功</div>
+
+    </div>
+
+    <!-- 逻辑脚本 -->
+    <script>
+        let hasFaceAuth = false; 
+        // 历史记录栈
+        let historyStack = ['screen-home']; 
+        let surveyShown = false;
+
+        const wishlistData = [
+            {
+                id: 's1', name: '坂田岗头店', checked: false,
+                buildings: [
+                    {
+                        id: 'b1', name: '中心围中新7-10栋', checked: false, 
+                        rooms: [
+                            { id: 'r701', name: '701', info: '一居室', price: '¥1576' },
+                            { id: 'r702', name: '702', info: '开间', price: '¥1200' }
+                        ]
+                    },
+                    {
+                        id: 'b2', name: '中心围中新4-6栋', checked: false,
+                        rooms: [
+                            { id: 'r401', name: '401', info: '大阳台', price: '¥1680' }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 's2', name: '福田梅林店', checked: false,
+                buildings: [
+                    {
+                        id: 'b3', name: 'A栋', checked: false,
+                        rooms: [
+                             { id: 'r102', name: '102', info: '单间', price: '¥976' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // 页面跳转逻辑
+        function gotoScreen(id) {
+            // 避免重复入栈
+            if(historyStack[historyStack.length - 1] !== id) {
+                historyStack.push(id);
+            }
+            showScreen(id);
+        }
+
+        // 统一返回函数
+        function goBack() {
+            if (historyStack.length > 1) {
+                historyStack.pop(); // 移除当前页面
+                const prevId = historyStack[historyStack.length - 1]; // 获取上一个页面
+                showScreen(prevId);
+            } else {
+                // 如果栈只有1个，保持在首页
+                showScreen('screen-home');
+            }
+        }
+        
+        // 新增：回到首页函数
+        function goHome() {
+            historyStack = ['screen-home']; // 清空栈，只留首页
+            showScreen('screen-home');
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => {
+                s.classList.remove('active');
+                s.style.display = 'none';
+            });
+            const target = document.getElementById(id);
+            if(target) {
+                target.style.display = 'flex';
+                setTimeout(() => target.classList.add('active'), 10);
+                target.scrollTop = 0;
+                
+                if(id === 'screen-wishlist') renderWishlist();
+                if(id === 'screen-apply') renderApplyList();
+            }
+        }
+
+        function openStoreDetail(name) {
+            gotoScreen('screen-store-detail');
+        }
+
+        function openMap(fromId) {
+            gotoScreen('screen-map');
+        }
+
+        // --- 心愿单逻辑 ---
+        function addToWishlist() {
+            const btn = document.getElementById('btnAddWish');
+            btn.innerText = "已加入心愿单";
+            btn.classList.replace('bg-[#F59E0B]', 'bg-gray-400');
+            showToast("已加入心愿单");
+        }
+
+        function renderWishlist() {
+            const container = document.getElementById('wishlist-container');
+            container.innerHTML = '';
+            
+            if(wishlistData.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-10">心愿单空空如也</div>';
+                updateApplyBtnState();
+                return;
+            }
+
+            wishlistData.forEach((store, sIdx) => {
+                let buildingsHtml = '';
+                store.buildings.forEach((bld, bIdx) => {
+                    let roomsHtml = '';
+                    bld.rooms.forEach((room, rIdx) => {
+                        roomsHtml += `
+                            <div class="flex items-center gap-3 py-3 border-b border-gray-100 pl-8 relative">
+                                <div class="w-14 h-10 bg-gray-200 rounded bg-cover flex-shrink-0" style="background-image: url('https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=100')"></div>
+                                <div class="flex-1">
+                                    <div class="text-sm font-bold text-gray-800">${room.name}</div>
+                                    <div class="text-xs text-red-500 font-bold">${room.price} <span class="text-[10px] text-gray-400 font-normal">起</span></div>
+                                </div>
+                                <div onclick="deleteRoom(${sIdx}, ${bIdx}, ${rIdx})" class="w-8 h-8 flex items-center justify-center text-gray-300 cursor-pointer absolute right-0 top-3"><i class="fas fa-trash-alt text-xs"></i></div>
+                            </div>
+                        `;
+                    });
+
+                    buildingsHtml += `
+                        <div class="bg-white rounded-xl mb-3 p-3 border border-gray-100 shadow-sm">
+                            <div class="flex items-center justify-between mb-2 pb-2 border-b border-gray-50">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded border border-gray-300 flex items-center justify-center cursor-pointer checkbox-custom ${bld.checked ? 'checked' : 'bg-white'}" onclick="toggleBuildingCheck(${sIdx}, ${bIdx})">
+                                        <i class="fas fa-check text-[10px] ${bld.checked ? 'block' : 'hidden'}"></i>
+                                    </div>
+                                    <span class="font-bold text-gray-700 text-sm">${bld.name}</span>
+                                </div>
+                                <div onclick="event.stopPropagation(); openMap('screen-wishlist')" class="text-blue-600 text-xs bg-blue-50 px-2 py-1 rounded-full cursor-pointer border border-blue-100 flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>查看位置
+                                </div>
+                            </div>
+                            ${roomsHtml}
+                        </div>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="mb-6">
+                        <div class="flex items-center gap-2 mb-2 px-1">
+                             <div class="w-5 h-5 rounded border border-gray-300 flex items-center justify-center cursor-pointer checkbox-custom ${store.checked ? 'checked' : 'bg-white'}" onclick="toggleStoreCheck(${sIdx})">
+                                <i class="fas fa-check text-xs ${store.checked ? 'block' : 'hidden'}"></i>
+                            </div>
+                            <span class="font-bold text-gray-900 text-base">${store.name}</span>
+                        </div>
+                        ${buildingsHtml}
+                    </div>
+                `;
+            });
+            updateApplyBtnState();
+        }
+
+        function toggleStoreCheck(sIdx) {
+            const store = wishlistData[sIdx];
+            store.checked = !store.checked;
+            store.buildings.forEach(b => {
+                b.checked = store.checked;
+            });
+            renderWishlist();
+        }
+
+        function toggleBuildingCheck(sIdx, bIdx) {
+            const store = wishlistData[sIdx];
+            store.buildings[bIdx].checked = !store.buildings[bIdx].checked;
+            store.checked = store.buildings.every(b => b.checked);
+            renderWishlist();
+        }
+
+        function deleteRoom(sIdx, bIdx, rIdx) {
+            const store = wishlistData[sIdx];
+            store.buildings[bIdx].rooms.splice(rIdx, 1);
+            if(store.buildings[bIdx].rooms.length === 0) store.buildings.splice(bIdx, 1);
+            if(store.buildings.length === 0) wishlistData.splice(sIdx, 1);
+            renderWishlist();
+        }
+
+        function updateApplyBtnState() {
+            let hasChecked = false;
+            wishlistData.forEach(s => s.buildings.forEach(b => { if(b.checked) hasChecked = true; }));
+            const btn = document.getElementById('btn-goto-apply');
+            if(hasChecked) {
+                btn.classList.remove('bg-gray-200', 'text-gray-500');
+                btn.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+            } else {
+                btn.classList.add('bg-gray-200', 'text-gray-500');
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
+            }
+        }
+
+        // --- 申请流程 ---
+        function gotoApplyPage() {
+            gotoScreen('screen-apply');
+        }
+
+        function renderApplyList() {
+            const container = document.getElementById('apply-list-container');
+            container.innerHTML = '';
+
+            const today = new Date();
+            const minDate = today.toISOString().split('T')[0];
+            const maxDateObj = new Date(today);
+            maxDateObj.setDate(today.getDate() + 6);
+            const maxDate = maxDateObj.toISOString().split('T')[0];
+
+            wishlistData.forEach(store => {
+                store.buildings.forEach(bld => {
+                    if(bld.checked) {
+                        let timeOpts = '';
+                        for(let i=8; i<20; i+=2) { timeOpts += `<option value="${i}">${i}:00 - ${i+2}:00</option>`; }
+                        
+                        container.innerHTML += `
+                            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                                <div class="font-bold text-gray-800 mb-3 text-sm">${store.name} - ${bld.name}</div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-[10px] text-gray-400">日期</label>
+                                        <input type="date" class="apply-date w-full bg-gray-50 rounded p-2 text-xs" 
+                                               min="${minDate}" max="${maxDate}" 
+                                               onchange="checkApplyForm()">
+                                    </div>
+                                    <div><label class="text-[10px] text-gray-400">时间</label><select class="apply-time w-full bg-gray-50 rounded p-2 text-xs" onchange="checkApplyForm()"><option value="">请选择</option>${timeOpts}</select></div>
+                                </div>
+                            </div>`;
+                    }
+                });
+            });
+            checkApplyForm();
+        }
+
+        function checkApplyForm() {
+            const name = document.getElementById('apply-name').value.trim();
+            const id = document.getElementById('apply-id').value.trim();
+            const dates = document.querySelectorAll('.apply-date');
+            const times = document.querySelectorAll('.apply-time');
+            let timeValid = dates.length > 0;
+            dates.forEach(d => { if(!d.value) timeValid = false; });
+            times.forEach(t => { if(!t.value) timeValid = false; });
+            
+            const btn = document.getElementById('btn-submit-apply');
+            if(name && id && timeValid) {
+                btn.classList.remove('bg-gray-200', 'text-gray-500');
+                btn.classList.add('bg-blue-600', 'text-white', 'shadow-lg');
+            } else {
+                btn.classList.add('bg-gray-200', 'text-gray-500');
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-lg');
+            }
+        }
+
+        function showWxAuthModal() {
+            const btn = document.getElementById('btn-submit-apply');
+            if(btn.classList.contains('bg-gray-200')) return;
+            document.getElementById('modal-wx-auth').style.display = 'flex';
+        }
+
+        function finishApply(isAgreed) {
+            document.getElementById('modal-wx-auth').style.display = 'none';
+            showToast(isAgreed ? "申请提交成功" : "已取消授权");
+            setTimeout(() => gotoScreen('screen-my-viewing'), 500);
+        }
+
+        // --- Tab 逻辑 ---
+        function switchMyViewingTab(tab) {
+            const tabValid = document.getElementById('tab-valid');
+            const tabInvalid = document.getElementById('tab-invalid');
+            const contentValid = document.getElementById('viewing-valid-content');
+            const contentInvalid = document.getElementById('viewing-invalid-content');
+
+            if (tab === 'valid') {
+                tabValid.classList.add('tab-active');
+                tabValid.classList.remove('tab-inactive');
+                tabInvalid.classList.add('tab-inactive');
+                tabInvalid.classList.remove('tab-active');
+                contentValid.classList.remove('hidden');
+                contentInvalid.classList.add('hidden');
+            } else {
+                tabInvalid.classList.add('tab-active');
+                tabInvalid.classList.remove('tab-inactive');
+                tabValid.classList.add('tab-inactive');
+                tabValid.classList.remove('tab-active');
+                contentInvalid.classList.remove('hidden');
+                contentValid.classList.add('hidden');
+            }
+        }
+
+        // --- 开门与管家交互逻辑 ---
+        function handleDoorAction(btn, type) {
+            if(!hasFaceAuth) { 
+                gotoScreen('screen-face-auth'); 
+                return; 
+            }
+
+            const spinner = btn.querySelector('.spinner');
+            const txt = btn.querySelector('.btn-text');
+            
+            if(spinner) spinner.classList.remove('hidden');
+            if(txt) txt.innerText = '连接中...';
+
+            setTimeout(() => {
+                if(spinner) spinner.classList.add('hidden');
+                if(txt) txt.innerText = type === 'gate' ? '门禁已开启' : '房门已开启';
+                showToast(type === 'gate' ? '门禁已开启' : '房门已开启');
+                
+                if(!surveyShown && type === 'door') {
+                    setTimeout(() => {
+                       const survey = document.getElementById('embedded-survey');
+                       if(survey) survey.classList.remove('hidden');
+                    }, 1000);
+                }
+            }, 1500);
+        }
+
+        function handleSurveyChoice(isSatisfied) {
+            document.getElementById('embedded-survey').classList.add('hidden');
+            surveyShown = true;
+            document.getElementById('butler-section').classList.remove('hidden');
+            showToast("感谢您的反馈");
+        }
+
+        // 管家弹窗相关
+        function showButlerWechat() {
+            document.getElementById('modal-butler-wechat').style.display = 'flex';
+        }
+
+        function showButlerPhone() {
+            document.getElementById('modal-butler-phone').style.display = 'flex';
+        }
+
+        function closeButlerModals() {
+            document.getElementById('modal-butler-wechat').style.display = 'none';
+            document.getElementById('modal-butler-phone').style.display = 'none';
+        }
+
+        function completeFaceAuth() {
+            hasFaceAuth = true;
+            showToast("认证成功");
+            setTimeout(() => gotoScreen('screen-viewing-detail'), 800);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 2000);
+        }
+    </script>
+</body>
+</html>

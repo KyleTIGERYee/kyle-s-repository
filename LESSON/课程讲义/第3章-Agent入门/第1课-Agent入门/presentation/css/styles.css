@@ -1,0 +1,507 @@
+/* 自定义样式 - Agent入门交互式课件 - 浅色Claymorphism主题 */
+
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&family=Comic+Neue:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Colors - Claymorphism Education Theme */
+    --primary: #4F46E5;
+    --primary-light: #818CF8;
+    --primary-dark: #3730A3;
+    --secondary: #F0FDF4;
+    --secondary-light: #34D399;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --accent: #8B5CF6;
+    
+    /* 浅色主题背景色 */
+    --bg: #EEF2FF;
+    --background: #EEF2FF;
+    --surface: #FFFFFF;
+    --card: #FFFFFF;
+    
+    /* 文字颜色 */
+    --text: #312E81;
+    --text-primary: #312E81;
+    --text-secondary: #6366F1;
+    --text-muted: #6B7280;
+    
+    /* 边框颜色 */
+    --border: rgba(79, 70, 229, 0.2);
+    
+    /* Claymorphism Shadows */
+    --shadow-soft: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+    --shadow-pressed: inset 4px 4px 8px rgba(79, 70, 229, 0.1), inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+    --shadow-float: 12px 12px 24px rgba(79, 70, 229, 0.2), -12px -12px 24px rgba(255, 255, 255, 0.9);
+    
+    /* Typography */
+    --font-display: 'Baloo 2', cursive;
+    --font-body: 'Comic Neue', cursive;
+    
+    /* Spacing */
+    --radius-sm: 12px;
+    --radius-md: 20px;
+    --radius-lg: 28px;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease-out;
+    --transition-normal: 300ms ease-out;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+/* 字号标准 */
+.text-hero {
+    font-size: 72px;
+    line-height: 1.1;
+    font-family: var(--font-display);
+}
+
+.text-hero-sub {
+    font-size: 36px;
+    line-height: 1.3;
+}
+
+.text-title {
+    font-size: 48px;
+    line-height: 1.2;
+    font-family: var(--font-display);
+}
+
+.text-subtitle {
+    font-size: 32px;
+    line-height: 1.3;
+    font-family: var(--font-display);
+}
+
+.text-body {
+    font-size: 24px;
+    line-height: 1.8;
+}
+
+.text-label {
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+/* 颜色类 */
+.text-accent {
+    color: var(--primary);
+}
+
+.text-white {
+    color: #ffffff;
+}
+
+.text-text-secondary {
+    color: var(--text-secondary);
+}
+
+.bg-dark-bg {
+    background: var(--bg);
+}
+
+.bg-card {
+    background: var(--surface);
+}
+
+.bg-accent\/10 {
+    background: rgba(79, 70, 229, 0.1);
+}
+
+.bg-accent\/20 {
+    background: rgba(79, 70, 229, 0.2);
+}
+
+.border-accent\/30 {
+    border-color: rgba(79, 70, 229, 0.3);
+}
+
+.border-white\/10 {
+    border-color: var(--border);
+}
+
+/* 字体 */
+.font-display {
+    font-family: var(--font-display);
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+/* 幻灯片容器 */
+.presentation-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.slides-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(50px);
+    transition: all 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.slide.prev {
+    transform: translateX(-50px);
+}
+
+.slide-content {
+    width: 95%;
+    max-width: 1600px;
+}
+
+/* 卡片样式 - Claymorphism */
+.interactive-box {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+    padding: 1.5rem;
+}
+
+.interactive-box:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-float);
+}
+
+/* 导航控制 */
+.navigation-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 100;
+    background: var(--surface);
+    padding: 12px 24px;
+    border-radius: 50px;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow-soft);
+}
+
+.nav-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    background: var(--surface);
+    color: var(--primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-soft);
+}
+
+.nav-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-float);
+    background: var(--primary);
+    color: white;
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.slide-indicator {
+    font-size: 16px;
+    color: var(--text-muted);
+    min-width: 60px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* SVG动画 */
+.framework-flow {
+    width: 100%;
+}
+
+.framework-svg {
+    width: 100%;
+    height: auto;
+}
+
+.flow-node {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.flow-node:hover circle {
+    stroke-width: 3;
+    filter: drop-shadow(0 0 10px rgba(79, 70, 229, 0.5));
+}
+
+.flow-line {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+}
+
+.flow-line.animated {
+    animation: drawLine 0.5s ease forwards;
+}
+
+@keyframes drawLine {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* 表格样式 */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    padding: 16px;
+    text-align: left;
+}
+
+thead th {
+    background: rgba(79, 70, 229, 0.1);
+    font-weight: 600;
+    color: var(--primary);
+}
+
+tbody tr {
+    border-bottom: 1px solid var(--border);
+}
+
+tbody tr:hover {
+    background: rgba(79, 70, 229, 0.02);
+}
+
+/* 徽章样式 */
+.clay-badge {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    border: 2px solid rgba(79, 70, 229, 0.2);
+    background: var(--surface);
+    color: var(--primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-soft);
+}
+
+.clay-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-float);
+}
+
+/* 响应式调整 */
+@media (max-width: 1280px) {
+    .text-hero {
+        font-size: 56px;
+    }
+    
+    .text-hero-sub {
+        font-size: 28px;
+    }
+    
+    .text-title {
+        font-size: 40px;
+    }
+    
+    .text-subtitle {
+        font-size: 26px;
+    }
+    
+    .text-body {
+        font-size: 20px;
+    }
+    
+    .text-label {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .text-hero {
+        font-size: 40px;
+    }
+    
+    .text-hero-sub {
+        font-size: 22px;
+    }
+    
+    .text-title {
+        font-size: 32px;
+    }
+    
+    .text-subtitle {
+        font-size: 22px;
+    }
+    
+    .text-body {
+        font-size: 18px;
+    }
+    
+    .text-label {
+        font-size: 14px;
+    }
+    
+    .grid-cols-2,
+    .grid-cols-3,
+    .grid-cols-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .slide {
+        padding: 1rem;
+    }
+    
+    .navigation-controls {
+        bottom: 15px;
+        padding: 8px 16px;
+    }
+}
+
+/* 动画效果 */
+.slide-animate {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.slide.active .slide-animate {
+    animation: slideUp 0.6s ease forwards;
+}
+
+.slide.active .slide-animate:nth-child(1) { animation-delay: 0.1s; }
+.slide.active .slide-animate:nth-child(2) { animation-delay: 0.2s; }
+.slide.active .slide-animate:nth-child(3) { animation-delay: 0.3s; }
+.slide.active .slide-animate:nth-child(4) { animation-delay: 0.4s; }
+.slide.active .slide-animate:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(79, 70, 229, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(79, 70, 229, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(79, 70, 229, 0.5);
+}
+
+/* 代码块样式 */
+.font-mono {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+/* 列表样式 */
+ul {
+    list-style: none;
+}
+
+ul li::before {
+    content: "•";
+    color: var(--primary);
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+/* 特殊样式 */
+.overflow-auto {
+    overflow: auto;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+/* 按钮样式 */
+button {
+    font-family: inherit;
+}
+
+/* 输入框占位符 */
+.placeholder-text {
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+/* SVG图标样式 */
+.icon-svg {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+
+/* 渐变背景装饰 */
+.gradient-bg {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%);
+}
+
+.radial-glow {
+    background: radial-gradient(circle at center, rgba(79, 70, 229, 0.2) 0%, transparent 70%);
+}

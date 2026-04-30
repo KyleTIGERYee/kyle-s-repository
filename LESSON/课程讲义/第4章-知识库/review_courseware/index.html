@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前三章深度复习：从对话到 Agent 的进阶之路</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-indigo-50">
+    <main>
+        <!-- Slide 1: Cover -->
+        <section class="slide active" data-index="0">
+            <div class="slide-content px-12">
+                <div class="mb-12">
+                    <span class="clay-badge border-primary/40 text-primary-dark mb-8">AI 核心课程 · 综合复习</span>
+                    <h1 class="text-hero leading-tight">掌握 AI 应用<br><span class="text-primary italic underline decoration-accent">底层开发逻辑</span></h1>
+                </div>
+                <div class="flex items-center gap-10 mt-6 border-l-8 border-accent pl-12">
+                    <div>
+                        <h2 class="text-hero-sub text-text-primary">第 0 课：前三章深度精讲</h2>
+                        <p class="text-body text-text-muted mt-2">一课一报，一词一页。深度复盘每一个核心工程概念。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Knowledge Roadmap (ASCII Art Visualized) -->
+        <section class="slide" data-index="1">
+            <div class="slide-content px-12">
+                <h2 class="text-title text-primary font-bold mb-12">三章九课 · 核心能力进化全景图</h2>
+                <div class="grid grid-cols-3 gap-8">
+                    <!-- Chapter 1 -->
+                    <div class="clay-card border-t-8 border-primary relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-5"><svg class="w-32 h-32" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                        <div class="text-label text-primary mb-4">Chap 1: 对话工程</div>
+                        <h3 class="text-subtitle font-bold mb-6 italic">说得更专业，说得更完整</h3>
+                        <ul class="space-y-4 text-body font-bold text-text-muted">
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>提示词基础 (PE)</li>
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>进阶技巧 (Few-shot/CoT)</li>
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>上下文管理</li>
+                        </ul>
+                    </div>
+                    <!-- Chapter 2 -->
+                    <div class="clay-card border-t-8 border-accent relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-5"><svg class="w-32 h-32" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM9 9h6v6H9z"/></svg></div>
+                        <div class="text-label text-accent mb-4">Chap 2: 流程编排</div>
+                        <h3 class="text-subtitle font-bold mb-6 italic">串行、分流与检索逻辑</h3>
+                        <ul class="space-y-4 text-body font-bold text-text-muted">
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-accent"><circle cx="12" cy="12" r="4"/></svg>节点流向与变量传递</li>
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-accent"><circle cx="12" cy="12" r="4"/></svg>条件判断与循环</li>
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-accent"><circle cx="12" cy="12" r="4"/></svg>RAG 检索增强逻辑</li>
+                        </ul>
+                    </div>
+                    <!-- Chapter 3 -->
+                    <div class="clay-card border-t-8 border-green-500 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-5"><svg class="w-32 h-32" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg></div>
+                        <div class="text-label text-green-600 mb-4">Chap 3: Agent 自动化</div>
+                        <h3 class="text-subtitle font-bold mb-6 italic">理解、推理与工具集</h3>
+                        <ul class="space-y-4 text-body font-bold text-text-muted">
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-green-500"><circle cx="12" cy="12" r="4"/></svg>ReAct 行动闭环</li>
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-green-500"><circle cx="12" cy="12" r="4"/></svg>工具调用 (Tool Call)</li>
+                            <li class="flex items-center gap-3"><svg class="w-6 h-6 text-green-500"><circle cx="12" cy="12" r="4"/></svg>Skill 封装与 MCP</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Token Calculator (Deep Dive) -->
+        <section class="slide" data-index="2">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19h16M4 5h16M4 12h16" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">精讲：Token —— AI 世界的“颗粒度”</h2>
+                </div>
+                <div class="grid grid-cols-2 gap-16">
+                    <div class="clay-card flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-subtitle font-bold mb-4">为什么 1 个汉字不等于 1 个 Token？</h3>
+                            <p class="text-body text-text-muted leading-relaxed">
+                                大模型并不直接“读取”字符，而是将文本切割为最频繁出现的字符组合。
+                                在中文环境下，1 个汉字平均约占 1.5 到 2 个 Tokens。
+                            </p>
+                        </div>
+                        <div class="mt-8 space-y-4">
+                            <div class="p-5 bg-primary/5 rounded-xl border border-primary/20 text-body font-bold">
+                                典型比例：<br>
+                                🇺🇸 1 个英文单词 ≈ 1 - 1.3 Tokens<br>
+                                🇨🇳 100 个汉字 ≈ 150 - 180 Tokens
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clay-card-pressed p-10 flex flex-col items-center">
+                        <h4 class="text-label mb-6 opacity-60">交互式 Token 估算器</h4>
+                        <textarea id="tokenInput" oninput="updateTokenCalc()" placeholder="在此输入中文或英文预览 Token 占用量..." class="w-full h-48 p-6 bg-white rounded-2xl border-none shadow-inner text-xl mb-6 focus:ring-4 focus:ring-primary/20 outline-none"></textarea>
+                        <div class="text-center">
+                            <div id="tokenResult">0</div>
+                            <p class="text-label text-primary font-bold">ESTIMATED TOKENS</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Temperature Simulator -->
+        <section class="slide" data-index="3">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM12 9V3" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">精讲：Temperature —— 创造力与严谨性的天平</h2>
+                </div>
+                <div class="clay-card p-12 bg-white/60">
+                    <div class="mb-12 text-center">
+                        <h3 class="text-subtitle font-bold mb-8 italic">Prompt: "帮我推荐一个适合租房的公寓案例"</h3>
+                        <div class="flex items-center justify-center gap-10">
+                            <span class="text-label font-bold text-primary">T = 0 (严谨)</span>
+                            <input type="range" min="0" max="1" step="0.1" value="0.7" oninput="updateTempSim(this.value)" class="w-96 h-4 bg-primary/20 rounded-full appearance-none cursor-pointer">
+                            <span class="text-label font-bold text-error">T = 1.0 (创意)</span>
+                        </div>
+                        <p class="mt-4 text-hero-sub font-display font-bold text-primary">当前 T = <span id="tempVal">0.7</span></p>
+                    </div>
+                    <div class="clay-card bg-white p-10 min-h-[160px] flex items-center justify-center shadow-float">
+                        <p id="tempOutputContainer" class="text-body font-bold text-primary text-center">推荐结果：金港豪庭，或者您也可以考虑深蓝广场（具备多样性）</p>
+                    </div>
+                </div>
+                <div class="mt-12 grid grid-cols-2 gap-8">
+                    <div class="p-6 bg-primary/5 rounded-2xl border-l-8 border-primary">
+                        <p class="text-label font-bold mb-2">低 T (0 - 0.3)</p>
+                        <p class="text-body">适用于代码编写、客观事实查询、系统逻辑判断。</p>
+                    </div>
+                    <div class="p-6 bg-error/5 rounded-2xl border-l-8 border-error">
+                        <p class="text-label font-bold mb-2">高 T (0.8 - 1.0)</p>
+                        <p class="text-body">适用于诗歌创作、广告文案、角色扮演等发散场景。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: System Prompt Architecture -->
+        <section class="slide" data-index="4">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">精讲：System Prompt —— 塑造 AI 的源头</h2>
+                </div>
+                <div class="grid grid-cols-2 gap-10">
+                    <div class="clay-card border-l-8 border-primary flex flex-col justify-center">
+                        <h3 class="text-subtitle font-bold mb-8">黄金四要素架构</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-center gap-6">
+                                <div class="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center font-bold text-2xl">1</div>
+                                <div><p class="text-label">身份 (Identity)</p><p class="text-body opacity-60">你是谁？(e.g., 资深租房专家)</p></div>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <div class="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center font-bold text-2xl">2</div>
+                                <div><p class="text-label">任务 (Task)</p><p class="text-body opacity-60">你要做什么？(e.g., 分析财务报告)</p></div>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <div class="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center font-bold text-2xl">3</div>
+                                <div><p class="text-label">准则 (Rules)</p><p class="text-body opacity-60">怎么做？(e.g., 输出必须是 JSON)</p></div>
+                            </div>
+                            <div class="flex items-center gap-6">
+                                <div class="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center font-bold text-2xl">4</div>
+                                <div><p class="text-label">边界 (Boundary)</p><p class="text-body opacity-60">不要做什么？(e.g., 严禁回答医疗建议)</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="clay-card bg-indigo-900 text-white border-none shadow-float">
+                            <h4 class="text-label mb-4 text-primary-light">专业级示例片段</h4>
+                            <div class="code-block h-64 text-sm leading-relaxed">
+# 身份<br>
+你是安居乐寓的合规审查官。<br>
+# 核心任务<br>
+根据用户上传的电子合同，对比《公司租赁法务规范》，找出潜在的风险条款。<br>
+# 约束<br>
+1. 仅针对法律条款进行分析。<br>
+2. 如果合同内容模糊，必须在报告中标明。
+                            </div>
+                        </div>
+                        <p class="text-body text-text-muted italic">提示：给 AI “具体的负面约束”比“泛泛的正面引导”更有效。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Few-shot Side-by-Side -->
+        <section class="slide" data-index="5">
+            <div class="slide-content px-12">
+                <h2 class="text-title text-primary font-bold mb-12">精讲：Few-shot —— 用少量示例“对齐”期望</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <!-- Bad Case -->
+                    <div class="clay-card border-l-8 border-error p-8 relative opacity-80">
+                        <div class="absolute top-6 right-8 text-error font-bold text-xl">BAD CASE</div>
+                        <h4 class="text-subtitle font-bold mb-6">低质量示例</h4>
+                        <div class="space-y-4 text-base opacity-70">
+                            <p class="p-3 bg-error/5 rounded-lg border-dashed border border-error/20">
+                                用户：我想退房。 <br>
+                                AI：好的，请联系管家。
+                            </p>
+                            <p class="p-3 bg-error/5 rounded-lg border-dashed border border-error/20">
+                                用户：押金什么时候退？<br>
+                                AI：一般 3 天。
+                            </p>
+                        </div>
+                        <div class="mt-8 p-4 bg-error text-white rounded-xl text-center font-bold">
+                            风险：描述过于口语化，AI 无法捕捉专业语境。
+                        </div>
+                    </div>
+                    <!-- Good Case -->
+                    <div class="clay-card border-l-8 border-green-500 p-8 shadow-float">
+                        <div class="absolute top-6 right-8 text-green-600 font-bold text-xl">GOOD CASE</div>
+                        <h4 class="text-subtitle font-bold mb-6">高质量示例 (结构化)</h4>
+                        <div class="space-y-4 text-base">
+                            <div class="p-3 bg-green-50 rounded-lg border border-green-200">
+                                <p class="font-bold text-primary">Input:</p>
+                                <p>"我要申请提前退宿，深梦扬帆活动期的"</p>
+                                <p class="font-bold text-primary mt-2">Output:</p>
+                                <p>{"status": "REFUND_REQUEST", "policy": "FESTIVAL_SPECIAL_TERM", "next_step": "CHECK_INVENTORY"}</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 p-4 bg-green-500 text-white rounded-xl text-center font-bold">
+                            优势：提供了明确的 JSON 结构和业务字段，AI 会强力模仿。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: CoT Logic Stairs -->
+        <section class="slide" data-index="6">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h.01M7 20h.01M17 20h.01" stroke-width="2.5"/><path d="M12 16v-4h-4v-4h-4M12 16h4v-4h4v-4" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">精讲：CoT (思维链) —— 拒绝“跳跃式”错误</h2>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    <div class="space-y-12">
+                        <div class="clay-card p-6 border-l-8 border-primary transition-all duration-700" style="transform: translateX(0px)">
+                            <h4 class="text-label text-primary mb-2">Step 1: 观察原始问题</h4>
+                            <p class="text-body font-bold">“如果我今天申请退房，且我是年付客户，我能退多少钱？”</p>
+                        </div>
+                        <div class="clay-card p-6 border-l-8 border-primary transition-all duration-700 delay-200" style="transform: translateX(40px)">
+                            <h4 class="text-label text-primary mb-2">Step 2: 显性逻辑链 (CoT)</h4>
+                            <p class="text-body italic">“首先，查询当月剩余天数；其次，计算年付折扣是否需要收回；最后，根据公式计算总额。”</p>
+                        </div>
+                        <div class="clay-card p-6 border-l-8 border-accent transition-all duration-700 delay-500 shadow-float" style="transform: translateX(80px)">
+                            <h4 class="text-label text-accent mb-2">Step 3: 最终输出</h4>
+                            <p class="text-body font-bold">基于上述逻辑，您的退款总额为 4520.5 元。</p>
+                        </div>
+                    </div>
+                    <div class="clay-card-pressed p-10 text-center">
+                        <h3 class="text-subtitle font-bold text-primary mb-6">为什么 CoT 有效？</h3>
+                        <p class="text-body leading-relaxed opacity-80">
+                            模型的神经网络擅长模式识别，但不擅长复杂的逻辑预判。
+                            **“一步一步想”**（Let's think step by step）是通过把中间状态显性化，强制模型将计算资源分配给逻辑环节，从而极大降低计算幻觉。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Context Window Stack -->
+        <section class="slide" data-index="7">
+            <div class="slide-content px-12">
+                <h2 class="text-title text-primary font-bold mb-12 text-center">精讲：上下文窗口 —— 消失的记忆</h2>
+                <div class="clay-card p-12 bg-white/80 max-w-5xl mx-auto flex flex-col items-center">
+                    <div class="relative w-full h-[400px] flex flex-col justify-end gap-2 border-b-8 border-primary/20 pb-4">
+                        <!-- Top (Oldest - will slide out) -->
+                        <div class="w-full p-4 bg-slate-200 text-slate-400 rounded-xl text-center text-label italic">System: 你是客服... (最早的信息，面临溢出)</div>
+                        <div class="w-full p-4 bg-primary/20 text-text-muted rounded-xl text-center text-label">History 1: 用户询问房价...</div>
+                        <div class="w-full p-4 bg-primary/40 text-text-primary rounded-xl text-center text-label">History 2: 回复价格 5000...</div>
+                        <!-- Current (Bottom) -->
+                        <div class="w-full p-6 bg-primary text-white rounded-2xl text-center font-bold text-xl shadow-float animate-pulse">Input: 那如果我只住半个月呢？ (当前最重要)</div>
+                        
+                        <div class="absolute -left-12 top-0 bottom-0 flex flex-col justify-between py-10 opacity-40">
+                            <p class="text-xs uppercase origin-bottom -rotate-90">Context Window Limit</p>
+                        </div>
+                    </div>
+                    <div class="mt-12 grid grid-cols-2 gap-10 w-full">
+                        <div class="clay-card border-none bg-blue-50 text-center">
+                            <h4 class="text-label text-primary mb-3">常见的坑</h4>
+                            <p class="text-body font-bold">“我输入明明没超，为什么模型胡言乱语？”</p>
+                            <p class="text-sm mt-2 text-text-muted italic">真相：模型总算力窗口 = System + 历史轮次 + 你的输入 + 输出。</p>
+                        </div>
+                        <div class="clay-card border-none bg-accent/5 text-center">
+                            <h4 class="text-label text-accent mb-3">解决方案</h4>
+                            <p class="text-body font-bold">摘要压缩、关键信息持久化、向量检索注入。</p>
+                            <p class="text-sm mt-2 text-text-muted italic">核心思想：只喂给 AI 最相关的那几口“粮食”。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Node Anatomy -->
+        <section class="slide" data-index="8">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 12V4h16v16h-8M4 12l4-4 4 4" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">精讲：节点 (Node) —— 工作流的原子</h2>
+                </div>
+                <div class="flex flex-col items-center gap-12">
+                    <div class="flex items-center justify-between gap-10 w-full max-w-6xl">
+                        <div class="clay-card-pressed p-10 flex-1 text-center group hover:bg-white transition-all">
+                            <div class="text-label text-primary-light mb-4">INPUT 层</div>
+                            <p class="text-subtitle font-bold">输入变量</p>
+                            <p class="text-body opacity-50 mt-2">String / Number / File</p>
+                        </div>
+                        <div class="flex-1 clay-card p-10 text-center bg-primary text-white border-none shadow-float">
+                            <div class="text-label text-white/60 mb-4">LOGIC 层</div>
+                            <p class="text-subtitle font-bold text-hero-sub">处理节点</p>
+                            <p class="text-body opacity-80 mt-2 italic">LLM / 代码执行 / API 转换</p>
+                        </div>
+                        <div class="clay-card-pressed p-10 flex-1 text-center group hover:bg-white transition-all">
+                            <div class="text-label text-primary-light mb-4">OUTPUT 层</div>
+                            <p class="text-subtitle font-bold">输出变量</p>
+                            <p class="text-body opacity-50 mt-2">用于下游节点引用</p>
+                        </div>
+                    </div>
+                    <div class="clay-card p-8 bg-indigo-50 border-2 border-dashed border-primary max-w-3xl">
+                        <h4 class="text-subtitle font-bold mb-4 text-primary">设计准则：高内聚，低耦合</h4>
+                        <p class="text-body italic">每一个节点只解决一个颗粒度的问题。如果一个 LLM 节点既要分析又要输出 JSON 还要做纠错，请拆解成三个节点。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Variable Scope -->
+        <section class="slide" data-index="9">
+            <div class="slide-content px-12">
+                <h2 class="text-title text-primary font-bold mb-12 text-center">精讲：变量作用域 —— 数据的可见性</h2>
+                <div class="grid grid-cols-2 gap-12 max-w-6xl mx-auto">
+                    <div class="clay-card p-10 bg-white relative overflow-hidden">
+                        <div class="absolute -right-4 top-4 text-hero text-indigo-50 font-bold">G</div>
+                        <h3 class="text-subtitle font-bold text-primary mb-6">全局变量 (Global)</h3>
+                        <p class="text-body leading-relaxed mb-6">在工作流的**任何一个节点**都能看到并引用。通常用于：</p>
+                        <ul class="space-y-3 text-body font-bold text-text-muted">
+                            <li class="flex items-center gap-2"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>用户初始输入 (UserInput)</li>
+                            <li class="flex items-center gap-2"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>API 配置 Token</li>
+                            <li class="flex items-center gap-2"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>应用级环境变量</li>
+                        </ul>
+                    </div>
+                    <div class="clay-card p-10 bg-white relative border-2 border-dashed border-accent">
+                        <div class="absolute -right-4 top-4 text-hero text-indigo-50 font-bold">L</div>
+                        <h3 class="text-subtitle font-bold text-accent mb-6">局部变量 (Local)</h3>
+                        <p class="text-body leading-relaxed mb-6">仅在**特定作用域内**有效。例如：</p>
+                        <ul class="space-y-3 text-body font-bold text-text-muted">
+                            <li class="flex items-center gap-2"><svg class="w-6 h-6 text-accent"><circle cx="12" cy="12" r="4"/></svg>循环内部的索引 (Index)</li>
+                            <li class="flex items-center gap-2"><svg class="w-6 h-6 text-accent"><circle cx="12" cy="12" r="4"/></svg>某个 API 节点的中间返回</li>
+                            <li class="flex items-center gap-2"><svg class="w-6 h-6 text-accent"><circle cx="12" cy="12" r="4"/></svg>条件判断的布尔值</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-12 p-8 clay-card bg-amber-50 border-amber-200 max-w-4xl mx-auto">
+                    <p class="text-body text-amber-700 italic font-bold">⚠️ 同名变量冲突警告：尽量给局部变量加上节点命名前缀（如 `api_house_list`）以防止在后续引用时混淆。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Decison & Loop Tree -->
+        <section class="slide" data-index="10">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 10v10M2 17l10 5 10-5" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">精讲：分支与循环 —— 工作流的智商</h2>
+                </div>
+                <div class="grid grid-cols-2 gap-12 h-[500px]">
+                    <div class="clay-card p-10 flex flex-col items-center">
+                        <h4 class="text-subtitle font-bold mb-8">分流逻辑：If / Else</h4>
+                        <div class="space-y-4 w-full">
+                            <div class="p-4 bg-white border rounded-xl text-center text-body">接收咨询问题</div>
+                            <div class="flex justify-center"><svg class="w-6 h-6" fill="currentColor"><path d="M12 21l-12-18h24z"/></svg></div>
+                            <div class="flex gap-4">
+                                <div class="flex-1 p-4 bg-error/10 border-error border-2 rounded-xl text-center text-label text-error font-bold">投诉建议 ➔ 转人工</div>
+                                <div class="flex-1 p-4 bg-green-500 border-green-600 border-2 rounded-xl text-center text-label text-white font-bold">房源咨询 ➔ AI 回复</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clay-card p-10 flex flex-col items-center border-accent border-2">
+                        <h4 class="text-subtitle font-bold text-accent mb-8">循环逻辑：Loop</h4>
+                        <div class="relative w-full h-full flex flex-col items-center justify-center">
+                            <svg class="w-32 h-32 text-accent animate-spin-slow mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5"/></svg>
+                            <p class="text-body font-bold text-center">核心：退出条件 (Exit Policy)</p>
+                            <p class="text-sm mt-2 text-text-muted px-6 italic">严禁设计没有上限的循环。必须配置“最大重试次数”或“目标达成判断”。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12: RAG Step Stepper -->
+        <section class="slide" data-index="11">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8" stroke-width="2.5"/><path d="M21 21l-4.35-4.35" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">精讲：RAG —— 让 AI 读懂企业专有文档</h2>
+                </div>
+                <div class="clay-card p-12 bg-white/40">
+                    <div class="flex justify-between relative">
+                        <div class="absolute top-1/2 left-0 right-0 h-2 bg-primary/10 -translate-y-1/2 z-0"></div>
+                        <div class="rag-step-box z-10 w-64 h-32 bg-white border-2 border-primary rounded-2xl flex items-center justify-center text-center p-4 transition-all duration-500 cursor-pointer" onclick="showRAGStep(1)">
+                            <p class="text-label">1. 文档拆解 (Slicing)</p>
+                        </div>
+                        <div class="rag-step-box z-10 w-64 h-32 bg-white border-2 border-primary rounded-2xl flex items-center justify-center text-center p-4 transition-all duration-500 cursor-pointer" onclick="showRAGStep(2)">
+                            <p class="text-label">2. 向量嵌入 (Embedding)</p>
+                        </div>
+                        <div class="rag-step-box z-10 w-64 h-32 bg-white border-2 border-primary rounded-2xl flex items-center justify-center text-center p-4 transition-all duration-500 cursor-pointer" onclick="showRAGStep(3)">
+                            <p class="text-label">3. 向量检索 (Search)</p>
+                        </div>
+                        <div class="rag-step-box z-10 w-64 h-32 bg-white border-2 border-primary rounded-2xl flex items-center justify-center text-center p-4 transition-all duration-500 cursor-pointer" onclick="showRAGStep(4)">
+                            <p class="text-label">4. 上下文注入 (Inject)</p>
+                        </div>
+                    </div>
+                    <div class="mt-16 text-center">
+                        <p class="text-subtitle font-bold text-primary">什么是检索增强生成？</p>
+                        <p class="text-body text-text-muted mt-4">它是“翻书考试”。在生成答案前，先去外部大海中捞出那根针，再把针喂给 AI。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 13: RAG Splicing Quality -->
+        <section class="slide" data-index="12">
+            <div class="slide-content px-12">
+                <h2 class="text-title text-primary font-bold mb-12">精讲：切片策略 —— 这里的坑最深</h2>
+                <div class="grid grid-cols-2 gap-10">
+                    <div class="clay-card border-l-8 border-error">
+                        <h4 class="text-subtitle font-bold text-error mb-4">糟糕的切片</h4>
+                        <div class="p-6 bg-slate-100 rounded-xl space-y-4">
+                            <p class="text-sm border-b pb-2 opacity-40">...退房规则如下：一、年付客户退押金应当...</p>
+                            <p class="text-sm font-bold text-error underline">--- 切片标记 (强制 200 字切断) ---</p>
+                            <p class="text-sm opacity-40">...提前 30 天申请。二、月付客户则不需要...</p>
+                        </div>
+                        <p class="mt-6 text-body">后果：当用户问“年付退押金怎么办”时，AI 只拿到了上半段，**完全丢失了“提前 30 天”这一关键条件**。</p>
+                    </div>
+                    <div class="clay-card border-l-8 border-green-500">
+                        <h4 class="text-subtitle font-bold text-green-600 mb-4">优秀的切片 (按语义归位)</h4>
+                        <div class="p-6 bg-green-50 rounded-xl space-y-4">
+                            <p class="text-sm font-bold text-primary">安居乐寓业务切片 001:</p>
+                            <p class="text-sm">描述：年付客户退房规则。<br>包含：退款公式、提前申请时限、违约条款。</p>
+                        </div>
+                        <p class="mt-6 text-body">原则：**切片大小必须包含完整的逻辑闭环**。如果知识库质量差，模型的推理能力再强也无法弥补。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: ReAct Cycle Animation -->
+        <section class="slide" data-index="13">
+            <div class="slide-content px-12 text-center">
+                <h2 class="text-title text-primary font-bold mb-12">精讲：ReAct 范式 —— Agent 的“灵魂循环”</h2>
+                <div class="relative w-[600px] h-[600px] mx-auto border-4 border-dashed border-primary/20 rounded-full flex items-center justify-center">
+                    <!-- Circle Flow -->
+                    <div class="absolute w-full h-full animate-spin-slow">
+                        <div class="absolute -top-10 left-1/2 -translate-x-1/2 clay-badge bg-primary text-white border-none shadow-float">THOUGHT (思考)</div>
+                        <div class="absolute top-1/2 -right-10 -translate-y-1/2 clay-badge bg-accent text-white border-none shadow-float">ACTION (行动)</div>
+                        <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 clay-badge bg-amber-500 text-white border-none shadow-float">OBSERVATION (观察)</div>
+                    </div>
+                    
+                    <div class="max-w-md p-8 clay-card bg-white shadow-float">
+                        <p class="text-hero-sub font-bold text-primary mb-4">为什么叫 ReAct？</p>
+                        <p class="text-body leading-relaxed">
+                            Reasoning (推理) + Acting (行动)。<br>
+                            不仅像 CoT 一样思考，还要与外部工具发生真实的互动，并根据结果调整思考方向。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Tool Description Importance -->
+        <section class="slide" data-index="14">
+            <div class="slide-content px-12">
+                <h2 class="text-title text-primary font-bold mb-12 text-center">精讲：工具描述 —— 决定 AI “懂不懂”你</h2>
+                <div class="grid grid-cols-2 gap-12">
+                    <div class="clay-card-pressed p-10 flex flex-col items-center">
+                        <div class="text-hero text-error/20 mb-4 select-none">BAD</div>
+                        <h4 class="text-subtitle font-bold text-error mb-4">模糊描述</h4>
+                        <code class="p-4 bg-slate-900 text-white rounded-xl w-full text-sm block">"description": "查询房源信息"</code>
+                        <p class="mt-8 text-body opacity-60 italic text-center">后果：当用户问“福田有没有房子”时，模型可能不调用此工具，或者不知道该传什么参数。</p>
+                    </div>
+                    <div class="clay-card border-none bg-indigo-900 border-indigo-400 p-10 flex flex-col items-center shadow-float">
+                        <div class="text-hero text-green-400/20 mb-4 select-none">PRO</div>
+                        <h4 class="text-subtitle font-bold text-green-400 mb-4">精准描述 (业务驱动)</h4>
+                        <code class="p-4 bg-slate-800 text-blue-200 rounded-xl w-full text-sm block leading-relaxed">
+"description": "当你需要查询安居乐寓在特定行政区、价格区间内的房源明细时，请调用此工具。它能返回包含房号、朝向、租金的完整列表。"
+                        </code>
+                        <p class="mt-8 text-body text-white/70 italic text-center">优势：模型明确了“何时用”以及“能拿回什么”，大幅降低调用幻觉。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 16: Function Calling JSON Schema -->
+        <section class="slide" data-index="15">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">精讲：JSON Schema —— Agent 的通信协议</h2>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div class="clay-card bg-slate-900 p-10 border-none">
+                        <div class="text-label text-blue-400 mb-4">TOOL DEFINITION (STRUCTURE)</div>
+                        <div class="code-block h-96 text-sm text-green-300">
+{
+  "name": "search_apartments",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "district": {
+        "type": "string",
+        "enum": ["福田", "南山", "龙华"]
+      },
+      "max_price": { "type": "number" },
+      "is_balcony": { "type": "boolean" }
+    },
+    "required": ["district"]
+  }
+}
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-center space-y-8">
+                        <div class="clay-card bg-white p-8">
+                            <h4 class="text-subtitle font-bold text-primary mb-4">Schema 的三大死穴</h4>
+                            <ul class="space-y-4 text-body font-bold text-text-muted">
+                                <li class="flex items-center gap-4"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>类型声明 (Type)：String 绝不能传成 Number</li>
+                                <li class="flex items-center gap-4"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>强制项 (Required)：模型必须生成这些参数</li>
+                                <li class="flex items-center gap-4"><svg class="w-6 h-6 text-primary"><circle cx="12" cy="12" r="4"/></svg>枚举值 (Enum)：限定模型只能选这些分类</li>
+                            </ul>
+                        </div>
+                        <p class="text-body italic text-primary">“如果 Schema 没写对，AI 会像一个拿错地图的司机，拼命想开车却去不了目的地。”</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 17: Skill Hierarcy -->
+        <section class="slide" data-index="16">
+            <div class="slide-content px-12">
+                <h2 class="text-title text-primary font-bold mb-12 text-center">精讲：Skill 封装 —— 打造能力组件库</h2>
+                <div class="relative h-[500px] flex items-center justify-center">
+                    <!-- Workflow - Outer -->
+                    <div class="absolute w-[800px] h-[500px] border-4 border-dashed border-primary/20 rounded-[60px] flex flex-col items-center pt-8">
+                        <span class="clay-badge border-primary/20 text-primary-light">WORKFLOW (顶级编排)</span>
+                    </div>
+                    <!-- Skill - Mid -->
+                    <div class="absolute w-[600px] h-[350px] bg-primary/5 border-4 border-primary rounded-[40px] flex flex-col items-center pt-8 shadow-float">
+                        <span class="clay-badge bg-primary text-white border-none shadow-sm">SKILL (中层封装：复合能力)</span>
+                    </div>
+                    <!-- Tool - Inner -->
+                    <div class="absolute w-[400px] h-[150px] bg-white border-4 border-accent rounded-[24px] flex items-center justify-center shadow-lg">
+                        <span class="text-subtitle font-bold text-accent">TOOL (底层原子工具)</span>
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-body italic text-text-muted">“Tool 是锤子，Skill 是房屋装修服务，Workflow 是整个大厦的施工图纸。”</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 18: MCP Overview -->
+        <section class="slide" data-index="17">
+            <div class="slide-content px-12">
+                <div class="flex items-top justify-between">
+                    <h2 class="text-title text-primary font-bold mb-12">精讲：MCP —— AI 工具的“通用接口”</h2>
+                    <div class="clay-badge border-accent text-accent">MODEL CONTEXT PROTOCOL</div>
+                </div>
+                <div class="clay-card p-12 bg-white/60">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                        <div class="space-y-8">
+                            <h3 class="text-subtitle font-bold">为什么我们要学协议？</h3>
+                            <p class="text-body leading-relaxed text-text-muted">
+                                以往，每个 AI 想要调用 Google 日历或 GitHub 都要单独写适配代码。
+                                **MCP 是一套开放协议**，它让只要符合协议的任何工具 (Server)，都能被只要符合协议的任何模型 (Client，如 Claude Desktop) 一秒调用。
+                            </p>
+                            <div class="clay-card-pressed p-6 rounded-2xl bg-indigo-50 border-none">
+                                <p class="text-label text-primary mb-2">架构精髓</p>
+                                <p class="text-body font-bold">Server (工具提供方) ➔ Protocol (桥梁) ➔ Client (模型对话框)</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-center">
+                            <div class="w-80 h-80 bg-primary/10 rounded-full flex items-center justify-center relative">
+                                <div class="w-64 h-64 border-4 border-primary border-dashed rounded-full animate-spin-slow"></div>
+                                <svg class="absolute w-32 h-32 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M2 12h20" stroke-width="3"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 19: Case 1 - Smart CS Architecture Deep Dive -->
+        <section class="slide" data-index="18">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12 justify-center">
+                    <svg class="w-16 h-16 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke-width="2"/></svg>
+                    <h2 class="text-title text-primary font-bold">综合串联：安居乐寓智能客服全架构</h2>
+                </div>
+                <div class="flex flex-col gap-6 max-w-6xl mx-auto h-[600px] overflow-y-auto pr-4">
+                    <!-- Layer 1 -->
+                    <div class="clay-card border-l-[12px] border-primary p-8 bg-white/90 shrink-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="text-subtitle font-bold text-primary">Layer 1: 对话层 (PE & Prompt)</h4>
+                            <span class="text-label bg-primary/10 text-primary px-4 py-1 rounded-full uppercase">1st Chap</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-8 text-body italic">
+                            <div class="p-4 bg-slate-50 rounded-xl">"你是资深租赁管家，回答风格客观稳定..."</div>
+                            <div class="p-4 bg-slate-50 rounded-xl">"Few-shot 示例：用户输入 -> 标准 FAQ 返回..."</div>
+                        </div>
+                    </div>
+                    <!-- Layer 2 -->
+                    <div class="clay-card border-l-[12px] border-accent p-8 bg-white/90 shrink-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="text-subtitle font-bold text-accent">Layer 2: 逻辑控制层 (Workflow)</h4>
+                            <span class="text-label bg-accent/10 text-accent px-4 py-1 rounded-full uppercase">2nd Chap</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-indigo-50 border-l-4 border-accent rounded-xl text-body font-bold">分类节点：检测意图 (租房 / 投诉 / 闲聊)</div>
+                            <div class="p-4 bg-indigo-50 border-l-4 border-accent rounded-xl text-body font-bold">分支逻辑：如果是闲聊 ➔ 返回拒绝策略；如果是投诉 ➔ 记录变量并结束流</div>
+                        </div>
+                    </div>
+                    <!-- Layer 3 -->
+                    <div class="clay-card border-l-[12px] border-amber-500 p-8 bg-white/90 shrink-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <h4 class="text-subtitle font-bold text-amber-600">Layer 3: 知识检索层 (RAG)</h4>
+                            <span class="text-label bg-amber-500/10 text-amber-600 px-4 py-1 rounded-full uppercase">2.5 Chap</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-6 text-sm italic">
+                            <div class="p-4 bg-slate-50 border rounded-xl text-center">知识库：公积金退房 FAQ</div>
+                            <div class="p-4 bg-slate-50 border rounded-xl text-center">策略：语义检索 (Top 3)</div>
+                            <div class="p-4 bg-slate-50 border rounded-xl text-center">处理：切片注入上下文历史</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 20: Case 2 - AI Agent House Finder (ReAct Show) -->
+        <section class="slide" data-index="19">
+            <div class="slide-content px-12">
+                <div class="flex items-center gap-6 mb-12">
+                    <svg class="w-16 h-16 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2.5"/><path d="M12 8v4l3 3" stroke-width="2.5"/></svg>
+                    <h2 class="text-title text-primary font-bold">综合串联：AI 找房专家 ReAct 思路链深度演练</h2>
+                </div>
+                <div class="clay-card p-10 bg-white/60 h-[550px] relative" id="reactCase">
+                    <!-- Timeline Nodes -->
+                    <div class="flex justify-between items-center mb-16 relative">
+                        <div class="absolute top-1/2 left-0 right-0 h-1 bg-primary/10 -translate-y-1/2"></div>
+                        <div class="step-node active z-10" onclick="showCaseStep(1, 'reactCase')">1</div>
+                        <div class="step-node z-10" onclick="showCaseStep(2, 'reactCase')">2</div>
+                        <div class="step-node z-10" onclick="showCaseStep(3, 'reactCase')">3</div>
+                        <div class="step-node z-10" onclick="showCaseStep(4, 'reactCase')">4</div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-10 h-64 overflow-hidden">
+                        <div class="col-span-1 clay-card bg-indigo-900 border-none flex flex-col justify-center items-center text-center p-8 transition-all duration-500">
+                             <div class="step-code-content w-full">
+                                <h4 class="text-label text-primary-light mb-4 text-xs font-bold uppercase">LLM Output (Internal Thought)</h4>
+                                <p class="text-sm italic text-blue-100">“用户寻找福田近地铁 5000 元房源。我手头有 search_house 权限。首先检索符合价格区域条件的清单。”</p>
+                             </div>
+                             <div class="step-code-content w-full hidden">
+                                <h4 class="text-label text-primary-light mb-4 text-xs font-bold uppercase">LLM Output (Action Call)</h4>
+                                <code class="text-xs text-green-300 block bg-black/40 p-3 rounded">
+{
+  "name": "search_h",
+  "dist": "福田",
+  "limit": 5000
+}
+                                </code>
+                             </div>
+                             <div class="step-code-content w-full hidden">
+                                <h4 class="text-label text-primary-light mb-4 text-xs font-bold uppercase">Environment Result (Observation)</h4>
+                                <p class="text-sm text-blue-100 italic">“成功返回房源 A, B, C。其中 A 标有‘近地铁’标签。”</p>
+                             </div>
+                             <div class="step-code-content w-full hidden">
+                                <h4 class="text-label text-green-400 mb-4 text-xs font-bold uppercase">Final Answer</h4>
+                                <p class="text-base font-bold text-white leading-relaxed">“为您优选【房源 A】，距离 1 号线仅 300 米，且完全符合您的 5000 元预算。”</p>
+                             </div>
+                        </div>
+                        <div class="col-span-2 clay-card bg-white h-full overflow-y-auto flex items-center justify-center border-dashed border-2 border-primary/20">
+                            <p class="text-body text-text-muted italic px-12 text-center">点击上方蓝色节点演练从“初始思考”到“最终工具调用并给出回答”的 ReAct 全闭环逻辑</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 21: Pitfall Wall -->
+        <section class="slide" data-index="20">
+            <div class="slide-content px-12">
+                <h2 class="text-title text-primary font-bold mb-12 text-center">翻转墙：常见误区大扫偏</h2>
+                <div class="grid grid-cols-4 gap-6 h-[500px]">
+                    <!-- Pitfall 1 -->
+                    <div class="flip-card h-full">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-red-50">
+                                <p class="text-label font-bold text-red-600 mb-2">MYTH 1</p>
+                                <h4 class="text-body font-bold">提示词越长就越准确？</h4>
+                            </div>
+                            <div class="flip-card-back bg-white border-2 border-green-500 text-green-700">
+                                <p class="text-body font-bold">真相：核心指令要前置。过长的干扰信息反而会稀释关注度。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Pitfall 2 -->
+                    <div class="flip-card h-full">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-red-50">
+                                <p class="text-label font-bold text-red-600 mb-2">MYTH 2</p>
+                                <h4 class="text-body font-bold">RAG 检索数量越多越好？</h4>
+                            </div>
+                            <div class="flip-card-back bg-white border-2 border-green-500 text-green-700">
+                                <p class="text-body font-bold">真相：Top 3-5 为佳。太多会引入噪音，导致模型得出自相矛盾的结论。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Pitfall 3 -->
+                    <div class="flip-card h-full">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-red-50">
+                                <p class="text-label font-bold text-red-600 mb-2">MYTH 3</p>
+                                <h4 class="text-body font-bold">给 Agent 所有工具最强大？</h4>
+                            </div>
+                            <div class="flip-card-back bg-white border-2 border-green-500 text-green-700">
+                                <p class="text-body font-bold">真相：过多选择会导致决策失灵。工具应当“按需精简”。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Pitfall 4 -->
+                    <div class="flip-card h-full">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front bg-red-50">
+                                <p class="text-label font-bold text-red-600 mb-2">MYTH 4</p>
+                                <h4 class="text-body font-bold">循环是为了处理无限可能？</h4>
+                            </div>
+                            <div class="flip-card-back bg-white border-2 border-green-500 text-green-700">
+                                <p class="text-body font-bold">真相：没有退出条件的循环是毁灭性的。必须严设最大步数。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center mt-12 text-label opacity-40">这就是工程师思维：承认边界，尊重逻辑</p>
+            </div>
+        </section>
+
+        <!-- Slide 22: Farewell & Teaser -->
+        <section class="slide" data-index="21">
+            <div class="slide-content px-12 text-center items-center h-full flex flex-col justify-center">
+                <div class="clay-card p-20 bg-primary/90 text-white max-w-6xl w-full border-none shadow-float relative overflow-hidden">
+                    <div class="absolute -right-20 -bottom-20 opacity-10"><svg class="w-96 h-96" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+                    <div class="relative z-10">
+                        <h2 class="text-hero leading-tight mb-10">下一站：<br>全量文档知识库</h2>
+                        <div class="grid grid-cols-2 gap-10">
+                            <div class="p-8 bg-white/10 rounded-3xl border border-white/20">
+                                <h4 class="text-subtitle font-bold mb-4">为什么 RAG 的切片会失效？</h4>
+                                <p class="text-body opacity-70 italic">在第四章，我们将终结切片之痛。</p>
+                            </div>
+                            <div class="p-8 bg-white/10 rounded-3xl border border-white/20">
+                                <h4 class="text-subtitle font-bold mb-4">掌握 M-R-E-R-G 协议</h4>
+                                <p class="text-body opacity-70 italic">解锁百万级上下文的真正玩法。</p>
+                            </div>
+                        </div>
+                        <div class="mt-16 flex justify-center gap-10">
+                            <button class="nav-btn bg-white text-primary px-12 py-6 w-fit h-auto rounded-full font-bold text-hero-sub hover:scale-110 shadow-lg" onclick="window.location.reload()">
+                                重新复盘
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Navigation Control -->
+    <nav class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-10 bg-white/50 backdrop-blur-lg px-12 py-5 rounded-full shadow-soft border border-white/40">
+        <button id="prevBtn" onclick="prevSlide()" class="nav-btn h-16 w-16 group">
+            <svg class="w-10 h-10 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <div class="flex items-center gap-4 font-display font-bold text-primary text-3xl">
+            <span id="currentSlide">1</span>
+            <span class="opacity-20">/</span>
+            <span id="totalSlides">?</span>
+        </div>
+        <button id="nextBtn" onclick="nextSlide()" class="nav-btn h-16 w-16 group">
+            <svg class="w-10 h-10 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </nav>
+
+    <!-- Bottom Progress -->
+    <div class="fixed bottom-0 left-0 right-0 h-3 bg-white/10 z-50">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-primary via-accent to-green-500 transition-all duration-700 w-0"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

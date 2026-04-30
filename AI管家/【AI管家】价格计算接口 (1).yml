@@ -1,0 +1,543 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  icon_type: emoji
+  mode: workflow
+  name: 【AI管家】价格计算接口
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: tool
+      id: 1775614447731-source-1775614455247-target
+      source: '1775614447731'
+      sourceHandle: source
+      target: '1775614455247'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: tool
+        targetType: http-request
+      id: 1775614455247-source-1775617086546-target
+      source: '1775614455247'
+      sourceHandle: source
+      target: '1775617086546'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: tool
+        targetType: http-request
+      id: 1775614455247-source-1775618510019-target
+      source: '1775614455247'
+      sourceHandle: source
+      target: '1775618510019'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1775617086546-source-1775623042872-target
+      source: '1775617086546'
+      sourceHandle: source
+      target: '1775623042872'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1775618510019-source-1775623042872-target
+      source: '1775618510019'
+      sourceHandle: source
+      target: '1775623042872'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1775623042872-source-1775614760261-target
+      source: '1775623042872'
+      sourceHandle: source
+      target: '1775614760261'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - default: '18576460000'
+          hint: ''
+          label: account
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: account
+        - default: 123456Aa!
+          hint: ''
+          label: password
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: password
+        - default: '59059'
+          hint: ''
+          label: roomid
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: roomid
+        - default: '197'
+          hint: ''
+          label: storeIds
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: storeIds
+        - default: ''
+          hint: ''
+          label: monthNum
+          options: []
+          placeholder: ''
+          required: false
+          type: text-input
+          variable: monthNum
+      height: 212
+      id: '1775614447731'
+      position:
+        x: 115.98577744914226
+        y: 282
+      positionAbsolute:
+        x: 115.98577744914226
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        is_team_authorization: true
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: ''
+            ja_JP: ''
+            pt_BR: ''
+            zh_Hans: ''
+          label:
+            en_US: account
+            ja_JP: account
+            pt_BR: account
+            zh_Hans: account
+          llm_description: ''
+          max: null
+          min: null
+          name: account
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: ''
+            ja_JP: ''
+            pt_BR: ''
+            zh_Hans: ''
+          label:
+            en_US: password
+            ja_JP: password
+            pt_BR: password
+            zh_Hans: password
+          llm_description: ''
+          max: null
+          min: null
+          name: password
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        params:
+          account: ''
+          password: ''
+        plugin_id: ''
+        plugin_unique_identifier: ''
+        provider_icon:
+          background: '#6366F1'
+          content: 🔗
+        provider_id: mcp-read-only
+        provider_name: mcp-read-only
+        provider_type: mcp
+        selected: false
+        title: get_access_token
+        tool_configurations: {}
+        tool_description: "\n        模拟登录获取 access-token。\n        通过调用AJLY平台接口，获取RSA公钥加密密码后登录，返回access-token。\n\
+          \        如果不传account和password，则使用环境变量中配置的默认账号密码。\n        \n        Args:\n\
+          \            account: 登录账号，不传则使用环境变量 AJLY_ACCOUNT\n            password:\
+          \ 登录密码（明文），不传则使用环境变量 AJLY_PASSWORD\n            \n        Returns:\n   \
+          \         包含 access-token 的 JSON 字符串\n        "
+        tool_label: get_access_token
+        tool_name: get_access_token
+        tool_node_version: '2'
+        tool_parameters:
+          account:
+            type: mixed
+            value: '{{#1775614447731.account#}}'
+          password:
+            type: mixed
+            value: '{{#1775614447731.password#}}'
+        type: tool
+      height: 83
+      id: '1775614455247'
+      position:
+        x: 469.3940309479169
+        y: 303
+      positionAbsolute:
+        x: 469.3940309479169
+        y: 303
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        outputs:
+        - value_selector:
+          - '1775623042872'
+          - final_price
+          value_type: number
+          variable: result
+        selected: false
+        title: 输出
+        type: end
+      height: 87
+      id: '1775614760261'
+      position:
+        x: 1651.58781273794
+        y: 351.8831927340105
+      positionAbsolute:
+        x: 1651.58781273794
+        y: 351.8831927340105
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - id: key-value-25
+            key: storeIds
+            type: text
+            value: '197'
+          type: x-www-form-urlencoded
+        headers: ''
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 获取租期优惠
+        type: http-request
+        url: https://uat-mp.szajly.com/web/api/lease/v1/fixed/price/set/1/1
+        variables: []
+      height: 152
+      id: '1775617086546'
+      position:
+        x: 954.9806926610108
+        y: 240.94146361077344
+      positionAbsolute:
+        x: 954.9806926610108
+        y: 240.94146361077344
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        headers: ''
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 定价和特价系数
+        type: http-request
+        url: https://uat-mp.szajly.com/web/api/v3/tenant/price/compute/{{#1775614447731.roomid#}}/0/1?roomId={{#1775614447731.roomid#}}&tenantId=0&computeType=1
+        variables: []
+      height: 205
+      id: '1775618510019'
+      position:
+        x: 954.9806926610108
+        y: 467.78284997643664
+      positionAbsolute:
+        x: 954.9806926610108
+        y: 467.78284997643664
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\n\ndef main(discount_data, price_data, monthNum, storeids,\
+          \ roomid) -> dict:\n    \"\"\"\n    计算最终租金价格\n    公式：定价 × 特价系数 × (折扣/100)\n\
+          \    \"\"\"\n    result = {\n        \"success\": False,\n        \"final_price\"\
+          : 0.0,\n        \"price_details\": {},\n        \"markdown_result\": \"\"\
+          ,\n        \"error_message\": \"\"\n    }\n    \n    try:\n        # ==========\
+          \ 1. 参数处理 ==========\n        target_month = int(monthNum) if monthNum else\
+          \ 0\n        target_store = str(storeids) if storeids else \"\"\n      \
+          \  target_room = str(roomid) if roomid else \"未知\"\n        \n        if\
+          \ target_month <= 0:\n            result[\"error_message\"] = \"请输入有效的签约月数（>0）\"\
+          \n            return result\n            \n        # ========== 2. 安全解析函数\
+          \ ==========\n        def safe_parse_json(raw_data, var_name):\n       \
+          \     \"\"\"安全解析 JSON，处理字符串、字典、列表等各种情况\"\"\"\n            if not raw_data:\n\
+          \                return None, f\"{var_name} 为空\"\n                \n   \
+          \         # 如果是字符串，解析 JSON\n            if isinstance(raw_data, str):\n\
+          \                try:\n                    parsed = json.loads(raw_data)\n\
+          \                except json.JSONDecodeError as e:\n                   \
+          \ return None, f\"{var_name} JSON 解析失败: {str(e)}\"\n            else:\n\
+          \                parsed = raw_data\n                \n            # 如果是列表且长度为\
+          \ 1，取第一个元素（Dify 有时会包裹数组）\n            if isinstance(parsed, list):\n   \
+          \             if len(parsed) == 1:\n                    parsed = parsed[0]\n\
+          \                else:\n                    return None, f\"{var_name} 格式错误：期望是对象，但得到了包含\
+          \ {len(parsed)} 个元素的列表\"\n                    \n            # 确认是字典\n  \
+          \          if not isinstance(parsed, dict):\n                return None,\
+          \ f\"{var_name} 格式错误：期望是字典，实际是 {type(parsed).__name__}\"\n             \
+          \   \n            return parsed, None\n        \n        # ========== 3.\
+          \ 解析折扣数据 ==========\n        discount_json, err = safe_parse_json(discount_data,\
+          \ \"discount_data\")\n        if err:\n            result[\"error_message\"\
+          ] = err\n            return result\n            \n        # ========== 4.\
+          \ 解析定价数据 ==========\n        price_json, err = safe_parse_json(price_data,\
+          \ \"price_data\")\n        if err:\n            result[\"error_message\"\
+          ] = err\n            return result\n        \n        # ========== 5. 获取定价和特价系数\
+          \ ==========\n        price_info = price_json.get(\"data\", {})\n      \
+          \  \n        # 如果 data 是列表（有些接口会这样返回），取第一个\n        if isinstance(price_info,\
+          \ list):\n            if len(price_info) > 0:\n                price_info\
+          \ = price_info[0]\n            else:\n                result[\"error_message\"\
+          ] = \"定价接口返回的 data 为空数组\"\n                return result\n        \n   \
+          \     if not isinstance(price_info, dict):\n            result[\"error_message\"\
+          ] = f\"定价数据格式错误：{type(price_info).__name__}\"\n            return result\n\
+          \            \n        pricing_money = price_info.get(\"pricingMoney\")\n\
+          \        special_ratio = price_info.get(\"specialMoneyRatio\")\n       \
+          \ \n        if pricing_money is None:\n            result[\"error_message\"\
+          ] = \"未获取到 pricingMoney（定价）\"\n            return result\n            \n\
+          \        # 特价系数处理（如果为null，默认为1.0即100%）\n        if special_ratio is None:\n\
+          \            special_ratio = 1.0\n        else:\n            special_ratio\
+          \ = float(special_ratio)\n            \n        # ========== 6. 查找对应门店的折扣数据\
+          \ ==========\n        discount_items = discount_json.get(\"data\", [])\n\
+          \        \n        # 如果 data 不是列表，包装成列表\n        if not isinstance(discount_items,\
+          \ list):\n            discount_items = [discount_items] if discount_items\
+          \ else []\n            \n        target_discount_data = None\n        \n\
+          \        for item in discount_items:\n            if not isinstance(item,\
+          \ dict):\n                continue\n            if str(item.get(\"storeIds\"\
+          , \"\")) == target_store:\n                target_discount_data = item\n\
+          \                break\n                \n        # ========== 7. 查找对应月份的折扣\
+          \ ==========\n        discount_percent = 100.0  # 默认为100%\n        discount_note\
+          \ = \"100% (默认)\"\n        \n        if target_discount_data:\n        \
+          \    price_discounts = target_discount_data.get(\"priceDiscounts\", [])\n\
+          \            if not isinstance(price_discounts, list):\n               \
+          \ price_discounts = [price_discounts] if price_discounts else []\n     \
+          \           \n            for d in price_discounts:\n                if\
+          \ not isinstance(d, dict):\n                    continue\n             \
+          \   if d.get(\"monthNum\") == target_month:\n                    scale_value\
+          \ = d.get(\"setScaleValue\")\n                    if scale_value is not\
+          \ None:\n                        discount_percent = float(scale_value)\n\
+          \                        discount_note = f\"{int(discount_percent)}%\"\n\
+          \                    else:\n                        discount_percent = 100.0\n\
+          \                        discount_note = \"100% (折扣为空，按默认计算)\"\n       \
+          \             break\n            else:\n                # 没找到对应月份\n    \
+          \            discount_note = \"100% (未找到该月份折扣，按默认计算)\"\n        else:\n\
+          \            discount_note = \"100% (未找到门店折扣数据，按默认计算)\"\n            \n\
+          \        # ========== 8. 计算最终价格 ==========\n        # 公式：定价 × 特价系数 × (折扣/100)\n\
+          \        final_price = float(pricing_money) * special_ratio * (discount_percent\
+          \ / 100.0)\n        \n        # ========== 9. 组装结果 ==========\n        result[\"\
+          price_details\"] = {\n            \"storeid\": target_store,\n         \
+          \   \"roomid\": target_room,\n            \"month_num\": target_month,\n\
+          \            \"pricing_money\": float(pricing_money),\n            \"special_ratio\"\
+          : special_ratio,\n            \"special_ratio_percent\": f\"{int(special_ratio\
+          \ * 100)}%\",\n            \"discount_percent\": discount_percent,\n   \
+          \         \"discount_note\": discount_note\n        }\n        \n      \
+          \  result[\"final_price\"] = round(final_price, 2)\n        result[\"success\"\
+          ] = True\n        \n        # ========== 10. 生成 Markdown ==========\n  \
+          \      lines = [\n            f\"经查询，storeid为**{target_store}**，roomid为**{target_room}**的价格详情为：\"\
+          ,\n            \"\",\n            \"| 项目 | 数值 | 说明 |\",\n            \"\
+          |------|------|------|\",\n            f\"| 签约月数 | {target_month} 个月 | 用户选择\
+          \ |\",\n            f\"| 基础定价 | {float(pricing_money):.2f} 元 | pricingMoney\
+          \ |\",\n            f\"| 特价系数 | {special_ratio}（{int(special_ratio * 100)}%）\
+          \ | specialMoneyRatio |\",\n            f\"| 月份折扣 | {discount_note} | 第\
+          \ {target_month} 个月 |\",\n            \"| **最终价格** | \" + f\"**{result['final_price']:.2f}\
+          \ 元** | 定价×特价×折扣 |\",\n            \"\",\n            \"**计算公式：**\",\n \
+          \           f\"```\\n{float(pricing_money):.2f} × {special_ratio} × {discount_percent/100:.2f}\
+          \ = {result['final_price']:.2f} 元\\n```\"\n        ]\n        \n       \
+          \ result[\"markdown_result\"] = \"\\n\".join(lines)\n        \n    except\
+          \ Exception as e:\n        import traceback\n        result[\"error_message\"\
+          ] = f\"计算异常: {str(e)}\\n{traceback.format_exc()}\"\n        \n    return\
+          \ result"
+        code_language: python3
+        outputs:
+          error_message:
+            children: null
+            type: string
+          final_price:
+            children: null
+            type: number
+          markdown_result:
+            children: null
+            type: string
+          price_details:
+            children: null
+            type: object
+          success:
+            children: null
+            type: boolean
+        selected: false
+        title: 代码执行
+        type: code
+        variables:
+        - value_selector:
+          - '1775617086546'
+          - body
+          value_type: string
+          variable: discount_data
+        - value_selector:
+          - '1775618510019'
+          - body
+          value_type: string
+          variable: price_data
+        - value_selector:
+          - '1775614447731'
+          - monthNum
+          value_type: string
+          variable: monthNum
+        - value_selector:
+          - '1775614447731'
+          - storeIds
+          value_type: string
+          variable: storeids
+        - value_selector:
+          - '1775614447731'
+          - roomid
+          value_type: string
+          variable: roomid
+      height: 51
+      id: '1775623042872'
+      position:
+        x: 1310.4753751251196
+        y: 365.94959052577866
+      positionAbsolute:
+        x: 1310.4753751251196
+        y: 365.94959052577866
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    viewport:
+      x: -9.171305279783951
+      y: -33.2332000538391
+      zoom: 0.7178172675237938
+  rag_pipeline_variables: []

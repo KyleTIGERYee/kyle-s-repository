@@ -1,0 +1,7 @@
+{
+  "name": "FinSight - 企业财务经营看板",
+  "description": "专为高管设计的移动端企业财务看板。支持全公司数据聚合、门店运营下钻、多店对标及趋势分析。",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

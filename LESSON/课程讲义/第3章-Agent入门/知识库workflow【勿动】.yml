@@ -1,0 +1,233 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 知识库workflow【勿动】
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/tongyi:0.1.30@04fa1c28928e92e425bc946f8f4f5c8f14d0531786c384f128c0e9445f1eee56
+    version: null
+kind: app
+version: 0.5.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: knowledge-retrieval
+      id: 1768297884584-source-1768297887508-target
+      source: '1768297884584'
+      sourceHandle: source
+      target: '1768297887508'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: code
+      id: 1768297887508-source-1768462421783-target
+      source: '1768297887508'
+      sourceHandle: source
+      target: '1768462421783'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1768462421783-source-1768297937413-target
+      source: '1768462421783'
+      sourceHandle: source
+      target: '1768297937413'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: true
+        title: 用户输入
+        type: start
+        variables:
+        - default: ''
+          hint: ''
+          label: query
+          max_length: 48
+          options: []
+          placeholder: ''
+          required: true
+          type: text-input
+          variable: query
+      height: 107
+      id: '1768297884584'
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        dataset_ids:
+        - ssDw4ecgZXoWJF0Z28G3/sesr5aEYTe3rCmwu+fGavPJmWdNBO8HELVWjfdhDsbs
+        multiple_retrieval_config:
+          reranking_enable: true
+          reranking_mode: reranking_model
+          reranking_model:
+            model: gte-rerank-v2
+            provider: langgenius/tongyi/tongyi
+          top_k: 4
+        query_variable_selector:
+        - '1768297884584'
+        - query
+        retrieval_mode: multiple
+        selected: false
+        title: 知识检索
+        type: knowledge-retrieval
+      height: 88
+      id: '1768297887508'
+      position:
+        x: 382
+        y: 282
+      positionAbsolute:
+        x: 382
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        outputs:
+        - value_selector:
+          - '1768462421783'
+          - combined_text
+          value_type: string
+          variable: result
+        selected: false
+        title: 输出
+        type: end
+      height: 86
+      id: '1768297937413'
+      position:
+        x: 983
+        y: 282
+      positionAbsolute:
+        x: 983
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import json\n\ndef main(input_data):\n    \"\"\"\n    防弹版提取函数：无论输入什么，保证不报错\n\
+          \    \"\"\"\n    # 1. 预设默认值 (防止中间出错导致变量不存在)\n    result_text = \"\"\n  \
+          \  \n    try:\n        # 数据预处理：如果是 None 或空，直接跳过\n        if input_data is\
+          \ None:\n            data = []\n        else:\n            data = input_data\n\
+          \n        # 如果传入的是字符串，尝试转成对象\n        if isinstance(data, str):\n      \
+          \      try:\n                data = json.loads(data)\n            except:\n\
+          \                pass # 解析失败就保持原样\n        \n        # 兼容性处理：如果包裹在 result\
+          \ 或 data 字段里\n        if isinstance(data, dict):\n            if 'result'\
+          \ in data: \n                data = data['result']\n            elif 'data'\
+          \ in data: \n                data = data['data']\n            else:\n  \
+          \              data = [data] # 单个字典转列表\n        \n        # 确保 data 是列表，如果不是，强行转为空列表\n\
+          \        if not isinstance(data, list):\n            data = []\n\n     \
+          \   # 核心提取逻辑\n        contents = []\n        for item in data:\n       \
+          \     if isinstance(item, dict):\n                # 安全获取 content，如果没有则由空字符串代替\n\
+          \                c = item.get('content', '')\n                if c:\n  \
+          \                  contents.append(str(c).strip())\n        \n        #\
+          \ 拼接结果\n        result_text = \"\\n\\n\".join(contents)\n\n    except Exception\
+          \ as e:\n        # 万一代码崩了，把错误信息返回给 AI，方便调试，而不是直接中断\n        result_text\
+          \ = f\"数据处理异常: {str(e)}\"\n\n    # 2. 【关键】必须返回字典，且 key 必须和输出变量名 'combined_text'\
+          \ 完全一致\n    return {\n        \"combined_text\": result_text\n    }"
+        code_language: python3
+        outputs:
+          combined_text:
+            children: null
+            type: string
+        selected: false
+        title: 代码执行
+        type: code
+        variables:
+        - value_selector:
+          - '1768297887508'
+          - result
+          value_type: array[object]
+          variable: input_data
+      height: 50
+      id: '1768462421783'
+      position:
+        x: 682
+        y: 282
+      positionAbsolute:
+        x: 682
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    viewport:
+      x: 60.35632600077395
+      y: 193.90897684662573
+      zoom: 0.7772031481642284
+  rag_pipeline_variables: []

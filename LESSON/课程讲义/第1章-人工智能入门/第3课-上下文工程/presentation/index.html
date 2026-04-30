@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第3课：上下文工程 - 交互式课件</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        'primary-light': '#818CF8',
+                        'primary-dark': '#3730A3',
+                        secondary: '#22C55E',
+                        'secondary-light': '#4ADE80',
+                        accent: '#F59E0B',
+                        purple: '#8B5CF6',
+                        pink: '#EC4899',
+                        red: '#EF4444',
+                        background: '#EEF2FF',
+                        surface: '#FFFFFF',
+                        'text-primary': '#312E81',
+                        'text-secondary': '#6366F1',
+                        muted: '#6B7280',
+                    },
+                    fontFamily: {
+                        display: ['Baloo 2', 'cursive'],
+                        body: ['Comic Neue', 'cursive'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 强制大字体样式 */
+        .slide-content { width: 95% !important; max-width: 1600px !important; }
+        .text-body { font-size: 1.5rem !important; line-height: 1.8 !important; }
+        .text-title { font-size: 3rem !important; }
+        .text-subtitle { font-size: 2rem !important; }
+        .text-label { font-size: 1.25rem !important; }
+        
+        /* 标题徽章样式 */
+        .clay-badge {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            border: 2px solid rgba(79, 70, 229, 0.3);
+            font-size: 1.25rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .clay-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 12px rgba(79, 70, 229, 0.15);
+        }
+        
+        /* 页面指示点样式 */
+        .slide-dot {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .slide-dot:hover {
+            transform: scale(1.3);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        .slide-dot.bg-primary {
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+        
+        /* 交互组件样式 - Claymorphism风格 */
+        .interactive-box {
+            background: var(--surface);
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 28px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+        }
+        .interactive-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 12px 12px 24px rgba(79, 70, 229, 0.2), -12px -12px 24px rgba(255, 255, 255, 0.9);
+        }
+        
+        /* 按钮样式 */
+        .btn-action {
+            background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%);
+            color: white;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+        }
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 12px 12px 24px rgba(79, 70, 229, 0.2), -12px -12px 24px rgba(255, 255, 255, 0.9);
+        }
+        
+        /* 幻灯片基础 */
+        #slides-container {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        .slide-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        /* 隐藏内容 */
+        .hidden-content { display: none; }
+        .hidden-content.show { display: block; }
+        
+        /* Token计算器样式 */
+        .token-calculator {
+            background: var(--surface);
+            border-radius: 28px;
+            padding: 2rem;
+            box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 滑块样式 */
+        .slider-container {
+            background: var(--surface);
+            border-radius: 28px;
+            padding: 2rem;
+            box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #4F46E5 0%, #22C55E 100%);
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #4F46E5;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* 对比表格样式 */
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--surface);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 2px solid rgba(79, 70, 229, 0.1);
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%);
+            color: white;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        /* 流程图样式 */
+        .flow-step {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .flow-step:hover {
+            transform: translateY(-4px);
+            box-shadow: 12px 12px 24px rgba(79, 70, 229, 0.2), -12px -12px 24px rgba(255, 255, 255, 0.9);
+        }
+        
+        /* 导航按钮样式 */
+        .nav-btn {
+            background: var(--surface);
+            border: 3px solid #4F46E5;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+        }
+        
+        .nav-btn:hover {
+            background: #4F46E5;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        /* 页面指示点 */
+        .slide-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(79, 70, 229, 0.2);
+            border: 2px solid #4F46E5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .slide-dot.active {
+            background: #4F46E5;
+            transform: scale(1.3);
+        }
+    </style>
+</head>
+<body class="bg-background text-text-primary font-body overflow-hidden">
+    <!-- 动态背景画布 -->
+    <canvas id="particleCanvas" class="fixed inset-0 z-0"></canvas>
+    <div class="fixed inset-0 z-0 bg-gradient-to-b from-primary/10 via-secondary/5 to-background pointer-events-none"></div>
+
+    <!-- 主容器 -->
+    <div id="presentation" class="relative w-full h-screen z-10">
+        <div id="slides-container" class="relative w-full h-full">
+            
+            <!-- 第1页：封面 -->
+            <section class="slide" data-index="0">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center items-center text-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-primary border-primary/50">第1章 · 人工智能入门</span>
+                    </div>
+                    <h1 class="font-display text-hero font-bold mb-8 leading-tight">
+                        <span class="block">上下文工程</span>
+                        <span class="block text-primary text-hero-sub mt-4">让AI拥有记忆的能力</span>
+                    </h1>
+                    <p class="text-body text-muted mb-16 max-w-4xl">理解上下文窗口与记忆机制，掌握Coze中的长短期记忆功能</p>
+                    <div class="flex items-center justify-center gap-16">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 rounded-full border-2 border-primary/50 flex items-center justify-center mb-4" style="box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-body">45分钟</div>
+                        </div>
+                        <div class="w-px h-20 bg-primary/30"></div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 rounded-full border-2 border-primary/50 flex items-center justify-center mb-4" style="box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-body">进阶课程</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第2页：课程目标 -->
+            <section class="slide" data-index="1">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="text-center mb-12">
+                        <span class="clay-badge mb-4 text-secondary border-secondary/50">Course Objectives</span>
+                        <h2 class="font-display text-title font-bold mt-4">课程目标</h2>
+                        <p class="text-subtitle text-muted mt-4">完成本课后，你将能够：</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box flex items-start gap-6">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="font-display text-4xl text-primary font-bold">01</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-subtitle font-semibold mb-3">理解上下文窗口</h3>
+                                <p class="text-body text-muted">理解上下文窗口与记忆的区别，掌握Token计算方法</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box flex items-start gap-6">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="font-display text-4xl text-primary font-bold">02</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-subtitle font-semibold mb-3">掌握对话轮数控制</h3>
+                                <p class="text-body text-muted">理解对话轮数限制的意义，掌握成本控制方法</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box flex items-start gap-6">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="font-display text-4xl text-primary font-bold">03</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-subtitle font-semibold mb-3">使用Coze记忆功能</h3>
+                                <p class="text-body text-muted">熟练使用Coze中的短期记忆和长期记忆（数据库）功能</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box flex items-start gap-6">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="font-display text-4xl text-primary font-bold">04</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-subtitle font-semibold mb-3">创建记忆型Bot</h3>
+                                <p class="text-body text-muted">创建一个能记住用户信息的智能Bot</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第3页：什么是上下文窗口 -->
+            <section class="slide" data-index="2">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-accent border-accent/50">3.1.1 概念解析</span>
+                        <h2 class="font-display text-title font-bold mt-4">什么是上下文窗口？</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12 items-center">
+                        <div class="interactive-box h-[500px] flex items-center justify-center">
+                            <svg viewBox="0 0 400 400" class="w-full h-full">
+                                <!-- 窗口外框 -->
+                                <rect x="50" y="50" width="300" height="300" rx="20" fill="none" stroke="#4F46E5" stroke-width="4"/>
+                                <!-- 窗口内容 -->
+                                <rect x="70" y="70" width="260" height="60" rx="10" fill="rgba(79,70,229,0.1)" stroke="#4F46E5" stroke-width="2"/>
+                                <text x="200" y="105" text-anchor="middle" fill="#4F46E5" font-size="14" font-weight="bold">系统指令</text>
+                                
+                                <rect x="70" y="140" width="260" height="80" rx="10" fill="rgba(34,197,94,0.1)" stroke="#22C55E" stroke-width="2"/>
+                                <text x="200" y="175" text-anchor="middle" fill="#22C55E" font-size="14" font-weight="bold">历史对话</text>
+                                <text x="200" y="195" text-anchor="middle" fill="#6B7280" font-size="12">用户：你好</text>
+                                <text x="200" y="210" text-anchor="middle" fill="#6B7280" font-size="12">AI：您好！</text>
+                                
+                                <rect x="70" y="230" width="260" height="50" rx="10" fill="rgba(245,158,11,0.1)" stroke="#F59E0B" stroke-width="2"/>
+                                <text x="200" y="260" text-anchor="middle" fill="#F59E0B" font-size="14" font-weight="bold">当前输入</text>
+                                
+                                <rect x="70" y="290" width="260" height="40" rx="10" fill="rgba(236,72,153,0.1)" stroke="#EC4899" stroke-width="2"/>
+                                <text x="200" y="315" text-anchor="middle" fill="#EC4899" font-size="14" font-weight="bold">知识库检索</text>
+                            </svg>
+                        </div>
+                        <div class="space-y-8">
+                            <div class="border-l-4 border-primary pl-8">
+                                <p class="text-body leading-relaxed">上下文窗口（Context Window）是指模型能同时处理的输入文本长度，通常以tokens为单位。它是衡量模型"短期记忆容量"的关键指标。</p>
+                            </div>
+                            <div class="interactive-box">
+                                <h4 class="font-display text-subtitle font-semibold mb-4 text-primary">窗口包含的内容</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-4 h-4 rounded-full bg-primary"></div>
+                                        <span class="text-body">系统指令（System Prompt）</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-4 h-4 rounded-full bg-secondary"></div>
+                                        <span class="text-body">历史对话（Conversation History）</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-4 h-4 rounded-full" style="background: #F59E0B;"></div>
+                                        <span class="text-body">当前输入（User Input）</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-4 h-4 rounded-full" style="background: #EC4899;"></div>
+                                        <span class="text-body">知识库检索结果（RAG Results）</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第4页：Token计算器 -->
+            <section class="slide" data-index="3">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-accent border-accent/50">3.1.2 Token计算</span>
+                        <h2 class="font-display text-title font-bold mt-4">Token计算器</h2>
+                        <p class="text-subtitle text-muted mt-4">输入文本，实时计算Token数量</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="token-calculator">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">输入文本</h3>
+                            <textarea id="tokenInput" rows="6" class="w-full bg-surface-light/50 border-2 border-primary rounded-xl px-6 py-4 text-body focus:border-primary focus:outline-none resize-none mb-6" placeholder="输入文本，计算Token数量..."></textarea>
+                            <div class="flex gap-4">
+                                <button onclick="calculateTokens()" class="btn-action flex-1">计算Token</button>
+                                <button onclick="clearTokenInput()" class="clay-btn" style="background: var(--surface); color: var(--text-primary); border: 2px solid var(--primary);">清空</button>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="interactive-box text-center">
+                                <div class="text-label text-muted mb-2">Token数量</div>
+                                <div id="tokenCount" class="font-display text-6xl font-bold text-primary">0</div>
+                            </div>
+                            <div class="interactive-box">
+                                <h4 class="font-display text-subtitle font-semibold mb-4">Token换算参考</h4>
+                                <table class="w-full text-body">
+                                    <tr class="border-b border-primary/20">
+                                        <td class="py-3">英文</td>
+                                        <td class="py-3 text-primary font-semibold">~0.75个单词</td>
+                                    </tr>
+                                    <tr class="border-b border-primary/20">
+                                        <td class="py-3">中文</td>
+                                        <td class="py-3 text-primary font-semibold">~0.5-0.7个汉字</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3">代码</td>
+                                        <td class="py-3 text-primary font-semibold">~0.5-1个字符</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="bg-primary/10 rounded-2xl p-6 border border-primary/30">
+                                <p class="text-body text-muted flex items-center gap-2"><svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>提示：可使用 <a href="https://dashscope.console.aliyun.com/tokenizer" target="_blank" class="text-primary underline">阿里云Tokenizer</a> 进行精确计算</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第5页：常见模型上下文窗口对比 -->
+            <section class="slide" data-index="4">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-accent border-accent/50">3.1.1 概念解析</span>
+                        <h2 class="font-display text-title font-bold mt-4">常见模型上下文窗口对比</h2>
+                    </div>
+                    <div class="interactive-box mb-8">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-left py-4 px-6">厂商</th>
+                                    <th class="text-left py-4 px-6">最强模型</th>
+                                    <th class="text-left py-4 px-6">上下文窗口</th>
+                                    <th class="text-left py-4 px-6">可视化</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-body">
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-6 font-semibold">DeepSeek</td>
+                                    <td class="py-4 px-6">DeepSeek V3.2</td>
+                                    <td class="py-4 px-6 text-primary font-bold">128K tokens</td>
+                                    <td class="py-4 px-6">
+                                        <div class="w-full bg-primary/10 rounded-full h-4">
+                                            <div class="bg-primary h-4 rounded-full" style="width: 32%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-6 font-semibold">阿里巴巴</td>
+                                    <td class="py-4 px-6">Qwen3-Max-Thinking</td>
+                                    <td class="py-4 px-6 text-primary font-bold">256K tokens</td>
+                                    <td class="py-4 px-6">
+                                        <div class="w-full bg-primary/10 rounded-full h-4">
+                                            <div class="bg-primary h-4 rounded-full" style="width: 64%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-6 font-semibold">月之暗面</td>
+                                    <td class="py-4 px-6">Kimi K2.5</td>
+                                    <td class="py-4 px-6 text-primary font-bold">256K tokens</td>
+                                    <td class="py-4 px-6">
+                                        <div class="w-full bg-primary/10 rounded-full h-4">
+                                            <div class="bg-primary h-4 rounded-full" style="width: 64%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-6 font-semibold">OpenAI</td>
+                                    <td class="py-4 px-6">ChatGPT-5.2</td>
+                                    <td class="py-4 px-6 text-primary font-bold">400K tokens</td>
+                                    <td class="py-4 px-6">
+                                        <div class="w-full bg-primary/10 rounded-full h-4">
+                                            <div class="bg-primary h-4 rounded-full" style="width: 100%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-6 font-semibold">Anthropic</td>
+                                    <td class="py-4 px-6">Claude Opus 4.5</td>
+                                    <td class="py-4 px-6 text-primary font-bold">200K tokens</td>
+                                    <td class="py-4 px-6">
+                                        <div class="w-full bg-primary/10 rounded-full h-4">
+                                            <div class="bg-primary h-4 rounded-full" style="width: 50%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-6 font-semibold">Google</td>
+                                    <td class="py-4 px-6">Gemini 3.0 Pro</td>
+                                    <td class="py-4 px-6 text-primary font-bold">1M tokens</td>
+                                    <td class="py-4 px-6">
+                                        <div class="w-full bg-primary/10 rounded-full h-4">
+                                            <div class="bg-secondary h-4 rounded-full" style="width: 100%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="bg-primary/10 rounded-2xl p-6 border border-primary/30">
+                        <p class="text-body text-muted flex items-center gap-2"><svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>Google Gemini 3.0 Pro 拥有最大的上下文窗口（1M tokens），可以处理整本书的内容！</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第6页：窗口超限会发生什么？ -->
+            <section class="slide" data-index="5">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-accent border-accent/50">3.1.2 Token计算</span>
+                        <h2 class="font-display text-title font-bold mt-4">窗口超限会发生什么？</h2>
+                        <p class="text-subtitle text-muted mt-4">当对话内容超过上下文窗口限制时，系统会采取以下处理方式：</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box cursor-pointer" onclick="showTruncationDetail()">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                    <span class="text-3xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">截断（Truncation）</h3>
+                            </div>
+                            <p class="text-body text-muted">最早的对话被删除，保留最近的对话内容。这是最常见的处理方式。</p>
+                            <div id="truncationDetail" class="hidden-content mt-4 p-4 bg-primary/10 rounded-xl">
+                                <p class="text-body">例如：上下文限制10轮，当前有12轮对话，系统会删除最早的2轮，保留最近10轮。</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box cursor-pointer" onclick="showSummarizationDetail()">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(74, 222, 128, 0.1) 100%); border: 2px solid rgba(34, 197, 94, 0.2);">
+                                    <span class="text-3xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">摘要（Summarization）</h3>
+                            </div>
+                            <p class="text-body text-muted">将早期对话压缩成摘要，保留关键信息，节省Token。</p>
+                            <div id="summarizationDetail" class="hidden-content mt-4 p-4 bg-secondary/10 rounded-xl">
+                                <p class="text-body">AI会自动生成之前对话的摘要，用更少Token保留核心信息。</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box cursor-pointer" onclick="showErrorDetail()">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(248, 113, 113, 0.1) 100%); border: 2px solid rgba(239, 68, 68, 0.2);">
+                                    <span class="text-3xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">报错（Error）</h3>
+                            </div>
+                            <p class="text-body text-muted">部分系统会直接拒绝处理，提示上下文过长。</p>
+                            <div id="errorDetail" class="hidden-content mt-4 p-4 bg-red-500/10 rounded-xl">
+                                <p class="text-body">系统返回错误："Context length exceeded" 或 "输入过长"。</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box cursor-pointer" onclick="showHallucinationDetail()">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%); border: 2px solid rgba(245, 158, 11, 0.2);">
+                                    <span class="text-3xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">幻觉（Hallucination）</h3>
+                            </div>
+                            <p class="text-body text-muted">模型可能会编造信息来填补空白，产生不准确的内容。</p>
+                            <div id="hallucinationDetail" class="hidden-content mt-4 p-4 bg-yellow-500/10 rounded-xl">
+                                <p class="text-body">当模型"忘记"了之前的信息，可能会凭空编造答案，这是最危险的情况。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第7页：注意力稀释演示 -->
+            <section class="slide" data-index="6">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-accent border-accent/50">3.1.3 注意力机制</span>
+                        <h2 class="font-display text-title font-bold mt-4">为什么长对话会"遗忘"？</h2>
+                        <p class="text-subtitle text-muted mt-4">即使上下文窗口足够大，模型也可能"忘记"早期的内容</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-8 mb-8">
+                        <div class="interactive-box text-center">
+                            <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold mb-3">注意力稀释</h3>
+                            <p class="text-body text-muted">信息太多，每个词获得的注意力减少</p>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(74, 222, 128, 0.1) 100%); border: 2px solid rgba(34, 197, 94, 0.2);">
+                                <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold mb-3">位置偏见</h3>
+                            <p class="text-body text-muted">模型对后面的信息更敏感</p>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%); border: 2px solid rgba(245, 158, 11, 0.2);">
+                                <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold mb-3">信息压缩</h3>
+                            <p class="text-body text-muted">模型必须压缩大量信息，细节可能丢失</p>
+                        </div>
+                    </div>
+                    <div class="interactive-box">
+                        <h4 class="font-display text-subtitle font-semibold mb-4 text-primary">实际案例演示</h4>
+                        <div class="grid grid-cols-2 gap-8">
+                            <div>
+                                <div class="text-label text-muted mb-2">对话第1轮</div>
+                                <div class="bg-primary/10 rounded-xl p-4 mb-4">
+                                    <p class="text-body"><strong>用户：</strong>"我叫张三，想找西乡的房"</p>
+                                    <p class="text-body mt-2"><strong>AI：</strong>"好的张三，西乡有很多优质房源..."</p>
+                                </div>
+                                <div class="text-label text-muted mb-2">...（经过20轮对话）...</div>
+                            </div>
+                            <div>
+                                <div class="text-label text-muted mb-2">对话第22轮</div>
+                                <div class="bg-yellow-500/10 rounded-xl p-4 mb-4 border border-yellow-500/30">
+                                    <p class="text-body"><strong>用户：</strong>"我上次说的预算你还记得吗？"</p>
+                                    <p class="text-body mt-2 text-yellow-600"><strong>AI：</strong>（可能已经忘记用户叫张三，也可能忘记预算）</p>
+                                </div>
+                                <div class="bg-red-500/10 rounded-xl p-4 border border-red-500/30">
+                                    <p class="text-body text-red-600 flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-.77-2.694-.77-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> 这就是"遗忘"现象！</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第8页：Coze短期记忆设置 -->
+            <section class="slide" data-index="7">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-secondary border-secondary/50">3.2.1 短期记忆</span>
+                        <h2 class="font-display text-title font-bold mt-4">Coze短期记忆：携带上下文轮数</h2>
+                        <p class="text-subtitle text-muted mt-4">拖动滑块，调整上下文轮数，观察成本和体验的变化</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="slider-container">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">调整上下文轮数</h3>
+                            <div class="mb-8">
+                                <div class="flex justify-between mb-4">
+                                    <span class="text-body text-muted">1轮</span>
+                                    <span id="roundValue" class="font-display text-4xl font-bold text-primary">5</span>
+                                    <span class="text-body text-muted">不限制</span>
+                                </div>
+                                <input type="range" id="contextSlider" min="1" max="20" value="5" class="w-full" oninput="updateContextRounds(this.value)">
+                                <div class="flex justify-between mt-2 text-sm text-muted">
+                                    <span>1</span>
+                                    <span>5</span>
+                                    <span>10</span>
+                                    <span>15</span>
+                                    <span>20+</span>
+                                </div>
+                            </div>
+                            <div class="bg-primary/10 rounded-xl p-4">
+                                <p class="text-body"><strong>当前设置：</strong><span id="roundDescription">5轮 - 平衡成本和体验</span></p>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="interactive-box">
+                                <h4 class="font-display text-subtitle font-semibold mb-4">成本影响</h4>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-body">Token消耗</span>
+                                        <div class="flex items-center gap-2">
+                                            <div id="costBar" class="w-32 bg-primary/20 rounded-full h-3">
+                                                <div class="bg-primary h-3 rounded-full transition-all" style="width: 50%"></div>
+                                            </div>
+                                            <span id="costValue" class="text-body font-semibold">中等</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-body">响应速度</span>
+                                        <div class="flex items-center gap-2">
+                                            <div id="speedBar" class="w-32 bg-secondary/20 rounded-full h-3">
+                                                <div class="bg-secondary h-3 rounded-full transition-all" style="width: 60%"></div>
+                                            </div>
+                                            <span id="speedValue" class="text-body font-semibold">较快</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="interactive-box">
+                                <h4 class="font-display text-subtitle font-semibold mb-4">体验影响</h4>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-body">对话连续性</span>
+                                        <div class="flex items-center gap-2">
+                                            <div id="continuityBar" class="w-32 bg-primary/20 rounded-full h-3">
+                                                <div class="bg-primary h-3 rounded-full transition-all" style="width: 60%"></div>
+                                            </div>
+                                            <span id="continuityValue" class="text-body font-semibold">良好</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-body">记忆准确性</span>
+                                        <div class="flex items-center gap-2">
+                                            <div id="accuracyBar" class="w-32 bg-secondary/20 rounded-full h-3">
+                                                <div class="bg-secondary h-3 rounded-full transition-all" style="width: 70%"></div>
+                                            </div>
+                                            <span id="accuracyValue" class="text-body font-semibold">较好</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第9页：轮数选择指南 -->
+            <section class="slide" data-index="8">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-secondary border-secondary/50">3.2.1 短期记忆</span>
+                        <h2 class="font-display text-title font-bold mt-4">如何选择合适的轮数？</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                    <span class="font-display text-2xl font-bold text-primary">1-3</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-subtitle font-semibold">简单问答</h3>
+                                    <p class="text-body text-muted">独立任务场景</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-body">
+                                <p class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 成本低、速度快</p>
+                                <p class="flex items-center gap-2"><svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> 缺乏连续性</p>
+                                <p class="text-muted mt-4">适用：FAQ、单轮查询</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(74, 222, 128, 0.1) 100%); border: 2px solid rgba(34, 197, 94, 0.2);">
+                                    <span class="font-display text-2xl font-bold text-secondary">5-10</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-subtitle font-semibold">一般对话</h3>
+                                    <p class="text-body text-muted">需求挖掘场景</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-body">
+                                <p class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 平衡成本和体验</p>
+                                <p class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 适合大多数场景</p>
+                                <p class="text-muted mt-4">适用：客服、销售咨询</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%); border: 2px solid rgba(245, 158, 11, 0.2);">
+                                    <span class="font-display text-2xl font-bold" style="color: #F59E0B;">10-20</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-subtitle font-semibold">深度咨询</h3>
+                                    <p class="text-body text-muted">复杂任务场景</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-body">
+                                <p class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 体验好、连续性强</p>
+                                <p class="flex items-center gap-2"><svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-.77-2.694-.77-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> 成本较高</p>
+                                <p class="text-muted mt-4">适用：技术支持、深度咨询</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(244, 114, 182, 0.1) 100%); border: 2px solid rgba(236, 72, 153, 0.2);">
+                                    <span class="font-display text-xl font-bold" style="color: #EC4899;">∞</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-subtitle font-semibold">不限制</h3>
+                                    <p class="text-body text-muted">长文档分析场景</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2 text-body">
+                                <p class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 体验最佳</p>
+                                <p class="flex items-center gap-2"><svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> 成本最高</p>
+                                <p class="text-muted mt-4">适用：文档分析、深度对话</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 bg-primary/10 rounded-2xl p-6 border border-primary/30">
+                        <p class="text-body"><strong class="flex items-center gap-2"><svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg> 最佳实践：</strong>根据业务场景选择合适的轮数。客服场景推荐5-10轮，销售场景推荐10-15轮，技术支持可选择不限制或20轮以上。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第10页：长期记忆vs短期记忆 -->
+            <section class="slide" data-index="9">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-secondary border-secondary/50">3.2.2 长期记忆</span>
+                        <h2 class="font-display text-title font-bold mt-4">短期记忆 vs 长期记忆</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                    <span class="text-3xl">⏱️</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-subtitle font-semibold text-primary">短期记忆</h3>
+                                    <p class="text-body text-muted">携带上下文轮数</p>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary mt-1">•</span>
+                                    <p class="text-body">随对话结束而消失</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary mt-1">•</span>
+                                    <p class="text-body">存储在上下文中</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary mt-1">•</span>
+                                    <p class="text-body">容量有限（轮数限制）</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-primary mt-1">•</span>
+                                    <p class="text-body">成本低但易丢失</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-primary/10 rounded-xl">
+                                <p class="text-body text-muted">就像人的工作记忆，可以暂时记住一些事情，但很快就会忘记。</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(74, 222, 128, 0.1) 100%); border: 2px solid rgba(34, 197, 94, 0.2);">
+                                    <span class="text-3xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg></span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-subtitle font-semibold text-secondary">长期记忆</h3>
+                                    <p class="text-body text-muted">数据库功能</p>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-secondary mt-1">•</span>
+                                    <p class="text-body">持久化存储</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-secondary mt-1">•</span>
+                                    <p class="text-body">存储在数据库中</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-secondary mt-1">•</span>
+                                    <p class="text-body">容量大（受限于存储）</p>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <span class="text-secondary mt-1">•</span>
+                                    <p class="text-body">成本高但持久可靠</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-secondary/10 rounded-xl">
+                                <p class="text-body text-muted">就像人的长期记忆，可以记住重要的信息，随时回忆起来。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 interactive-box">
+                        <h4 class="font-display text-subtitle font-semibold mb-4 text-center">记忆机制对比</h4>
+                        <table class="w-full text-body">
+                            <thead>
+                                <tr class="border-b-2 border-primary/30">
+                                    <th class="text-left py-3">特性</th>
+                                    <th class="text-center py-3">短期记忆</th>
+                                    <th class="text-center py-3">长期记忆</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-3">生命周期</td>
+                                    <td class="py-3 text-center">对话期间</td>
+                                    <td class="py-3 text-center">永久</td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-3">存储位置</td>
+                                    <td class="py-3 text-center">上下文</td>
+                                    <td class="py-3 text-center">数据库</td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-3">容量</td>
+                                    <td class="py-3 text-center">有限（轮数）</td>
+                                    <td class="py-3 text-center">大（存储限制）</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3">成本</td>
+                                    <td class="py-3 text-center">低</td>
+                                    <td class="py-3 text-center">高</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第11页：变量系统对比 -->
+            <section class="slide" data-index="10">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-secondary border-secondary/50">3.2.3 变量系统</span>
+                        <h2 class="font-display text-title font-bold mt-4">变量类型对比</h2>
+                        <p class="text-subtitle text-muted mt-4">用户输入变量 vs 系统变量 vs 全局变量</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-8">
+                        <div class="interactive-box">
+                            <div class="text-center mb-6">
+                                <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                    <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold text-primary">用户输入变量</h3>
+                            </div>
+                            <div class="space-y-3 text-body">
+                                <div class="flex justify-between">
+                                    <span class="text-muted">生命周期</span>
+                                    <span class="font-semibold">单次对话</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted">作用范围</span>
+                                    <span class="font-semibold">当前消息</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted">使用场景</span>
+                                    <span class="font-semibold">获取输入</span>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-primary/10 rounded-xl">
+                                <p class="text-body text-sm">示例：{{user_input}} - 存储用户当前发送的消息内容</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="text-center mb-6">
+                                <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(74, 222, 128, 0.1) 100%); border: 2px solid rgba(34, 197, 94, 0.2);">
+                                    <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold text-secondary">系统变量</h3>
+                            </div>
+                            <div class="space-y-3 text-body">
+                                <div class="flex justify-between">
+                                    <span class="text-muted">生命周期</span>
+                                    <span class="font-semibold">整个会话</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted">作用范围</span>
+                                    <span class="font-semibold">当前用户</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted">使用场景</span>
+                                    <span class="font-semibold">跨轮对话</span>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-secondary/10 rounded-xl">
+                                <p class="text-body text-sm">示例：{{user_name}} - 在当前会话中保持用户姓名</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="text-center mb-6">
+                                <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%); border: 2px solid rgba(245, 158, 11, 0.2);">
+                                    <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold" style="color: #F59E0B;">全局变量</h3>
+                            </div>
+                            <div class="space-y-3 text-body">
+                                <div class="flex justify-between">
+                                    <span class="text-muted">生命周期</span>
+                                    <span class="font-semibold">永久</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted">作用范围</span>
+                                    <span class="font-semibold">所有用户</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-muted">使用场景</span>
+                                    <span class="font-semibold">配置信息</span>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-yellow-500/10 rounded-xl">
+                                <p class="text-body text-sm">示例：{{company_name}} - 所有用户共享的公司名称</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 interactive-box">
+                        <h4 class="font-display text-subtitle font-semibold mb-4">变量使用示例</h4>
+                        <div class="bg-gray-900 rounded-xl p-6 font-mono text-sm text-gray-300 overflow-x-auto">
+                            <p class="text-green-400">// 场景：记住用户的租房偏好</p>
+                            <p class="mt-2">1. 用户输入："我想在西乡租房，预算3000"</p>
+                            <p class="mt-2 text-yellow-400">2. 提取变量：</p>
+                            <p class="pl-4">- {{user_name}} = "张三"</p>
+                            <p class="pl-4">- {{preferred_area}} = "西乡"</p>
+                            <p class="pl-4">- {{budget}} = "3000"</p>
+                            <p class="mt-2 text-blue-400">3. 存储到数据库</p>
+                            <p class="mt-2 text-purple-400">4. 后续对话引用：</p>
+                            <p class="pl-4 text-gray-400">"{{user_name}}，根据您之前提到的{{budget}}元预算，</p>
+                            <p class="pl-4 text-gray-400">我为您在{{preferred_area}}找到了几套新房源..."</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第13页：RAG基础 -->
+            <section class="slide" data-index="11">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-purple border-purple/50">3.3 RAG基础</span>
+                        <h2 class="font-display text-title font-bold mt-4">什么是RAG？</h2>
+                        <p class="text-subtitle text-muted mt-4">检索增强生成（Retrieval-Augmented Generation）</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-10">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">为什么需要RAG？</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3);">
+                                        <span class="text-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-body">知识截止</h4>
+                                        <p class="text-sm text-muted">大模型的知识有截止日期，无法获取最新信息</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3);">
+                                        <span class="text-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-body">私有知识</h4>
+                                        <p class="text-sm text-muted">模型不知道企业的内部信息和专有数据</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3);">
+                                        <span class="text-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg></span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-body">幻觉问题</h4>
+                                        <p class="text-sm text-muted">模型可能编造不存在的信息来回答问题</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3);">
+                                        <span class="text-lg"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-body">实时信息</h4>
+                                        <p class="text-sm text-muted">需要获取最新的动态数据和实时状态</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">RAG定义</h3>
+                            <div class="p-6 rounded-2xl" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%); border: 2px solid rgba(139, 92, 246, 0.2);">
+                                <p class="text-body leading-relaxed">
+                                    <strong style="color: #8B5CF6;">RAG（Retrieval-Augmented Generation）</strong>是一种通过集成外部知识源来增强大语言模型能力的技术。
+                                </p>
+                            </div>
+                            <div class="mt-6">
+                                <h4 class="font-semibold text-body mb-4">核心思想</h4>
+                                <div class="flex items-center justify-center gap-4">
+                                    <div class="text-center">
+                                        <div class="w-16 h-16 rounded-2xl mx-auto mb-2 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.3);">
+                                            <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg></span>
+                                        </div>
+                                        <p class="text-sm">LLM</p>
+                                    </div>
+                                    <span class="text-2xl">+</span>
+                                    <div class="text-center">
+                                        <div class="w-16 h-16 rounded-2xl mx-auto mb-2 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(167, 139, 250, 0.1) 100%); border: 2px solid rgba(139, 92, 246, 0.3);">
+                                            <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg></span>
+                                        </div>
+                                        <p class="text-sm">知识库</p>
+                                    </div>
+                                    <span class="text-2xl">=</span>
+                                    <div class="text-center">
+                                        <div class="w-16 h-16 rounded-2xl mx-auto mb-2 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(74, 222, 128, 0.1) 100%); border: 2px solid rgba(34, 197, 94, 0.3);">
+                                            <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></span>
+                                        </div>
+                                        <p class="text-sm">增强回答</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第14页：RAG工作流程 -->
+            <section class="slide" data-index="12">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-purple border-purple/50">3.3.2 RAG工作流程</span>
+                        <h2 class="font-display text-title font-bold mt-4">RAG三步走</h2>
+                        <p class="text-subtitle text-muted mt-4">检索 → 整合 → 生成</p>
+                    </div>
+                    <div class="interactive-box">
+                        <div class="flex items-center justify-between">
+                            <!-- Step 1 -->
+                            <div class="flex-1 text-center">
+                                <div class="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%); box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);">
+                                    <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold mb-2">Step 1: 检索</h3>
+                                <p class="text-body text-muted">从知识库中找到最相关的文档</p>
+                                <div class="mt-4 p-4 rounded-xl text-left text-sm" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                    <p>用户问："西乡店押金怎么算？"</p>
+                                    <p class="mt-2 text-primary">→ 找到"西乡店押金政策"</p>
+                                </div>
+                            </div>
+                            
+                            <div class="px-4">
+                                <span class="text-4xl text-muted">→</span>
+                            </div>
+                            
+                            <!-- Step 2 -->
+                            <div class="flex-1 text-center">
+                                <div class="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%); box-shadow: 0 8px 32px rgba(79, 70, 229, 0.3);">
+                                    <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold mb-2">Step 2: 整合</h3>
+                                <p class="text-body text-muted">将检索到的信息加入上下文</p>
+                                <div class="mt-4 p-4 rounded-xl text-left text-sm" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                                    <p>将押金政策内容</p>
+                                    <p class="mt-2 text-primary">→ 添加到Prompt中</p>
+                                </div>
+                            </div>
+                            
+                            <div class="px-4">
+                                <span class="text-4xl text-muted">→</span>
+                            </div>
+                            
+                            <!-- Step 3 -->
+                            <div class="flex-1 text-center">
+                                <div class="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%); box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);">
+                                    <span class="text-4xl"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold mb-2">Step 3: 生成</h3>
+                                <p class="text-body text-muted">基于检索信息生成准确回答</p>
+                                <div class="mt-4 p-4 rounded-xl text-left text-sm" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                    <p>基于政策内容</p>
+                                    <p class="mt-2 text-primary">→ 生成准确回答</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 interactive-box">
+                        <h4 class="font-display text-subtitle font-semibold mb-4">完整示例</h4>
+                        <div class="bg-gray-900 rounded-xl p-6 font-mono text-sm text-gray-300">
+                            <p class="text-yellow-400">用户提问：</p>
+                            <p class="pl-4">"安居乐寓西乡店的押金怎么算？"</p>
+                            <p class="mt-4 text-green-400">Step 1 - 检索：</p>
+                            <p class="pl-4">→ 从知识库找到"西乡店押金政策"文档</p>
+                            <p class="pl-4">→ 相似度匹配：0.95（最相关）</p>
+                            <p class="mt-4 text-blue-400">Step 2 - 整合：</p>
+                            <p class="pl-4">→ 将押金政策内容加入上下文窗口</p>
+                            <p class="mt-4 text-purple-400">Step 3 - 生成：</p>
+                            <p class="pl-4">→ "西乡店的押金政策是：押一付一，即押金等于一个月租金..."</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第15页：向量数据库 -->
+            <section class="slide" data-index="13">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-pink border-pink/50">3.3.3 向量数据库</span>
+                        <h2 class="font-display text-title font-bold mt-4">向量数据库简介</h2>
+                        <p class="text-subtitle text-muted mt-4">文本如何变成向量？如何进行相似度检索？</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-10">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">什么是向量数据库？</h3>
+                            <p class="text-body leading-relaxed mb-6">
+                                传统数据库存储文本、数字等原始数据，而<strong style="color: #EC4899;">向量数据库</strong>存储的是"语义向量"——将文本转换为数字向量，捕捉语义信息。
+                            </p>
+                            <div class="p-6 rounded-2xl" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(244, 114, 182, 0.05) 100%); border: 2px solid rgba(236, 72, 153, 0.2);">
+                                <h4 class="font-semibold mb-4">文本向量化过程</h4>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs text-white" style="background: #EC4899;">1</span>
+                                        <span>分词：["西乡", "地铁站", "附近", "的", "公寓"]</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs text-white" style="background: #EC4899;">2</span>
+                                        <span>编码：将每个词转换为数字向量</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs text-white" style="background: #EC4899;">3</span>
+                                        <span>聚合：合并为整个句子的向量</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">向量检索原理</h3>
+                            <div class="bg-gray-900 rounded-xl p-6 font-mono text-sm text-gray-300">
+                                <p class="text-yellow-400">用户提问：</p>
+                                <p class="pl-4">"西乡地铁房"</p>
+                                <p class="mt-4 text-blue-400">↓ 转换为向量</p>
+                                <p class="pl-4">[0.25, -0.51, 0.92, ..., 0.15]</p>
+                                <p class="mt-4 text-green-400">↓ 计算相似度</p>
+                                <div class="pl-4 space-y-2">
+                                    <p>文档A（西乡店介绍）：<span class="text-green-400">相似度 0.95</span> ← 最相关</p>
+                                    <p>文档B（南山店介绍）：<span class="text-yellow-400">相似度 0.32</span></p>
+                                    <p>文档C（福田店介绍）：<span class="text-red-400">相似度 0.28</span></p>
+                                </div>
+                                <p class="mt-4 text-purple-400">↓ 返回Top K个最相关文档</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 grid grid-cols-3 gap-6">
+                        <div class="text-center p-6 rounded-2xl" style="background: rgba(79, 70, 229, 0.1); border: 2px solid rgba(79, 70, 229, 0.2);">
+                            <div class="font-display text-3xl font-bold text-primary mb-2">768</div>
+                            <div class="text-body text-muted">常见向量维度</div>
+                        </div>
+                        <div class="text-center p-6 rounded-2xl" style="background: rgba(236, 72, 153, 0.1); border: 2px solid rgba(236, 72, 153, 0.2);">
+                            <div class="font-display text-3xl font-bold mb-2" style="color: #EC4899;">余弦相似度</div>
+                            <div class="text-body text-muted">常用相似度算法</div>
+                        </div>
+                        <div class="text-center p-6 rounded-2xl" style="background: rgba(34, 197, 94, 0.1); border: 2px solid rgba(34, 197, 94, 0.2);">
+                            <div class="font-display text-3xl font-bold text-secondary mb-2">Top-K</div>
+                            <div class="text-body text-muted">返回最相关的K个结果</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第16页：实战演示 - 需求分析 -->
+            <section class="slide" data-index="14">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-accent border-accent/50">3.4 实战演示</span>
+                        <h2 class="font-display text-title font-bold mt-4">创建能记住用户的Bot</h2>
+                        <p class="text-subtitle text-muted mt-4">需求分析与数据库设计</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-10">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">业务场景</h3>
+                            <p class="text-body mb-6">创建一个租房咨询Bot，能够：</p>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-4 p-4 rounded-xl" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                                    <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></span>
+                                    <span class="text-body">记住用户的姓名和联系方式</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-4 rounded-xl" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                    <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></span>
+                                    <span class="text-body">记录用户的租房偏好（预算、区域、户型）</span>
+                                </div>
+                                <div class="flex items-center gap-4 p-4 rounded-xl" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                                    <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg></span>
+                                    <span class="text-body">在后续对话中主动使用这些信息</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">数据库设计</h3>
+                            <div class="bg-gray-900 rounded-xl p-6 font-mono text-sm text-gray-300 overflow-x-auto">
+                                <p class="text-yellow-400">表名：user_preferences</p>
+                                <p class="mt-4 text-green-400">字段设计：</p>
+                                <div class="mt-2 space-y-1 pl-4">
+                                    <p>- user_id (主键): 用户唯一标识</p>
+                                    <p>- user_name: 用户姓名</p>
+                                    <p>- phone: 联系电话</p>
+                                    <p>- budget: 预算（元/月）</p>
+                                    <p>- preferred_area: 偏好区域</p>
+                                    <p>- room_type: 户型要求</p>
+                                    <p>- move_in_date: 期望入住时间</p>
+                                    <p>- special_requirements: 特殊需求</p>
+                                    <p>- created_at: 记录创建时间</p>
+                                    <p>- updated_at: 记录更新时间</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第17页：实战演示 - Bot配置步骤 -->
+            <section class="slide" data-index="15">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-accent border-accent/50">3.4.3 Bot配置步骤</span>
+                        <h2 class="font-display text-title font-bold mt-4">配置步骤详解</h2>
+                        <p class="text-subtitle text-muted mt-4">Step by Step 创建记忆型Bot</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-8">
+                        <div class="interactive-box text-center">
+                            <div class="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center" style="background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%); box-shadow: 0 8px 32px rgba(79, 70, 229, 0.3);">
+                                <span class="text-3xl text-white font-bold">1</span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold mb-4">创建数据库</h3>
+                            <div class="text-left text-body space-y-2">
+                                <p>1. 进入Coze平台</p>
+                                <p>2. 选择你的Bot</p>
+                                <p>3. 点击"数据库"标签</p>
+                                <p>4. 创建新数据表</p>
+                                <p>5. 设置user_id为主键</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center" style="background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%); box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);">
+                                <span class="text-3xl text-white font-bold">2</span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold mb-4">配置提示词</h3>
+                            <div class="text-left text-body space-y-2">
+                                <p>1. 定义角色和任务</p>
+                                <p>2. 说明记忆功能</p>
+                                <p>3. 设计工作流程</p>
+                                <p>4. 提供示例对话</p>
+                                <p>5. 引用变量{{xxx}}</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center" style="background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%); box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);">
+                                <span class="text-3xl text-white font-bold">3</span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold mb-4">设置工作流</h3>
+                            <div class="text-left text-body space-y-2">
+                                <p>1. 接收用户输入</p>
+                                <p>2. 判断是否有用户信息</p>
+                                <p>3. 无则询问并存储</p>
+                                <p>4. 有则读取并引用</p>
+                                <p>5. 生成个性化回复</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 interactive-box">
+                        <h4 class="font-display text-subtitle font-semibold mb-4">提示词示例（部分）</h4>
+                        <div class="bg-gray-900 rounded-xl p-6 font-mono text-sm text-gray-300">
+                            <p class="text-green-400">## 记忆功能</p>
+                            <p>你需要在对话中收集并记住以下信息：</p>
+                            <p class="pl-4">1. 客户姓名（{{user_name}}）</p>
+                            <p class="pl-4">2. 联系电话（{{phone}}）</p>
+                            <p class="pl-4">3. 预算范围（{{budget}}）</p>
+                            <p class="pl-4">4. 目标区域（{{preferred_area}}）</p>
+                            <p class="mt-4 text-blue-400">## 示例对话</p>
+                            <p>小安："好的{{user_name}}，我已经记下了您的预算{{budget}}元，</p>
+                            <p>区域{{preferred_area}}，接下来为您找房..."</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第18页：实战演示 - 测试验证 -->
+            <section class="slide" data-index="16">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-accent border-accent/50">3.4.4 测试与验证</span>
+                        <h2 class="font-display text-title font-bold mt-4">测试场景演示</h2>
+                        <p class="text-subtitle text-muted mt-4">验证记忆功能是否正常工作</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-10">
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%);">
+                                    <span class="text-xl">🆕</span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">测试场景1：首次对话</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="p-4 rounded-xl" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                                    <p class="text-sm text-muted mb-1">用户</p>
+                                    <p class="text-body">"你好"</p>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                    <p class="text-sm text-muted mb-1">Bot</p>
+                                    <p class="text-body">"您好！我是安居乐寓的小安...（询问信息）"</p>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                                    <p class="text-sm text-muted mb-1">用户</p>
+                                    <p class="text-body">"我叫李四，想在西乡租个单间，预算2500"</p>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                    <p class="text-sm text-muted mb-1">Bot</p>
+                                    <p class="text-body">"（将信息存入数据库）好的李四，我记下了..."</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);">
+                                    <span class="text-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">测试场景2：后续对话</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="p-4 rounded-xl" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                                    <p class="text-sm text-muted mb-1">用户（再次对话）</p>
+                                    <p class="text-body">"上次说的房源还有吗？"</p>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                                    <p class="text-sm text-muted mb-1">系统</p>
+                                    <p class="text-body">读取数据库 → 获取用户信息</p>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                    <p class="text-sm text-muted mb-1">Bot</p>
+                                    <p class="text-body">"李四您好！根据您上次提到的2500元预算和西乡区域，我为您找到了几套新房源..."</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 rounded-xl text-center" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(74, 222, 128, 0.1) 100%); border: 2px solid rgba(34, 197, 94, 0.3);">
+                                <p class="text-body font-semibold text-secondary flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 记忆功能验证成功！</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第19页：实战练习 -->
+            <section class="slide" data-index="17">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-red border-red/50">3.5 实战练习</span>
+                        <h2 class="font-display text-title font-bold mt-4">动手实践</h2>
+                        <p class="text-subtitle text-muted mt-4">通过练习巩固所学知识</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-8">
+                        <div class="interactive-box">
+                            <div class="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style="background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%); box-shadow: 0 8px 32px rgba(79, 70, 229, 0.3);">
+                                <span class="text-2xl text-white font-bold">1</span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold text-center mb-4">设计数据库表结构</h3>
+                            <div class="text-body space-y-3">
+                                <p><strong>任务：</strong>为安居乐寓设计"客户投诉记录"数据表</p>
+                                <p><strong>要求：</strong></p>
+                                <ul class="list-disc pl-5 space-y-1 text-sm">
+                                    <li>确定至少5个字段</li>
+                                    <li>设计字段类型和约束</li>
+                                    <li>说明每个字段用途</li>
+                                </ul>
+                                <div class="mt-4 p-3 rounded-xl text-sm" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                                    <p class="text-muted">参考字段：</p>
+                                    <p>投诉ID、用户ID、投诉类型、投诉内容、处理状态、处理结果、创建时间</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style="background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%); box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);">
+                                <span class="text-2xl text-white font-bold">2</span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold text-center mb-4">配置上下文轮数</h3>
+                            <div class="text-body space-y-3">
+                                <p><strong>任务：</strong>为你的Bot选择合适的上下文轮数</p>
+                                <p><strong>步骤：</strong></p>
+                                <ul class="list-disc pl-5 space-y-1 text-sm">
+                                    <li>分析业务场景</li>
+                                    <li>测试不同轮数（3/5/10轮）</li>
+                                    <li>记录Token消耗</li>
+                                    <li>选择最佳平衡点</li>
+                                </ul>
+                                <div class="mt-4 p-3 rounded-xl text-sm" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                    <p class="text-muted">思考题：</p>
+                                    <p>轮数越多越好吗？什么情况下应该减少轮数？</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style="background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%); box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);">
+                                <span class="text-2xl text-white font-bold">3</span>
+                            </div>
+                            <h3 class="font-display text-subtitle font-semibold text-center mb-4">创建记忆型Bot</h3>
+                            <div class="text-body space-y-3">
+                                <p><strong>任务：</strong>创建能记住用户租房偏好的Bot</p>
+                                <p><strong>要求：</strong></p>
+                                <ul class="list-disc pl-5 space-y-1 text-sm">
+                                    <li>使用数据库存储用户信息</li>
+                                    <li>在提示词中引用变量</li>
+                                    <li>实现3轮以上对话连续性</li>
+                                    <li>测试记忆功能</li>
+                                </ul>
+                                <div class="mt-4 p-3 rounded-xl text-sm" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                                    <p class="text-muted">评分标准：</p>
+                                    <p>数据库设计30%、变量引用30%、记忆功能30%、体验10%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第20页：本课小结 -->
+            <section class="slide" data-index="18">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-primary border-primary/50">3.6 本课小结</span>
+                        <h2 class="font-display text-title font-bold mt-4">核心概念回顾</h2>
+                        <p class="text-subtitle text-muted mt-4">总结本课重点知识</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div class="interactive-box">
+                                <h3 class="font-display text-subtitle font-semibold mb-4 flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-full flex items-center justify-center text-white" style="background: #4F46E5;">1</span>
+                                    上下文窗口
+                                </h3>
+                                <p class="text-body">模型能同时处理的token数量，是"短期记忆容量"。常见模型从128K到1M tokens不等。</p>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="font-display text-subtitle font-semibold mb-4 flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-full flex items-center justify-center text-white" style="background: #22C55E;">2</span>
+                                    短期记忆
+                                </h3>
+                                <p class="text-body">对话中的历史消息，通过"携带上下文轮数"控制。轮数越多成本越高，需要平衡体验与成本。</p>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="font-display text-subtitle font-semibold mb-4 flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-full flex items-center justify-center text-white" style="background: #F59E0B;">3</span>
+                                    长期记忆
+                                </h3>
+                                <p class="text-body">持久化存储的用户信息，通过数据库实现。可以跨会话记住用户偏好和历史记录。</p>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="interactive-box">
+                                <h3 class="font-display text-subtitle font-semibold mb-4 flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-full flex items-center justify-center text-white" style="background: #8B5CF6;">4</span>
+                                    变量系统
+                                </h3>
+                                <p class="text-body">用户输入变量（单次）、系统变量（会话级）、全局变量（永久）。用于在工作流中传递数据。</p>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="font-display text-subtitle font-semibold mb-4 flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-full flex items-center justify-center text-white" style="background: #EC4899;">5</span>
+                                    RAG
+                                </h3>
+                                <p class="text-body">检索增强生成，通过外部知识库增强模型能力。解决知识截止、私有知识、幻觉等问题。</p>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="font-display text-subtitle font-semibold mb-4 flex items-center gap-3">
+                                    <span class="w-10 h-10 rounded-full flex items-center justify-center text-white" style="background: #EF4444;">6</span>
+                                    向量数据库
+                                </h3>
+                                <p class="text-body">存储语义向量，支持相似度检索。将文本转换为向量，通过计算相似度找到最相关的文档。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 interactive-box">
+                        <h3 class="font-display text-subtitle font-semibold mb-4 text-center">关键技能清单</h3>
+                        <div class="grid grid-cols-4 gap-6 text-center">
+                            <div class="p-4 rounded-xl" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                                <span class="text-2xl mb-2 block"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></span>
+                                <p class="text-sm">理解上下文窗口限制和成本影响</p>
+                            </div>
+                            <div class="p-4 rounded-xl" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                <span class="text-2xl mb-2 block"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></span>
+                                <p class="text-sm">配置合适的上下文轮数</p>
+                            </div>
+                            <div class="p-4 rounded-xl" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                                <span class="text-2xl mb-2 block"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8-4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" stroke-linejoin="round" stroke-width="2"></path></svg></span>
+                                <p class="text-sm">设计数据库表结构</p>
+                            </div>
+                            <div class="p-4 rounded-xl" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <span class="text-2xl mb-2 block"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></span>
+                                <p class="text-sm">在提示词中引用变量</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第21页：下节预告 -->
+            <section class="slide" data-index="19">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-secondary border-secondary/50">下节预告</span>
+                        <h2 class="font-display text-title font-bold mt-4">下一章：工作流基础</h2>
+                        <p class="text-subtitle text-muted mt-4">Workflow Fundamentals</p>
+                    </div>
+                    <div class="interactive-box text-center py-12">
+                        <div class="w-32 h-32 rounded-full mx-auto mb-8 flex items-center justify-center" style="background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%); box-shadow: 0 16px 48px rgba(34, 197, 94, 0.3);">
+                            <span class="text-6xl"><svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg></span>
+                        </div>
+                        <h3 class="font-display text-3xl font-bold mb-6">我们将学习</h3>
+                        <div class="grid grid-cols-3 gap-8 max-w-4xl mx-auto">
+                            <div class="p-6 rounded-2xl" style="background: rgba(79, 70, 229, 0.1); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="text-4xl mb-4 block"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg></span>
+                                <p class="text-body font-semibold">什么是工作流</p>
+                                <p class="text-sm text-muted mt-2">为什么需要工作流</p>
+                            </div>
+                            <div class="p-6 rounded-2xl" style="background: rgba(34, 197, 94, 0.1); border: 2px solid rgba(34, 197, 94, 0.2);">
+                                <span class="text-4xl mb-4 block"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg></span>
+                                <p class="text-body font-semibold">基础节点</p>
+                                <p class="text-sm text-muted mt-2">输入、LLM、变量、条件、输出</p>
+                            </div>
+                            <div class="p-6 rounded-2xl" style="background: rgba(245, 158, 11, 0.1); border: 2px solid rgba(245, 158, 11, 0.2);">
+                                <span class="text-4xl mb-4 block"><svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></span>
+                                <p class="text-body font-semibold">搭建工作流</p>
+                                <p class="text-sm text-muted mt-2">创建第一个基础工作流</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第22页：课后作业 -->
+            <section class="slide" data-index="20">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="clay-badge mb-4 text-red border-red/50">课后作业</span>
+                        <h2 class="font-display text-title font-bold mt-4">巩固与提升</h2>
+                        <p class="text-subtitle text-muted mt-4">完成作业，深化理解</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-8">
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #4F46E5 0%, #818CF8 100%); box-shadow: 0 8px 32px rgba(79, 70, 229, 0.3);">
+                                    <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">设计题</h3>
+                            </div>
+                            <p class="text-body mb-4">为安居乐寓设计一个完整的用户画像数据库</p>
+                            <div class="p-4 rounded-xl" style="background: rgba(79, 70, 229, 0.1); border: 1px solid rgba(79, 70, 229, 0.2);">
+                                <p class="text-sm"><strong>要求：</strong></p>
+                                <ul class="list-disc pl-4 mt-2 space-y-1 text-sm">
+                                    <li>至少8个字段</li>
+                                    <li>说明每个字段的业务价值</li>
+                                    <li>设计主键和索引</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%); box-shadow: 0 8px 32px rgba(34, 197, 94, 0.3);">
+                                    <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">实践题</h3>
+                            </div>
+                            <p class="text-body mb-4">在Coze中创建一个记忆型Bot</p>
+                            <div class="p-4 rounded-xl" style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2);">
+                                <p class="text-sm"><strong>要求：</strong></p>
+                                <ul class="list-disc pl-4 mt-2 space-y-1 text-sm">
+                                    <li>记住用户姓名和预算</li>
+                                    <li>后续对话主动使用</li>
+                                    <li>测试10轮以上</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-14 h-14 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%); box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);">
+                                    <span class="text-2xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg></span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">思考题</h3>
+                            </div>
+                            <p class="text-body mb-4">对比短期记忆和长期记忆</p>
+                            <div class="p-4 rounded-xl" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2);">
+                                <p class="text-sm"><strong>问题：</strong></p>
+                                <ul class="list-disc pl-4 mt-2 space-y-1 text-sm">
+                                    <li>各自的优缺点是什么？</li>
+                                    <li>什么场景优先使用哪种？</li>
+                                    <li>如何组合使用？</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 text-center">
+                        <div class="inline-block interactive-box">
+                            <p class="text-body text-muted">完成所有作业后，你将获得</p>
+                            <p class="font-display text-2xl font-bold text-primary mt-2 flex items-center gap-2">上下文工程实战证书 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- 右侧页面指示点 -->
+    <div class="ui-element fixed right-8 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3">
+        <!-- 页面指示点将通过JS动态生成 -->
+    </div>
+
+    <!-- 翻页按钮 -->
+    <div class="ui-element fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6">
+        <button id="prevBtn" class="nav-btn w-14 h-14 rounded-full bg-white/90 border-2 border-primary text-primary flex items-center justify-center hover:border-primary/80 hover:shadow-lg transition-all" onclick="prevSlide()" disabled>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+        </button>
+        <div class="px-6 py-3 rounded-full bg-white/90 border-2 border-primary flex items-center gap-3 shadow-md">
+            <span id="currentSlide" class="text-primary font-bold text-lg">1</span>
+            <span class="text-muted">/</span>
+            <span id="totalSlides" class="text-muted text-lg">21</span>
+        </div>
+        <button id="nextBtn" class="nav-btn w-14 h-14 rounded-full bg-white/90 border-2 border-primary text-primary flex items-center justify-center hover:border-primary/80 hover:shadow-lg transition-all" onclick="nextSlide()">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- 引入JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>

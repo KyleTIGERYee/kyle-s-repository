@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第1课：Agent入门 - 交互式课件</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-[#EEF2FF] text-[#312E81] overflow-hidden">
+    <div class="presentation-container">
+        <div class="slides-wrapper" id="slidesWrapper">
+            <!-- Slide 1: 封面 -->
+            <section class="slide active" data-index="0">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center items-center px-12 text-center">
+                    <span class="clay-badge mb-4 slide-animate">第3章</span>
+                    <h1 class="font-display text-hero font-bold mb-6 slide-animate text-[#4F46E5]">Agent入门</h1>
+                    <p class="text-hero-sub text-[#6366F1] slide-animate">掌握AI Agent的核心概念与Dify实操</p>
+                    <div class="mt-12 slide-animate">
+                        <span class="clay-badge">课程时长：90分钟</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 2: 课程概览 -->
+            <section class="slide" data-index="1">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">课程概览</span>
+                    <h2 class="font-display text-title font-bold mb-8">课程概览</h2>
+                    <div class="grid grid-cols-2 gap-8 max-w-5xl mx-auto">
+                        <div class="interactive-box">
+                            <div class="mb-4">
+                                <svg class="w-12 h-12 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                            <h3 class="text-subtitle font-bold mb-3">内容类型</h3>
+                            <p class="text-body text-[#6366F1]">70% Tutorial + 30% Explanation</p>
+                            <p class="text-body text-[#6366F1] mt-2">Action Mapping 教学方法</p>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="mb-4">
+                                <svg class="w-12 h-12 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <h3 class="text-subtitle font-bold mb-3">目标学员</h3>
+                            <p class="text-body text-[#6366F1]">已掌握Dify工作流开发</p>
+                            <p class="text-body text-[#6366F1] mt-2">希望学习和掌握AI Agent的学员</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 max-w-5xl mx-auto">
+                        <h3 class="text-subtitle font-bold mb-4 text-center">学习目标</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex items-center gap-3 bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)]">
+                                <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-body">理解AI Agent的核心概念和定义</span>
+                            </div>
+                            <div class="flex items-center gap-3 bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)]">
+                                <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-body">掌握Agent的四大核心能力</span>
+                            </div>
+                            <div class="flex items-center gap-3 bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)]">
+                                <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-body">理解Agent与传统工作流的本质区别</span>
+                            </div>
+                            <div class="flex items-center gap-3 bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)]">
+                                <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-body">学会在Dify平台上搭建AI找房Agent</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 3: 课程导入 - 从工作流到Agent -->
+            <section class="slide" data-index="2">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">一、课程导入</span>
+                    <h2 class="font-display text-title font-bold mb-8">从工作流到Agent</h2>
+                    <div class="grid grid-cols-2 gap-12 max-w-6xl mx-auto">
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-bold mb-6 text-center">Dify工作流已掌握</h3>
+                            <div class="space-y-4">
+                                <div class="bg-[#EEF2FF] p-4 rounded-xl">
+                                    <span class="text-[#4F46E5] font-bold">基础工作流</span>
+                                    <p class="text-body text-[#6366F1] mt-1">输入、LLM、变量、条件、输出节点</p>
+                                </div>
+                                <div class="bg-[#EEF2FF] p-4 rounded-xl">
+                                    <span class="text-[#4F46E5] font-bold">进阶工作流</span>
+                                    <p class="text-body text-[#6366F1] mt-1">知识库检索、HTTP请求、代码、意图识别</p>
+                                </div>
+                                <div class="bg-[#EEF2FF] p-4 rounded-xl">
+                                    <span class="text-[#4F46E5] font-bold">复杂工作流</span>
+                                    <p class="text-body text-[#6366F1] mt-1">循环、并行、错误处理、性能优化</p>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-[#F0FDF4] border-2 border-[#34D399] rounded-xl">
+                                <p class="text-body text-[#34D399] font-bold">优势：<strong>确定性</strong>和<strong>可靠性</strong></p>
+                                <p class="text-label text-[#6366F1] mt-1">按照预定义的路径执行，适合标准化、重复性的任务</p>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="interactive-box border-[#4F46E5]">
+                                <h3 class="text-subtitle font-bold mb-4">现实挑战</h3>
+                                <p class="text-body text-[#6366F1]">复杂、多变、需要自主决策的任务</p>
+                            </div>
+                            <div class="interactive-box">
+                                <div class="flex items-start gap-4">
+                                    <svg class="w-8 h-8 text-[#4F46E5] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                                    <div>
+                                        <h4 class="text-subtitle font-bold mb-2">场景一：多意图对话</h4>
+                                        <p class="text-body text-[#6366F1]">"我想在深圳租一套房子，预算5000左右，然后还要把管家微信推给我。"</p>
+                                        <p class="text-label text-[#4F46E5] mt-2">工作流难以应对多个意图</p>
+                                        <p class="text-label text-[#34D399] mt-1">Agent能主动调用工具</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="interactive-box">
+                                <div class="flex items-start gap-4">
+                                    <svg class="w-8 h-8 text-[#4F46E5] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <div>
+                                        <h4 class="text-subtitle font-bold mb-2">场景二：多变的问题</h4>
+                                        <p class="text-body text-[#6366F1]">"这些房源里面哪个性价比最高？"</p>
+                                        <p class="text-label text-[#4F46E5] mt-2">工作流需预先配置所有问题</p>
+                                        <p class="text-label text-[#34D399] mt-1">Agent能自主分析生成回答</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 4: 什么是AI Agent -->
+            <section class="slide" data-index="3">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">一、课程导入</span>
+                    <h2 class="font-display text-title font-bold mb-8">什么是AI Agent？</h2>
+                    <div class="max-w-6xl mx-auto">
+                        <div class="interactive-box border-[#4F46E5] mb-8">
+                            <p class="text-body mb-4">
+                                <strong class="text-[#4F46E5]">AI Agent（人工智能代理/智能体）</strong>是一种能够<strong>自主感知环境、做出决策并执行行动</strong>的智能系统。
+                            </p>
+                            <p class="text-body text-[#6366F1]">
+                                具备自主感知、决策、执行与迭代能力的AI系统，核心是"能自己思考、自己行动、自己优化"，而非传统AI仅做被动响应。
+                            </p>
+                            <p class="text-label text-[#6366F1] mt-4">—— 今日头条 - AI Agent(智能体):核心定义、能力与企业落地</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-6">
+                            <div class="interactive-box text-center">
+                                <div class="mb-3">
+                                    <svg class="w-16 h-16 mx-auto text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                </div>
+                                <h3 class="text-subtitle font-bold mb-2">自主思考</h3>
+                                <p class="text-body text-[#6366F1]">理解上下文、推理分析、学习优化</p>
+                            </div>
+                            <div class="interactive-box text-center">
+                                <div class="mb-3">
+                                    <svg class="w-16 h-16 mx-auto text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                </div>
+                                <h3 class="text-subtitle font-bold mb-2">主动规划</h3>
+                                <p class="text-body text-[#6366F1]">制定行动计划、动态调整策略</p>
+                            </div>
+                            <div class="interactive-box text-center">
+                                <div class="mb-3">
+                                    <svg class="w-16 h-16 mx-auto text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                </div>
+                                <h3 class="text-subtitle font-bold mb-2">自动执行</h3>
+                                <p class="text-body text-[#6366F1]">调用工具完成任务、与环境交互</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 text-center">
+                            <span class="clay-badge">核心区别：从"被动响应"到"主动完成目标"</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 5: Agent核心特征 -->
+            <section class="slide" data-index="4">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">二、AI Agent核心概念</span>
+                    <h2 class="font-display text-title font-bold mb-8">AI Agent 核心特征</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="framework-flow mb-8" id="agentCoreFlow">
+                            <svg viewBox="0 0 900 200" class="w-full h-auto">
+                                <defs>
+                                    <linearGradient id="coreNodeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0.1" />
+                                    </linearGradient>
+                                    <marker id="coreArrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                        <polygon points="0 0, 10 3, 0 6" fill="#4F46E5" />
+                                    </marker>
+                                </defs>
+                                <path class="flow-line" d="M 180 100 L 280 100" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <path class="flow-line" d="M 420 100 L 520 100" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <path class="flow-line" d="M 660 100 L 760 100" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <g class="flow-node" data-node="think">
+                                    <circle cx="120" cy="100" r="60" fill="url(#coreNodeGradient)" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="120" y="90" text-anchor="middle" fill="#4F46E5" font-size="28" font-weight="bold">思考</text>
+                                    <text x="120" y="115" text-anchor="middle" fill="#312E81" font-size="14">自主思考</text>
+                                </g>
+                                <g class="flow-node" data-node="plan">
+                                    <circle cx="350" cy="100" r="60" fill="url(#coreNodeGradient)" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="350" y="90" text-anchor="middle" fill="#4F46E5" font-size="28" font-weight="bold">规划</text>
+                                    <text x="350" y="115" text-anchor="middle" fill="#312E81" font-size="14">主动规划</text>
+                                </g>
+                                <g class="flow-node" data-node="execute">
+                                    <circle cx="590" cy="100" r="60" fill="url(#coreNodeGradient)" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="590" y="90" text-anchor="middle" fill="#4F46E5" font-size="28" font-weight="bold">执行</text>
+                                    <text x="590" y="115" text-anchor="middle" fill="#312E81" font-size="14">自动执行</text>
+                                </g>
+                                <g class="flow-node" data-node="evolve">
+                                    <circle cx="830" cy="100" r="60" fill="url(#coreNodeGradient)" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="830" y="90" text-anchor="middle" fill="#4F46E5" font-size="28" font-weight="bold">优化</text>
+                                    <text x="830" y="115" text-anchor="middle" fill="#312E81" font-size="14">迭代优化</text>
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="grid grid-cols-4 gap-4">
+                            <div class="interactive-box text-center">
+                                <p class="text-label text-[#4F46E5] font-bold">理解上下文</p>
+                                <p class="text-label text-[#6366F1]">推理分析</p>
+                            </div>
+                            <div class="interactive-box text-center">
+                                <p class="text-label text-[#4F46E5] font-bold">制定行动计划</p>
+                                <p class="text-label text-[#6366F1]">动态调整策略</p>
+                            </div>
+                            <div class="interactive-box text-center">
+                                <p class="text-label text-[#4F46E5] font-bold">调用工具</p>
+                                <p class="text-label text-[#6366F1]">与外部环境交互</p>
+                            </div>
+                            <div class="interactive-box text-center">
+                                <p class="text-label text-[#4F46E5] font-bold">反馈迭代</p>
+                                <p class="text-label text-[#6366F1]">持续改进</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 6: Agent四大核心能力 -->
+            <section class="slide" data-index="5">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">二、AI Agent核心概念</span>
+                    <h2 class="font-display text-title font-bold mb-8">Agent 四大核心能力</h2>
+                    <div class="max-w-6xl mx-auto">
+                        <div class="relative">
+                            <svg viewBox="0 0 900 350" class="w-full h-auto">
+                                <defs>
+                                    <linearGradient id="abilityGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.3" />
+                                        <stop offset="100%" style="stop-color:#4F46E5;stop-opacity:0.05" />
+                                    </linearGradient>
+                                </defs>
+                                <g class="ability-node" data-ability="perception">
+                                    <circle cx="200" cy="60" r="70" fill="url(#abilityGradient)" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="200" y="50" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">感知</text>
+                                    <text x="200" y="75" text-anchor="middle" fill="#312E81" font-size="14">Perception</text>
+                                    <text x="200" y="120" text-anchor="middle" fill="#6366F1" font-size="12">理解环境信息</text>
+                                </g>
+                                <path d="M 200 130 Q 200 160 200 190" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <g class="ability-node" data-ability="planning">
+                                    <circle cx="200" cy="230" r="70" fill="url(#abilityGradient)" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="200" y="220" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">规划</text>
+                                    <text x="200" y="245" text-anchor="middle" fill="#312E81" font-size="14">Planning</text>
+                                    <text x="200" y="290" text-anchor="middle" fill="#6366F1" font-size="12">制定行动计划</text>
+                                </g>
+                                <path d="M 270 230 Q 450 180 500 150" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <g class="ability-node" data-ability="decision">
+                                    <circle cx="500" cy="100" r="70" fill="url(#abilityGradient)" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="500" y="90" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">决策</text>
+                                    <text x="500" y="115" text-anchor="middle" fill="#312E81" font-size="14">Decision</text>
+                                    <text x="500" y="160" text-anchor="middle" fill="#6366F1" font-size="12">选择最优方案</text>
+                                </g>
+                                <path d="M 570 100 Q 700 100 750 130" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <g class="ability-node" data-ability="execution">
+                                    <circle cx="750" cy="180" r="70" fill="url(#abilityGradient)" stroke="#4F46E5" stroke-width="2"/>
+                                    <text x="750" y="170" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">执行</text>
+                                    <text x="750" y="195" text-anchor="middle" fill="#312E81" font-size="14">Execution</text>
+                                    <text x="750" y="240" text-anchor="middle" fill="#6366F1" font-size="12">调用工具完成任务</text>
+                                </g>
+                                <path d="M 750 250 Q 750 300 650 320" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <path d="M 550 320 Q 450 350 350 320" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <path d="M 250 300 Q 200 300 200 270" stroke="#4F46E5" stroke-width="2" fill="none" marker-end="url(#coreArrowhead)"/>
+                                <text x="450" y="340" text-anchor="middle" fill="#4F46E5" font-size="14">闭环：执行结果反馈到感知</text>
+                            </svg>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-body text-[#6366F1]">点击各能力节点查看详情</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 7: 能力一：感知 -->
+            <section class="slide" data-index="6">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">二、AI Agent核心概念</span>
+                    <h2 class="font-display text-title font-bold mb-8">能力一：感知（Perception）</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="interactive-box border-[#4F46E5] mb-8">
+                            <h3 class="text-subtitle font-bold mb-4">定义</h3>
+                            <p class="text-body">Agent理解和获取环境信息的能力。</p>
+                        </div>
+                        <div class="mb-8">
+                            <h3 class="text-subtitle font-bold mb-4">在Dify中的体现</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    <span class="text-body">理解用户输入的自然语言</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span class="text-body">识别用户意图和情绪</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                    <span class="text-body">提取关键信息（实体识别）</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span class="text-body">感知上下文和历史对话</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-bold mb-4">示例</h3>
+                            <div class="bg-[#EEF2FF] rounded-xl p-6 font-mono text-body">
+                                <p class="text-[#6366F1] mb-4">用户输入："我想在西乡租一套两室一厅的房子，预算5000左右"</p>
+                                <p class="text-[#4F46E5] font-bold mb-3">感知结果：</p>
+                                <ul class="space-y-2">
+                                    <li class="flex items-center gap-2"><span class="text-[#34D399]">├─</span> 意图：房源查询</li>
+                                    <li class="flex items-center gap-2"><span class="text-[#34D399]">├─</span> 区域：西乡</li>
+                                    <li class="flex items-center gap-2"><span class="text-[#34D399]">├─</span> 户型：两室一厅</li>
+                                    <li class="flex items-center gap-2"><span class="text-[#34D399]">├─</span> 预算：5000元/月</li>
+                                    <li class="flex items-center gap-2"><span class="text-[#34D399]">└─</span> 其他需求：未明确</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 8: 能力二：规划 -->
+            <section class="slide" data-index="7">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">二、AI Agent核心概念</span>
+                    <h2 class="font-display text-title font-bold mb-8">能力二：规划（Planning）</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="interactive-box border-[#4F46E5] mb-8">
+                            <h3 class="text-subtitle font-bold mb-4">定义</h3>
+                            <p class="text-body">Agent制定行动计划、拆解复杂任务的能力。</p>
+                        </div>
+                        <div class="mb-8">
+                            <h3 class="text-subtitle font-bold mb-4">在Dify中的体现</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg>
+                                    <span class="text-body">将复杂任务拆解为子任务</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                    <span class="text-body">确定执行步骤和顺序</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                    <span class="text-body">识别任务依赖关系</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                    <span class="text-body">动态调整计划</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-bold mb-4">示例</h3>
+                            <div class="bg-[#EEF2FF] rounded-xl p-6 font-mono text-body">
+                                <p class="text-[#6366F1] mb-4">任务：为用户找到合适的房源</p>
+                                <p class="text-[#4F46E5] font-bold mb-3">规划结果：</p>
+                                <div class="space-y-3">
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-[#4F46E5] font-bold">Step 1:</span>
+                                        <span>提取用户需求参数<br><span class="text-[#6366F1]">└─ 区域=西乡, 户型=两室一厅, 最高预算=5000</span></span>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-[#4F46E5] font-bold">Step 2:</span>
+                                        <span>调用房源搜索工具<br><span class="text-[#6366F1]">└─ 调用 search_house 工作流</span></span>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-[#4F46E5] font-bold">Step 3:</span>
+                                        <span>分析房源优劣势<br><span class="text-[#6366F1]">└─ 对比价格、位置、配套</span></span>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-[#4F46E5] font-bold">Step 4:</span>
+                                        <span>生成推荐回复<br><span class="text-[#6366F1]">└─ 整合信息，生成房源卡片</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 9: 能力三：决策 -->
+            <section class="slide" data-index="8">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">二、AI Agent核心概念</span>
+                    <h2 class="font-display text-title font-bold mb-8">能力三：决策（Decision-making）</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="interactive-box border-[#4F46E5] mb-8">
+                            <h3 class="text-subtitle font-bold mb-4">定义</h3>
+                            <p class="text-body">Agent评估选项、做出最优选择的能力。</p>
+                        </div>
+                        <div class="mb-8">
+                            <h3 class="text-subtitle font-bold mb-4">在Dify中的体现</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span class="text-body">选择最合适的工具/技能</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span class="text-body">决定是否需要追问用户</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                    <span class="text-body">判断任务完成度</span>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border-2 border-[rgba(79,70,229,0.2)] flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    <span class="text-body">处理异常情况</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-bold mb-4">示例</h3>
+                            <div class="bg-[#EEF2FF] rounded-xl p-6 font-mono text-body">
+                                <p class="text-[#6366F1] mb-4">场景：用户询问"押金怎么退？"</p>
+                                <p class="text-[#4F46E5] font-bold mb-3">决策过程：</p>
+                                <div class="space-y-3 mb-4">
+                                    <div class="bg-[#FEE2E2] border border-[#EF4444] rounded-lg p-3">
+                                        <span class="text-[#EF4444] font-bold">选项A：</span>直接基于常识回答
+                                        <span class="text-[#EF4444] ml-2">└─ 评分：40分（可能不准确）</span>
+                                    </div>
+                                    <div class="bg-[#FEF3C7] border border-[#F59E0B] rounded-lg p-3">
+                                        <span class="text-[#F59E0B] font-bold">选项B：</span>询问用户具体门店
+                                        <span class="text-[#F59E0B] ml-2">└─ 评分：60分（安全但不够智能）</span>
+                                    </div>
+                                    <div class="bg-[#D1FAE5] border border-[#34D399] rounded-lg p-3">
+                                        <span class="text-[#34D399] font-bold">选项C：</span>调用知识库检索工具获取最新政策
+                                        <span class="text-[#34D399] ml-2">└─ 评分：95分（准确、专业）</span>
+                                    </div>
+                                </div>
+                                <p class="text-[#4F46E5] font-bold">决策结果：选择选项C，调用 search_knowledge_base 工具</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 10: 能力四：执行 -->
+            <section class="slide" data-index="9">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">二、AI Agent核心概念</span>
+                    <h2 class="font-display text-title font-bold mb-8">能力四：执行（Execution）</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="interactive-box border-[#4F46E5] mb-8">
+                            <h3 class="text-subtitle font-bold mb-4">定义</h3>
+                            <p class="text-body">Agent调用工具、与外部系统交互、完成任务的能力。</p>
+                        </div>
+                        <div class="mb-8">
+                            <h3 class="text-subtitle font-bold mb-4">在Dify中的体现</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="interactive-box text-center">
+                                    <svg class="w-12 h-12 mx-auto mb-2 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <span class="text-body">调用工作流作为工具</span>
+                                </div>
+                                <div class="interactive-box text-center">
+                                    <svg class="w-12 h-12 mx-auto mb-2 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                                    <span class="text-body">与外部API交互</span>
+                                </div>
+                                <div class="interactive-box text-center">
+                                    <svg class="w-12 h-12 mx-auto mb-2 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                                    <span class="text-body">返回结果给用户</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="text-subtitle font-bold mb-4">示例</h3>
+                            <div class="bg-[#EEF2FF] rounded-xl p-6 font-mono text-body">
+                                <p class="text-[#6366F1] mb-4">执行任务：查询房源信息</p>
+                                <p class="text-[#4F46E5] font-bold mb-3">执行过程：</p>
+                                <div class="space-y-3">
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-[#4F46E5] font-bold">1.</span>
+                                        <span>调用 search_house 工作流<br><span class="text-[#6366F1]">└─ 参数：{area: "宝安区", layoutName: "二居室", maxPrice: "5000"}</span></span>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-[#4F46E5] font-bold">2.</span>
+                                        <span>接收返回结果<br><span class="text-[#6366F1]">└─ 5套符合条件的房源</span></span>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-[#4F46E5] font-bold">3.</span>
+                                        <span>整合结果，生成房源卡片回复</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 11: Agent技术架构 (大尺寸SVG) -->
+            <section class="slide" data-index="10">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-8">
+                    <span class="clay-badge mb-2">二、AI Agent核心概念</span>
+                    <h2 class="font-display text-title font-bold mb-2">Agent 技术架构</h2>
+                    <div class="w-full h-[75vh] flex items-center justify-center">
+                        <svg viewBox="0 0 1200 600" class="w-full h-full">
+                            <defs>
+                                <linearGradient id="archGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.4" />
+                                    <stop offset="100%" style="stop-color:#818CF8;stop-opacity:0.2" />
+                                </linearGradient>
+                                <marker id="archArrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#4F46E5"/>
+                                </marker>
+                                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#4F46E5" flood-opacity="0.2"/>
+                                </filter>
+                            </defs>
+                            
+                            <!-- Agent节点（大脑）- 顶部中央 -->
+                            <rect x="350" y="30" width="500" height="100" rx="20" fill="url(#archGradient)" stroke="#4F46E5" stroke-width="3" filter="url(#shadow)"/>
+                            <text x="600" y="75" text-anchor="middle" fill="#4F46E5" font-size="32" font-weight="bold" font-family="Baloo 2, cursive">Agent 节点（LLM）</text>
+                            <text x="600" y="110" text-anchor="middle" fill="#312E81" font-size="20">大脑：推理 · 理解 · 决策 · 生成</text>
+                            
+                            <!-- 连接线 - 从大脑到工具层 -->
+                            <path d="M 450 130 L 200 220" stroke="#4F46E5" stroke-width="3" marker-end="url(#archArrow)"/>
+                            <path d="M 600 130 L 600 220" stroke="#4F46E5" stroke-width="3" marker-end="url(#archArrow)"/>
+                            <path d="M 750 130 L 1000 220" stroke="#4F46E5" stroke-width="3" marker-end="url(#archArrow)"/>
+                            
+                            <!-- 工具层标签 -->
+                            <text x="600" y="200" text-anchor="middle" fill="#6366F1" font-size="22" font-weight="bold">工具调用层</text>
+                            
+                            <!-- 工具卡片1: 房源接口 -->
+                            <rect x="50" y="230" width="300" height="180" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" filter="url(#shadow)"/>
+                            <rect x="50" y="230" width="300" height="50" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="200" y="265" text-anchor="middle" fill="#4F46E5" font-size="26" font-weight="bold" font-family="Baloo 2, cursive">房源接口</text>
+                            <text x="200" y="310" text-anchor="middle" fill="#6366F1" font-size="18">工作流工具</text>
+                            <line x1="80" y1="330" x2="320" y2="330" stroke="#EEF2FF" stroke-width="2"/>
+                            <text x="200" y="360" text-anchor="middle" fill="#312E81" font-size="16">搜索房源</text>
+                            <text x="200" y="385" text-anchor="middle" fill="#312E81" font-size="16">筛选条件 · 返回数据</text>
+                            
+                            <!-- 工具卡片2: 知识库 -->
+                            <rect x="450" y="230" width="300" height="180" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" filter="url(#shadow)"/>
+                            <rect x="450" y="230" width="300" height="50" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="600" y="265" text-anchor="middle" fill="#4F46E5" font-size="26" font-weight="bold" font-family="Baloo 2, cursive">知识库</text>
+                            <text x="600" y="310" text-anchor="middle" fill="#6366F1" font-size="18">工作流工具</text>
+                            <line x1="480" y1="330" x2="720" y2="330" stroke="#EEF2FF" stroke-width="2"/>
+                            <text x="600" y="360" text-anchor="middle" fill="#312E81" font-size="16">政策查询 · 租赁规则</text>
+                            <text x="600" y="385" text-anchor="middle" fill="#312E81" font-size="16">退租流程</text>
+                            
+                            <!-- 工具卡片3: 管家接口 -->
+                            <rect x="850" y="230" width="300" height="180" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2" filter="url(#shadow)"/>
+                            <rect x="850" y="230" width="300" height="50" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="1000" y="265" text-anchor="middle" fill="#4F46E5" font-size="26" font-weight="bold" font-family="Baloo 2, cursive">管家接口</text>
+                            <text x="1000" y="310" text-anchor="middle" fill="#6366F1" font-size="18">工作流工具</text>
+                            <line x1="880" y1="330" x2="1120" y2="330" stroke="#EEF2FF" stroke-width="2"/>
+                            <text x="1000" y="360" text-anchor="middle" fill="#312E81" font-size="16">获取管家联系方式</text>
+                            <text x="1000" y="385" text-anchor="middle" fill="#312E81" font-size="16">企微二维码</text>
+                            
+                            <!-- 底部说明 -->
+                            <rect x="300" y="480" width="600" height="80" rx="12" fill="rgba(79,70,229,0.08)" stroke="#4F46E5" stroke-width="2" stroke-dasharray="5,5"/>
+                            <text x="600" y="515" text-anchor="middle" fill="#4F46E5" font-size="20" font-weight="bold">Agent 自主决定调用哪些工具</text>
+                            <text x="600" y="545" text-anchor="middle" fill="#6366F1" font-size="16">根据用户意图，智能选择、组合、迭代调用</text>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 12: Agent vs 工作流对比 -->
+            <section class="slide" data-index="11">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">三、Agent vs 工作流</span>
+                    <h2 class="font-display text-title font-bold mb-8">本质区别：确定性 vs 自主性</h2>
+                    <div class="max-w-6xl mx-auto">
+                        <div class="grid grid-cols-2 gap-12">
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-6 text-center">工作流 (Workflow)</h3>
+                                <div class="space-y-4 mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                        <span class="text-body">预定义路径</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex items-center gap-3 bg-[#D1FAE5] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">确定性高</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#D1FAE5] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">可预测、可控</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#D1FAE5] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">适合标准化流程</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#D1FAE5] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">易于调试和维护</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="interactive-box border-[#4F46E5]">
+                                <h3 class="text-subtitle font-bold mb-6 text-center">Agent (智能体)</h3>
+                                <div class="space-y-4 mb-6">
+                                    <div class="flex items-center gap-3">
+                                        <svg class="w-6 h-6 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                        <span class="text-body">自主决策</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex items-center gap-3 bg-[#EEF2FF] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">灵活性强</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#EEF2FF] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">自适应、智能</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#EEF2FF] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">适合复杂多变任务</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#FEF3C7] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#F59E0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                        <span class="text-body">需要更多算力</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 13: 详细对比表 -->
+            <section class="slide" data-index="12">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">三、Agent vs 工作流</span>
+                    <h2 class="font-display text-title font-bold mb-8">详细对比</h2>
+                    <div class="max-w-6xl mx-auto overflow-auto">
+                        <table class="w-full text-body">
+                            <thead>
+                                <tr class="border-b-2 border-[#4F46E5]">
+                                    <th class="text-left py-4 px-4 text-[#4F46E5]">对比维度</th>
+                                    <th class="text-left py-4 px-4 text-[#4F46E5]">传统工作流</th>
+                                    <th class="text-left py-4 px-4 text-[#4F46E5]">AI Agent</th>
+                                    <th class="text-left py-4 px-4 text-[#4F46E5]">说明</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-[#6366F1]">
+                                <tr class="border-b border-[rgba(79,70,229,0.2)]">
+                                    <td class="py-4 px-4 text-[#312E81] font-bold">执行方式</td>
+                                    <td class="py-4 px-4">按预定义路径执行</td>
+                                    <td class="py-4 px-4">自主规划执行路径</td>
+                                    <td class="py-4 px-4">Agent更灵活</td>
+                                </tr>
+                                <tr class="border-b border-[rgba(79,70,229,0.2)]">
+                                    <td class="py-4 px-4 text-[#312E81] font-bold">决策能力</td>
+                                    <td class="py-4 px-4">基于条件的固定判断</td>
+                                    <td class="py-4 px-4">基于理解的动态决策</td>
+                                    <td class="py-4 px-4">Agent更智能</td>
+                                </tr>
+                                <tr class="border-b border-[rgba(79,70,229,0.2)]">
+                                    <td class="py-4 px-4 text-[#312E81] font-bold">工具使用</td>
+                                    <td class="py-4 px-4">固定节点调用</td>
+                                    <td class="py-4 px-4">自主选择和组合工具</td>
+                                    <td class="py-4 px-4">Agent更自主</td>
+                                </tr>
+                                <tr class="border-b border-[rgba(79,70,229,0.2)]">
+                                    <td class="py-4 px-4 text-[#312E81] font-bold">容错能力</td>
+                                    <td class="py-4 px-4">需要预先定义所有分支</td>
+                                    <td class="py-4 px-4">动态处理异常情况</td>
+                                    <td class="py-4 px-4">Agent更鲁棒</td>
+                                </tr>
+                                <tr class="border-b border-[rgba(79,70,229,0.2)]">
+                                    <td class="py-4 px-4 text-[#312E81] font-bold">开发成本</td>
+                                    <td class="py-4 px-4">需要详细设计所有路径</td>
+                                    <td class="py-4 px-4">需要设计能力和边界</td>
+                                    <td class="py-4 px-4">各有优劣</td>
+                                </tr>
+                                <tr class="border-b border-[rgba(79,70,229,0.2)]">
+                                    <td class="py-4 px-4 text-[#312E81] font-bold">运行成本</td>
+                                    <td class="py-4 px-4">较低（确定性执行）</td>
+                                    <td class="py-4 px-4">较高（需要推理）</td>
+                                    <td class="py-4 px-4">工作流更经济</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-4 text-[#312E81] font-bold">适用场景</td>
+                                    <td class="py-4 px-4">标准化、重复性任务</td>
+                                    <td class="py-4 px-4">复杂、开放式任务</td>
+                                    <td class="py-4 px-4">互补关系</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 14: 如何选择 -->
+            <section class="slide" data-index="13">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">三、Agent vs 工作流</span>
+                    <h2 class="font-display text-title font-bold mb-8">如何选择：工作流 vs Agent？</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="grid grid-cols-2 gap-8 mb-8">
+                            <div class="interactive-box border-[#34D399]">
+                                <h3 class="text-subtitle font-bold mb-6 text-[#34D399]">选择工作流的情况</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-3 bg-[#D1FAE5] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">任务流程固定、标准化</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#D1FAE5] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">需要高可靠性和确定性</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#D1FAE5] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">对成本敏感</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#D1FAE5] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">需要严格审计和合规</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="interactive-box border-[#4F46E5]">
+                                <h3 class="text-subtitle font-bold mb-6 text-[#4F46E5]">选择Agent的情况</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-3 bg-[#EEF2FF] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">任务复杂、需要多步骤推理</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#EEF2FF] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">用户输入开放、多变</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#EEF2FF] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">需要自主决策和适应</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-[#EEF2FF] p-3 rounded-lg">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-body">追求智能化用户体验</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box text-center border-[#4F46E5] gradient-bg">
+                            <h3 class="text-subtitle font-bold mb-2">最佳实践：两者结合</h3>
+                            <p class="text-body text-[#6366F1]">Agent负责"智能"，工作流负责"可靠"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 15: Agent + 工作流融合架构 (大尺寸SVG) -->
+            <section class="slide" data-index="14">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-8">
+                    <span class="clay-badge mb-2">三、Agent vs 工作流</span>
+                    <h2 class="font-display text-title font-bold mb-2">Agent + 工作流 融合架构</h2>
+                    <div class="w-full h-[75vh] flex items-center justify-center">
+                        <svg viewBox="0 0 1200 600" class="w-full h-full">
+                            <defs>
+                                <linearGradient id="fusionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.4" />
+                                    <stop offset="100%" style="stop-color:#818CF8;stop-opacity:0.2" />
+                                </linearGradient>
+                                <marker id="fusionArrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#4F46E5"/>
+                                </marker>
+                            </defs>
+                            
+                            <!-- 用户输入 - 顶部 -->
+                            <rect x="450" y="30" width="300" height="70" rx="16" fill="url(#fusionGradient)" stroke="#4F46E5" stroke-width="2"/>
+                            <text x="600" y="75" text-anchor="middle" fill="#312E81" font-size="26" font-weight="bold" font-family="Baloo 2, cursive">用户输入</text>
+                            
+                            <!-- 箭头到Agent -->
+                            <path d="M 600 100 L 600 150" stroke="#4F46E5" stroke-width="3" marker-end="url(#fusionArrow)"/>
+                            
+                            <!-- Agent决策层 - 中央 -->
+                            <rect x="350" y="160" width="500" height="100" rx="20" fill="rgba(79,70,229,0.3)" stroke="#4F46E5" stroke-width="3"/>
+                            <text x="600" y="200" text-anchor="middle" fill="#4F46E5" font-size="32" font-weight="bold" font-family="Baloo 2, cursive">Agent 决策层</text>
+                            <text x="600" y="240" text-anchor="middle" fill="#312E81" font-size="18">理解意图 · 选择工具 · 汇总结果</text>
+                            
+                            <!-- 分支箭头 -->
+                            <path d="M 450 260 L 200 340" stroke="#4F46E5" stroke-width="3" marker-end="url(#fusionArrow)"/>
+                            <path d="M 600 260 L 600 340" stroke="#4F46E5" stroke-width="3" marker-end="url(#fusionArrow)"/>
+                            <path d="M 750 260 L 1000 340" stroke="#4F46E5" stroke-width="3" marker-end="url(#fusionArrow)"/>
+                            
+                            <!-- 工作流A - 房源接口 -->
+                            <rect x="50" y="350" width="280" height="140" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2"/>
+                            <rect x="50" y="350" width="280" height="45" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="190" y="382" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold" font-family="Baloo 2, cursive">工作流 A</text>
+                            <text x="190" y="430" text-anchor="middle" fill="#6366F1" font-size="18">房源接口</text>
+                            <text x="190" y="465" text-anchor="middle" fill="#312E81" font-size="16">搜索 · 筛选 · 返回</text>
+                            
+                            <!-- 工作流B - 知识库 -->
+                            <rect x="460" y="350" width="280" height="140" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2"/>
+                            <rect x="460" y="350" width="280" height="45" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="600" y="382" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold" font-family="Baloo 2, cursive">工作流 B</text>
+                            <text x="600" y="430" text-anchor="middle" fill="#6366F1" font-size="18">知识库</text>
+                            <text x="600" y="465" text-anchor="middle" fill="#312E81" font-size="16">政策 · 规则 · 流程</text>
+                            
+                            <!-- 工作流C - 管家接口 -->
+                            <rect x="870" y="350" width="280" height="140" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2"/>
+                            <rect x="870" y="350" width="280" height="45" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="1010" y="382" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold" font-family="Baloo 2, cursive">工作流 C</text>
+                            <text x="1010" y="430" text-anchor="middle" fill="#6366F1" font-size="18">管家接口</text>
+                            <text x="1010" y="465" text-anchor="middle" fill="#312E81" font-size="16">联系方式 · 二维码</text>
+                            
+                            <!-- 底部说明 -->
+                            <rect x="250" y="530" width="700" height="50" rx="12" fill="rgba(79,70,229,0.08)" stroke="#4F46E5" stroke-width="2" stroke-dasharray="5,5"/>
+                            <text x="600" y="565" text-anchor="middle" fill="#4F46E5" font-size="22" font-weight="bold">Agent 负责"智能" · 工作流 负责"可靠"</text>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 16: Dify Agent功能简介 -->
+            <section class="slide" data-index="15">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">四、实操演示</span>
+                    <h2 class="font-display text-title font-bold mb-8">Dify平台Agent功能简介</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="interactive-box">
+                                <div class="mb-4">
+                                    <svg class="w-10 h-10 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                </div>
+                                <h3 class="text-subtitle font-bold mb-3">Function Calling</h3>
+                                <p class="text-body text-[#6366F1]">自动识别需要调用的工具并生成调用参数</p>
+                            </div>
+                            <div class="interactive-box">
+                                <div class="mb-4">
+                                    <svg class="w-10 h-10 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                </div>
+                                <h3 class="text-subtitle font-bold mb-3">多轮迭代</h3>
+                                <p class="text-body text-[#6366F1]">支持最多5轮工具调用迭代</p>
+                            </div>
+                            <div class="interactive-box">
+                                <div class="mb-4">
+                                    <svg class="w-10 h-10 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                </div>
+                                <h3 class="text-subtitle font-bold mb-3">工作流即工具</h3>
+                                <p class="text-body text-[#6366F1]">可以将其他工作流作为工具集成到Agent中</p>
+                            </div>
+                            <div class="interactive-box">
+                                <div class="mb-4">
+                                    <svg class="w-10 h-10 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                </div>
+                                <h3 class="text-subtitle font-bold mb-3">记忆能力</h3>
+                                <p class="text-body text-[#6366F1]">支持对话历史上下文</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 17: AI找房Agent架构概览 (大尺寸SVG) -->
+            <section class="slide" data-index="16">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-8">
+                    <span class="clay-badge mb-2">四、实操演示</span>
+                    <h2 class="font-display text-title font-bold mb-2">AI找房Agent架构概览</h2>
+                    <div class="w-full h-[75vh] flex items-center justify-center">
+                        <svg viewBox="0 0 1200 600" class="w-full h-full">
+                            <defs>
+                                <linearGradient id="houseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:0.4" />
+                                    <stop offset="100%" style="stop-color:#818CF8;stop-opacity:0.2" />
+                                </linearGradient>
+                                <marker id="houseArrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#4F46E5"/>
+                                </marker>
+                            </defs>
+                            
+                            <!-- 用户输入 - 顶部 -->
+                            <rect x="450" y="30" width="300" height="70" rx="16" fill="url(#houseGradient)" stroke="#4F46E5" stroke-width="2"/>
+                            <text x="600" y="75" text-anchor="middle" fill="#312E81" font-size="26" font-weight="bold" font-family="Baloo 2, cursive">用户输入</text>
+                            
+                            <!-- 箭头到Agent -->
+                            <path d="M 600 100 L 600 150" stroke="#4F46E5" stroke-width="3" marker-end="url(#houseArrow)"/>
+                            
+                            <!-- Agent节点 - 中央 -->
+                            <rect x="350" y="160" width="500" height="100" rx="20" fill="rgba(79,70,229,0.3)" stroke="#4F46E5" stroke-width="3"/>
+                            <text x="600" y="200" text-anchor="middle" fill="#4F46E5" font-size="32" font-weight="bold" font-family="Baloo 2, cursive">Agent 节点</text>
+                            <text x="600" y="240" text-anchor="middle" fill="#312E81" font-size="18">LLM大脑 · 意图理解 · 工具选择</text>
+                            
+                            <!-- 分支箭头 -->
+                            <path d="M 450 260 L 200 340" stroke="#4F46E5" stroke-width="3" marker-end="url(#houseArrow)"/>
+                            <path d="M 600 260 L 600 340" stroke="#4F46E5" stroke-width="3" marker-end="url(#houseArrow)"/>
+                            <path d="M 750 260 L 1000 340" stroke="#4F46E5" stroke-width="3" marker-end="url(#houseArrow)"/>
+                            
+                            <!-- 工具1: search_house -->
+                            <rect x="50" y="350" width="280" height="160" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2"/>
+                            <rect x="50" y="350" width="280" height="50" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="190" y="382" text-anchor="middle" fill="#4F46E5" font-size="22" font-weight="bold" font-family="Baloo 2, cursive">search_house</text>
+                            <text x="190" y="430" text-anchor="middle" fill="#6366F1" font-size="18">房源接口</text>
+                            <line x1="80" y1="450" x2="320" y2="450" stroke="#EEF2FF" stroke-width="2"/>
+                            <text x="190" y="480" text-anchor="middle" fill="#312E81" font-size="16">触发：找房相关</text>
+                            <text x="190" y="500" text-anchor="middle" fill="#6366F1" font-size="14">搜索 · 筛选 · 排序</text>
+                            
+                            <!-- 工具2: search_knowledge_base -->
+                            <rect x="460" y="350" width="280" height="160" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2"/>
+                            <rect x="460" y="350" width="280" height="50" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="600" y="382" text-anchor="middle" fill="#4F46E5" font-size="20" font-weight="bold" font-family="Baloo 2, cursive">search_knowledge</text>
+                            <text x="600" y="430" text-anchor="middle" fill="#6366F1" font-size="18">知识库</text>
+                            <line x1="490" y1="450" x2="710" y2="450" stroke="#EEF2FF" stroke-width="2"/>
+                            <text x="600" y="480" text-anchor="middle" fill="#312E81" font-size="16">触发：政策相关</text>
+                            <text x="600" y="500" text-anchor="middle" fill="#6366F1" font-size="14">政策 · 规则 · 流程</text>
+                            
+                            <!-- 工具3: get_butler_contact -->
+                            <rect x="870" y="350" width="280" height="160" rx="16" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2"/>
+                            <rect x="870" y="350" width="280" height="50" rx="16" fill="rgba(79,70,229,0.15)"/>
+                            <text x="1010" y="382" text-anchor="middle" fill="#4F46E5" font-size="18" font-weight="bold" font-family="Baloo 2, cursive">get_butler_contact</text>
+                            <text x="1010" y="430" text-anchor="middle" fill="#6366F1" font-size="18">管家接口</text>
+                            <line x1="900" y1="450" x2="1120" y2="450" stroke="#EEF2FF" stroke-width="2"/>
+                            <text x="1010" y="480" text-anchor="middle" fill="#312E81" font-size="16">触发：管家相关</text>
+                            <text x="1010" y="500" text-anchor="middle" fill="#6366F1" font-size="14">联系方式 · 二维码</text>
+                            
+                            <!-- 底部说明 -->
+                            <rect x="200" y="540" width="800" height="40" rx="10" fill="rgba(79,70,229,0.08)" stroke="#4F46E5" stroke-width="2" stroke-dasharray="5,5"/>
+                            <text x="600" y="568" text-anchor="middle" fill="#4F46E5" font-size="20" font-weight="bold">Agent 根据用户意图自动选择并调用相应工具</text>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 18: 步骤1导入YAML工作流文件 -->
+            <section class="slide" data-index="17">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">四、实操演示</span>
+                    <h2 class="font-display text-title font-bold mb-8">步骤1：导入YAML工作流文件</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="interactive-box border-[#4F46E5] mb-6">
+                            <h3 class="text-subtitle font-bold mb-4">导入流程</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-4">
+                                    <span class="w-10 h-10 bg-[#EEF2FF] rounded-full flex items-center justify-center text-[#4F46E5] font-bold">1</span>
+                                    <span class="text-body">登录Dify平台，进入"工作室"</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="w-10 h-10 bg-[#EEF2FF] rounded-full flex items-center justify-center text-[#4F46E5] font-bold">2</span>
+                                    <span class="text-body">点击右上角"导入YAML文件"</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="w-10 h-10 bg-[#EEF2FF] rounded-full flex items-center justify-center text-[#4F46E5] font-bold">3</span>
+                                    <span class="text-body">选择工作流YAML文件</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="w-10 h-10 bg-[#EEF2FF] rounded-full flex items-center justify-center text-[#4F46E5] font-bold">4</span>
+                                    <span class="text-body">点击"确认导入"</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="interactive-box text-center">
+                                <svg class="w-10 h-10 mx-auto mb-2 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <p class="text-body font-bold">房源接口</p>
+                                <p class="text-label text-[#6366F1]">房源搜索工具</p>
+                            </div>
+                            <div class="interactive-box text-center">
+                                <svg class="w-10 h-10 mx-auto mb-2 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                <p class="text-body font-bold">管家接口</p>
+                                <p class="text-label text-[#6366F1]">管家联系方式</p>
+                            </div>
+                            <div class="interactive-box text-center">
+                                <svg class="w-10 h-10 mx-auto mb-2 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <p class="text-body font-bold">知识库检索</p>
+                                <p class="text-label text-[#6366F1]">租赁政策查询</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 19: 房源接口工作流说明 -->
+            <section class="slide" data-index="18">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">四、实操演示 - 步骤1</span>
+                    <h2 class="font-display text-title font-bold mb-8">房源接口工作流说明</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="interactive-box mb-6">
+                            <h3 class="text-subtitle font-bold mb-4">工作流结构</h3>
+                            <div class="flex items-center gap-2 text-center flex-wrap justify-center">
+                                <span class="bg-[#EEF2FF] px-3 py-2 rounded-lg text-body text-sm">开始节点</span>
+                                <span class="text-[#4F46E5]">-&gt;</span>
+                                <span class="bg-[#EEF2FF] px-3 py-2 rounded-lg text-body text-sm">HTTP请求节点</span>
+                                <span class="text-[#4F46E5]">-&gt;</span>
+                                <span class="bg-[#EEF2FF] px-3 py-2 rounded-lg text-body text-sm">代码执行节点</span>
+                                <span class="text-[#4F46E5]">-&gt;</span>
+                                <span class="bg-[#EEF2FF] px-3 py-2 rounded-lg text-body text-sm">结束节点</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="interactive-box">
+                                <h4 class="text-body font-bold mb-3 text-[#4F46E5]">输入参数</h4>
+                                <ul class="space-y-2 text-body text-[#6366F1]">
+                                    <li>wxMiniAppId: 小程序ID（必填）</li>
+                                    <li>token: 用户认证Token（必填）</li>
+                                    <li>lat/lng: 用户经纬度（可选）</li>
+                                    <li>storeNames: 门店名称（可选）</li>
+                                    <li>area: 行政区（可选）</li>
+                                    <li>layoutName: 户型（可选）</li>
+                                    <li>maxPrice/minPrice: 价格范围（可选）</li>
+                                </ul>
+                            </div>
+                            <div class="interactive-box">
+                                <h4 class="text-body font-bold mb-3 text-[#4F46E5]">输出格式</h4>
+                                <p class="text-body text-[#6366F1] mb-3">返回Markdown表格，包含：</p>
+                                <ul class="space-y-2 text-body text-[#6366F1]">
+                                    <li>预览图、门店名称、房间号</li>
+                                    <li>价格、面积、户型</li>
+                                    <li>距离地铁、站点、站距</li>
+                                    <li>roomId</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 20: 管家接口工作流说明 -->
+            <section class="slide" data-index="19">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">四、实操演示 - 步骤1</span>
+                    <h2 class="font-display text-title font-bold mb-8">管家接口工作流说明</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="interactive-box">
+                                <h4 class="text-subtitle font-bold mb-4 text-[#4F46E5]">输入参数</h4>
+                                <ul class="space-y-3 text-body">
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <span>wxMiniAppId: <span class="text-[#6366F1]">小程序ID（必填）</span></span>
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <span>token: <span class="text-[#6366F1]">用户认证Token（必填）</span></span>
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <span>storeNames: <span class="text-[#6366F1]">门店名称（可选）</span></span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="interactive-box">
+                                <h4 class="text-subtitle font-bold mb-4 text-[#4F46E5]">输出格式</h4>
+                                <p class="text-body text-[#6366F1] mb-3">返回Markdown表格，包含：</p>
+                                <ul class="space-y-3 text-body">
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span>管家姓名</span>
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span>联系电话（可点击拨打）</span>
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span>所属门店</span>
+                                    </li>
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#34D399]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span>企微二维码</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 21: 知识库检索工作流说明 -->
+            <section class="slide" data-index="20">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">四、实操演示 - 步骤1</span>
+                    <h2 class="font-display text-title font-bold mb-8">知识库检索工作流说明</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="interactive-box">
+                                <h4 class="text-subtitle font-bold mb-4 text-[#4F46E5]">输入参数</h4>
+                                <ul class="space-y-3 text-body">
+                                    <li class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#4F46E5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <span>query: <span class="text-[#6366F1]">用户查询问题（必填）</span></span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="interactive-box">
+                                <h4 class="text-subtitle font-bold mb-4 text-[#4F46E5]">处理流程</h4>
+                                <div class="flex items-center gap-2 text-center flex-wrap">
+                                    <span class="bg-[#EEF2FF] px-3 py-2 rounded-lg text-body text-sm">开始节点</span>
+                                    <span class="text-[#4F46E5]">-&gt;</span>
+                                    <span class="bg-[#EEF2FF] px-3 py-2 rounded-lg text-body text-sm">知识检索节点</span>
+                                    <span class="text-[#4F46E5]">-&gt;</span>
+                                    <span class="bg-[#EEF2FF] px-3 py-2 rounded-lg text-body text-sm">代码执行</span>
+                                    <span class="text-[#4F46E5]">-&gt;</span>
+                                    <span class="bg-[#EEF2FF] px-3 py-2 rounded-lg text-body text-sm">结束节点</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 interactive-box">
+                            <h4 class="text-subtitle font-bold mb-4 text-[#4F46E5]">输出格式</h4>
+                            <p class="text-body">返回检索到的知识库内容文本</p>
+                            <p class="text-body text-[#6366F1] mt-2">用于检索租赁政策相关内容</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 22: 步骤2-5创建应用与配置 -->
+            <section class="slide" data-index="21">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">四、实操演示</span>
+                    <h2 class="font-display text-title font-bold mb-8">步骤2-5：创建应用与配置</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="space-y-4 mb-6">
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-4">步骤2：创建Chatflow应用</h3>
+                                <p class="text-body text-[#6366F1]">创建空白应用，选择Chatflow，填写名称"AI找房Agent"</p>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-4">步骤3：配置Agent大脑</h3>
+                                <p class="text-body text-[#6366F1]">模型选择qwen3.5-plus，温度=0，配置系统提示词</p>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-4">步骤4：添加工具</h3>
+                                <p class="text-body text-[#6366F1]">添加search_house、search_knowledge_base、get_butler_contact三个工具</p>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-4">步骤5：配置策略并测试</h3>
+                                <p class="text-body text-[#6366F1]">配置Function Calling策略，设置最大迭代次数=5，进行测试</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 23: 测试案例 -->
+            <section class="slide" data-index="22">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">四、实操演示 - 测试</span>
+                    <h2 class="font-display text-title font-bold mb-8">测试案例</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="space-y-4">
+                            <div class="interactive-box border-[#34D399]">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-[#34D399] font-bold">找房场景</span>
+                                </div>
+                                <p class="text-body mb-2">输入：我想在西乡找一套两居室，预算4000左右</p>
+                                <p class="text-label text-[#6366F1]">预期：调用search_house工具，返回房源列表</p>
+                            </div>
+                            <div class="interactive-box border-[#34D399]">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-[#34D399] font-bold">政策场景</span>
+                                </div>
+                                <p class="text-body mb-2">输入：押金退还要多久？</p>
+                                <p class="text-label text-[#6366F1]">预期：调用search_knowledge_base工具</p>
+                            </div>
+                            <div class="interactive-box border-[#34D399]">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-[#34D399] font-bold">管家场景</span>
+                                </div>
+                                <p class="text-body mb-2">输入：西乡永丰店的管家怎么联系？</p>
+                                <p class="text-label text-[#6366F1]">预期：调用get_butler_contact工具</p>
+                            </div>
+                            <div class="interactive-box border-[#EF4444]">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-[#EF4444] font-bold">越界场景</span>
+                                </div>
+                                <p class="text-body mb-2">输入：帮我写一份简历</p>
+                                <p class="text-label text-[#6366F1]">预期：执行阻断机制，正确引导用户</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 24: 课程总结 -->
+            <section class="slide" data-index="23">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">五、课程总结</span>
+                    <h2 class="font-display text-title font-bold mb-8">核心知识点回顾</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-4">1. Agent定义</h3>
+                                <ul class="space-y-2 text-body text-[#6366F1]">
+                                    <li>能够自主感知、决策、执行的智能实体</li>
+                                    <li>核心：从"被动响应"到"主动完成目标"</li>
+                                </ul>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-4">2. 四大核心能力</h3>
+                                <ul class="space-y-2 text-body text-[#6366F1]">
+                                    <li>感知（Perception）：理解环境信息</li>
+                                    <li>规划（Planning）：制定行动计划</li>
+                                    <li>决策（Decision）：选择最优方案</li>
+                                    <li>执行（Execution）：调用工具完成任务</li>
+                                </ul>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-4">3. Agent vs 工作流</h3>
+                                <ul class="space-y-2 text-body text-[#6366F1]">
+                                    <li>Agent：灵活、智能、自主</li>
+                                    <li>工作流：确定、可靠、高效</li>
+                                    <li>最佳实践：两者结合</li>
+                                </ul>
+                            </div>
+                            <div class="interactive-box">
+                                <h3 class="text-subtitle font-bold mb-4">4. Dify Agent开发</h3>
+                                <ul class="space-y-2 text-body text-[#6366F1]">
+                                    <li>大脑：Agent节点 + 系统提示词</li>
+                                    <li>工具：工作流作为Function Calling工具</li>
+                                    <li>策略：Function Calling自动选择工具</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 25: 课后作业 -->
+            <section class="slide" data-index="24">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">五、课后作业</span>
+                    <h2 class="font-display text-title font-bold mb-8">课后作业</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="space-y-4 mb-6">
+                            <div class="interactive-box border-[#4F46E5]">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="bg-[#EEF2FF] text-[#4F46E5] px-3 py-1 rounded-full text-label font-bold">必做</span>
+                                    <h4 class="text-body font-bold">基础作业：搭建AI找房Agent</h4>
+                                </div>
+                                <p class="text-body text-[#6366F1]">导入三个工具工作流、创建Chatflow应用、配置Agent节点、添加工具、设置模型参数</p>
+                            </div>
+                            <div class="interactive-box">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="bg-[#EEF2FF] text-[#6366F1] px-3 py-1 rounded-full text-label font-bold">选做</span>
+                                    <h4 class="text-body font-bold">进阶作业：提示词优化</h4>
+                                </div>
+                                <p class="text-body text-[#6366F1]">分析当前提示词优缺点，增加对话示例、完善边界情况处理</p>
+                            </div>
+                            <div class="interactive-box">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="bg-[#D1FAE5] text-[#34D399] px-3 py-1 rounded-full text-label font-bold">加分</span>
+                                    <h4 class="text-body font-bold">挑战作业：拓展新工具</h4>
+                                </div>
+                                <p class="text-body text-[#6366F1]">设计新工具工作流（预约看房、租金计算、房源对比等）并集成到Agent</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h4 class="text-body font-bold mb-3">提交内容</h4>
+                            <ul class="space-y-2 text-body text-[#6366F1]">
+                                <li>Dify项目链接和项目名称</li>
+                                <li>工作流截图（完整节点连接）</li>
+                                <li>LLM节点提示词截图</li>
+                                <li>工具配置截图</li>
+                                <li>4个测试用例的运行结果截图</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 26: 学习建议与常见问题 -->
+            <section class="slide" data-index="25">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <span class="clay-badge mb-4">五、课后作业</span>
+                    <h2 class="font-display text-title font-bold mb-8">学习建议与常见问题</h2>
+                    <div class="max-w-5xl mx-auto">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-subtitle font-bold mb-4">学习建议</h3>
+                                <div class="space-y-3">
+                                    <div class="interactive-box">
+                                        <span class="text-[#4F46E5] font-bold">1.</span>
+                                        <p class="text-body text-[#6366F1]">先完成基础作业，确保掌握核心技能后再挑战进阶作业</p>
+                                    </div>
+                                    <div class="interactive-box">
+                                        <span class="text-[#4F46E5] font-bold">2.</span>
+                                        <p class="text-body text-[#6366F1]">多测试边界情况，尝试各种异常输入来测试Agent的鲁棒性</p>
+                                    </div>
+                                    <div class="interactive-box">
+                                        <span class="text-[#4F46E5] font-bold">3.</span>
+                                        <p class="text-body text-[#6366F1]">记录优化过程，形成自己的提示词工程经验</p>
+                                    </div>
+                                    <div class="interactive-box">
+                                        <span class="text-[#4F46E5] font-bold">4.</span>
+                                        <p class="text-body text-[#6366F1]">对比不同平台（Coze和Dify），理解差异和各自优势</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-subtitle font-bold mb-4">常见问题</h3>
+                                <div class="space-y-3">
+                                    <div class="interactive-box">
+                                        <p class="text-body font-bold mb-1">Q1: 结构化输出不稳定？</p>
+                                        <p class="text-label text-[#6366F1]">调低Temperature（建议0.1-0.3）</p>
+                                    </div>
+                                    <div class="interactive-box">
+                                        <p class="text-body font-bold mb-1">Q2: 参数提取不准确？</p>
+                                        <p class="text-label text-[#6366F1]">增加更多示例，明确提取规则</p>
+                                    </div>
+                                    <div class="interactive-box">
+                                        <p class="text-body font-bold mb-1">Q3: Agent调用工具失败？</p>
+                                        <p class="text-label text-[#6366F1]">检查工具参数，确保工具已发布</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Slide 27: 谢谢观看 -->
+            <section class="slide" data-index="26">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center items-center px-12 text-center">
+                    <h1 class="font-display text-hero font-bold mb-6 text-[#4F46E5]">谢谢观看</h1>
+                    <p class="text-hero-sub text-[#6366F1] mb-8">第3章第1课 - Agent入门</p>
+                    <div class="mt-12">
+                        <span class="clay-badge">课程时长：90分钟</span>
+                    </div>
+                    <div class="mt-8 text-body text-[#6366F1]">
+                        <p>继续探索AI Agent的无限可能！</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 导航控制 -->
+        <div class="navigation-controls">
+            <button class="nav-btn prev-btn" id="prevBtn" onclick="prevSlide()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+            <div class="slide-indicator" id="slideIndicator">1 / 27</div>
+            <button class="nav-btn next-btn" id="nextBtn" onclick="nextSlide()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

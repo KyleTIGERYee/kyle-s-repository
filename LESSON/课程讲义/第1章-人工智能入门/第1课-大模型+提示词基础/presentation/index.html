@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第1课：大模型+提示词基础 - 交互式课件</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Comic+Neue:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        'primary-light': '#818CF8',
+                        'primary-dark': '#3730A3',
+                        secondary: '#22C55E',
+                        'secondary-light': '#4ADE80',
+                        accent: '#F59E0B',
+                        background: '#EEF2FF',
+                        surface: '#FFFFFF',
+                        'text-primary': '#312E81',
+                        'text-secondary': '#6366F1',
+                        muted: '#6B7280',
+                    },
+                    fontFamily: {
+                        display: ['Baloo 2', 'cursive'],
+                        body: ['Comic Neue', 'cursive'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 强制大字体样式 */
+        .slide-content { width: 95% !important; max-width: 1600px !important; }
+        .text-body { font-size: 1.5rem !important; line-height: 1.8 !important; }
+        .text-title { font-size: 3rem !important; }
+        .text-subtitle { font-size: 2rem !important; }
+        .text-label { font-size: 1.25rem !important; }
+        
+        /* 交互组件样式 - Claymorphism风格 */
+        .interactive-box {
+            background: var(--surface);
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 28px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+        }
+        .interactive-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 12px 12px 24px rgba(79, 70, 229, 0.2), -12px -12px 24px rgba(255, 255, 255, 0.9);
+        }
+        
+        /* 进度条容器 */
+        .progress-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            height: 24px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4F46E5, #818CF8);
+            border-radius: 8px;
+            transition: width 0.8s ease;
+        }
+        
+        /* 按钮样式 */
+        .btn-action {
+            background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+            color: #000;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+        }
+        .btn-action:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+        
+        /* 幻灯片基础 */
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* 隐藏内容 */
+        .hidden-content { display: none; }
+        .hidden-content.show { display: block; }
+    </style>
+</head>
+<body class="bg-background text-text-primary font-body overflow-hidden">
+    <!-- 动态背景画布 -->
+    <canvas id="particleCanvas" class="fixed inset-0 z-0"></canvas>
+    <div class="fixed inset-0 z-0 bg-gradient-to-b from-primary/10 via-secondary/5 to-background pointer-events-none"></div>
+
+    <!-- 主容器 -->
+    <div id="presentation" class="relative w-full h-screen z-10">
+        <div id="slides-container" class="relative w-full h-full">
+            
+            <!-- 第1页：封面 -->
+            <section class="slide active" data-index="0">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center items-center text-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label px-6 py-2 rounded-full border border-primary/50 text-primary">第1章 - 人工智能入门</span>
+                    </div>
+                    <h1 class="font-display text-title font-bold mb-8 leading-tight">
+                        <span class="block">大模型</span>
+                        <span class="block text-primary text-subtitle mt-4">+ 提示词基础</span>
+                    </h1>
+                    <p class="text-body text-muted mb-16 max-w-4xl">理解AI工作原理，掌握与智能对话的核心技能</p>
+                    <div class="flex items-center justify-center gap-16">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 rounded-full border-2 border-primary/50 flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-body">45分钟</div>
+                        </div>
+                        <div class="w-px h-20 bg-primary/30"></div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 rounded-full border-2 border-primary/50 flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <div class="text-body">零基础友好</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第2页：课程目标 -->
+            <section class="slide" data-index="1">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="text-center mb-12">
+                        <span class="text-label text-primary">Course Objectives</span>
+                        <h2 class="font-display text-title font-bold mt-4">课程目标</h2>
+                        <p class="text-subtitle text-muted mt-4">完成本课后，你将能够：</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box flex items-start gap-6">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="font-display text-4xl text-primary font-bold">01</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-subtitle font-semibold mb-3">理解LLM工作原理</h3>
+                                <p class="text-body text-muted">理解大语言模型的基本工作机制，建立正确的AI认知</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box flex items-start gap-6">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="font-display text-4xl text-primary font-bold">02</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-subtitle font-semibold mb-3">掌握核心概念</h3>
+                                <p class="text-body text-muted">掌握Token、上下文窗口、Temperature等关键参数</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box flex items-start gap-6">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="font-display text-4xl text-primary font-bold">03</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-subtitle font-semibold mb-3">调节模型参数</h3>
+                                <p class="text-body text-muted">学会调节模型参数以控制输出质量和创意程度</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box flex items-start gap-6">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%); border: 2px solid rgba(79, 70, 229, 0.2);">
+                                <span class="font-display text-4xl text-primary font-bold">04</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-subtitle font-semibold mb-3">编写结构化提示词</h3>
+                                <p class="text-body text-muted">理解提示词输入的重要性，能编写基础结构化提示词</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第3页：什么是大语言模型 -->
+            <section class="slide" data-index="2">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.1.1 AI Basics</span>
+                        <h2 class="font-display text-title font-bold mt-4">什么是大语言模型？</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12 items-center">
+                        <div class="interactive-box h-[500px] flex items-center justify-center">
+                            <svg viewBox="0 0 400 400" class="w-full h-full">
+                                <circle cx="200" cy="200" r="80" fill="none" stroke="#4F46E5" stroke-width="3"/>
+                                <circle cx="200" cy="200" r="60" fill="rgba(79,70,229,0.1)" stroke="#4F46E5" stroke-width="2"/>
+                                <text x="200" y="210" text-anchor="middle" fill="#4F46E5" font-size="24" font-weight="bold">LLM</text>
+                                <g class="input-arrows">
+                                    <path d="M 50 150 L 120 180" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    <path d="M 50 200 L 120 200" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    <path d="M 50 250 L 120 220" stroke="#666" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                </g>
+                                <g class="output-arrows">
+                                    <path d="M 280 180 L 350 150" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowhead-gold)"/>
+                                    <path d="M 280 200 L 350 200" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowhead-gold)"/>
+                                    <path d="M 280 220 L 350 250" stroke="#4F46E5" stroke-width="2" marker-end="url(#arrowhead-gold)"/>
+                                </g>
+                                <text x="80" y="130" fill="#888" font-size="16">文本输入</text>
+                                <text x="300" y="130" fill="#4F46E5" font-size="16">文本输出</text>
+                                <defs>
+                                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                        <polygon points="0 0, 10 3, 0 6" fill="#666"/>
+                                    </marker>
+                                    <marker id="arrowhead-gold" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                        <polygon points="0 0, 10 3, 0 6" fill="#4F46E5"/>
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                        <div class="space-y-8">
+                            <div class="border-l-4 border-primary pl-8">
+                                <p class="text-body leading-relaxed">大语言模型（Large Language Model，简称LLM）是一种基于深度学习的人工智能系统，它能够理解和生成人类语言。</p>
+                            </div>
+                            <div class="bg-primary/10 rounded-2xl p-8 border border-primary/30">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-primary mb-3 text-subtitle">通俗理解</h4>
+                                        <p class="text-body text-muted">想象一个读过互联网上几乎所有文本的"超级读者"，它通过海量阅读学会了语言的模式。当你向它提问时，它基于学到的模式"预测"接下来应该说什么。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第4页：关键特征与常见模型 -->
+            <section class="slide" data-index="3">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.1.1 AI Basics</span>
+                        <h2 class="font-display text-title font-bold mt-4">关键特征与常见模型</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="space-y-6">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">三大关键特征</h3>
+                            <div class="interactive-box flex items-center gap-6">
+                                <div class="w-20 h-20 rounded-2xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-display text-xl font-semibold mb-2">大规模</h4>
+                                    <p class="text-body text-muted">训练数据包含数千亿甚至数万亿个词</p>
+                                </div>
+                            </div>
+                            <div class="interactive-box flex items-center gap-6">
+                                <div class="w-20 h-20 rounded-2xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-10 h-10 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-display text-xl font-semibold mb-2">通用性</h4>
+                                    <p class="text-body text-muted">能处理多种任务（问答、翻译、写作、编程等）</p>
+                                </div>
+                            </div>
+                            <div class="interactive-box flex items-center gap-6">
+                                <div class="w-20 h-20 rounded-2xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-display text-xl font-semibold mb-2">生成能力</h4>
+                                    <p class="text-body text-muted">能创造连贯、有意义的文本</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">常见大语言模型</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-surface-light/50 rounded-xl p-6 text-center hover:bg-primary/10 transition-all cursor-pointer" onclick="showModelInfo('deepseek')">
+                                    <div class="font-display text-2xl text-primary mb-2">DeepSeek</div>
+                                    <div class="text-body text-muted">深度求索</div>
+                                </div>
+                                <div class="bg-surface-light/50 rounded-xl p-6 text-center hover:bg-primary/10 transition-all cursor-pointer" onclick="showModelInfo('qwen')">
+                                    <div class="font-display text-2xl text-primary mb-2">通义千问</div>
+                                    <div class="text-body text-muted">阿里巴巴</div>
+                                </div>
+                                <div class="bg-surface-light/50 rounded-xl p-6 text-center hover:bg-primary/10 transition-all cursor-pointer" onclick="showModelInfo('doubao')">
+                                    <div class="font-display text-2xl text-primary mb-2">豆包</div>
+                                    <div class="text-body text-muted">字节跳动</div>
+                                </div>
+                                <div class="bg-surface-light/50 rounded-xl p-6 text-center hover:bg-primary/10 transition-all cursor-pointer" onclick="showModelInfo('gpt')">
+                                    <div class="font-display text-2xl text-primary mb-2">GPT系列</div>
+                                    <div class="text-body text-muted">OpenAI</div>
+                                </div>
+                                <div class="bg-surface-light/50 rounded-xl p-6 text-center hover:bg-primary/10 transition-all cursor-pointer" onclick="showModelInfo('claude')">
+                                    <div class="font-display text-2xl text-primary mb-2">Claude</div>
+                                    <div class="text-body text-muted">Anthropic</div>
+                                </div>
+                                <div class="bg-surface-light/50 rounded-xl p-6 text-center hover:bg-primary/10 transition-all cursor-pointer" onclick="showModelInfo('gemini')">
+                                    <div class="font-display text-2xl text-primary mb-2">Gemini</div>
+                                    <div class="text-body text-muted">Google</div>
+                                </div>
+                            </div>
+                            <div id="modelInfo" class="mt-6 p-6 bg-primary/10 rounded-xl border border-primary/30 hidden">
+                                <p class="text-body" id="modelInfoText">点击上方模型查看详情</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第5页：概率性 -->
+            <section class="slide" data-index="4">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.1.2 Core Concept</span>
+                        <h2 class="font-display text-title font-bold mt-4">概率性：AI如何"思考"？</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="space-y-8">
+                            <p class="text-body text-muted">当你问AI问题时，它并不是在"思考"正确答案，而是在计算：</p>
+                            <div class="border-l-4 border-primary pl-8 py-4">
+                                <p class="text-subtitle italic text-primary">"基于我刚才看到的所有内容，下一个最可能出现的词是什么？"</p>
+                            </div>
+                            <div class="bg-blue-500/10 rounded-2xl p-8 border border-blue-500/30">
+                                <div class="flex items-start gap-4">
+                                    <svg class="w-10 h-10 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="text-body text-muted">这就是AI的"思考"方式——不是理解，而是概率预测。它选择概率最高的词作为下一个输出。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">交互演示：预测下一个词</h3>
+                            <div class="mb-6">
+                                <label class="text-body text-muted mb-3 block">输入文本：</label>
+                                <div class="flex gap-4">
+                                    <input type="text" id="probInput" value="今天天气很" class="flex-1 bg-surface-light/50 border-2 border-primary rounded-xl px-6 py-4 text-body focus:border-primary focus:outline-none" placeholder="输入文本...">
+                                    <button onclick="predictNext()" class="btn-action">预测</button>
+                                </div>
+                            </div>
+                            <div id="probResult" class="space-y-4">
+                                <p class="text-body text-muted">AI计算的概率分布：</p>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex justify-between text-body mb-2">
+                                            <span>"好"</span>
+                                            <span class="text-primary font-bold">75%</span>
+                                        </div>
+                                        <div class="progress-container">
+                                            <div class="progress-fill" style="width: 75%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-body mb-2">
+                                            <span>"热"</span>
+                                            <span class="text-muted">10%</span>
+                                        </div>
+                                        <div class="progress-container">
+                                            <div class="progress-fill" style="width: 10%; opacity: 0.5"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-body mb-2">
+                                            <span>"冷"</span>
+                                            <span class="text-muted">10%</span>
+                                        </div>
+                                        <div class="progress-container">
+                                            <div class="progress-fill" style="width: 10%; opacity: 0.5"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-body mb-2">
+                                            <span>"糟糕"</span>
+                                            <span class="text-muted">5%</span>
+                                        </div>
+                                        <div class="progress-container">
+                                            <div class="progress-fill" style="width: 5%; opacity: 0.3"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-6 p-6 bg-primary/20 rounded-xl border-2 border-primary text-center">
+                                    <p class="text-subtitle text-primary font-bold">AI选择："好"（概率最高）</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第6页：非确定性的影响 -->
+            <section class="slide" data-index="5">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.1.2 Core Concept</span>
+                        <h2 class="font-display text-title font-bold mt-4">非确定性的影响</h2>
+                    </div>
+                    <p class="text-body text-muted mb-8">由于概率机制，同样的输入可能得到不同的输出：</p>
+                    <div class="grid grid-cols-3 gap-8 mb-8">
+                        <div class="interactive-box text-center">
+                            <div class="w-24 h-24 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-6">
+                                <svg class="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </div>
+                            <h4 class="font-display text-xl font-semibold mb-3">不同输出</h4>
+                            <p class="text-body text-muted">刷新页面再问同样的问题，答案可能不同</p>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-24 h-24 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-6">
+                                <svg class="w-12 h-12 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="font-display text-xl font-semibold mb-3">可能出错</h4>
+                            <p class="text-body text-muted">有时会产生幻觉，生成看似合理但实际错误的内容</p>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-24 h-24 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-6">
+                                <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="font-display text-xl font-semibold mb-3">非100%准确</h4>
+                            <p class="text-body text-muted">从概率角度看，大模型的准确率不可能做到100%</p>
+                        </div>
+                    </div>
+                    <div class="bg-primary/10 rounded-2xl p-8 border border-primary/30">
+                        <h4 class="font-display text-xl font-semibold text-primary mb-4">与AI协作的本质</h4>
+                        <p class="text-body text-muted leading-relaxed">与AI协作不是像使用计算器那样得到确定的结果，而是像与一个有知识但有时会说错话的同事合作。你需要学会验证AI的输出，通过更好的提示词引导AI走向正确的概率分布。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第7页：Token概念 -->
+            <section class="slide" data-index="6">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.1.3 Core Mechanism</span>
+                        <h2 class="font-display text-title font-bold mt-4">Token是什么？</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">Token分解示例</h3>
+                            <div class="space-y-6">
+                                <div class="bg-surface-light/50 rounded-xl p-6">
+                                    <div class="text-body text-muted mb-3">输入："我"</div>
+                                    <div class="flex gap-2">
+                                        <span class="px-4 py-2 bg-primary/30 rounded-lg text-body">我</span>
+                                    </div>
+                                    <div class="text-body text-muted mt-3">= 1个token</div>
+                                </div>
+                                <div class="bg-surface-light/50 rounded-xl p-6">
+                                    <div class="text-body text-muted mb-3">输入："人工智能"</div>
+                                    <div class="flex gap-2">
+                                        <span class="px-4 py-2 bg-primary/30 rounded-lg text-body">人工</span>
+                                        <span class="px-4 py-2 bg-blue-500/30 rounded-lg text-body">智能</span>
+                                    </div>
+                                    <div class="text-body text-muted mt-3">= 2个tokens</div>
+                                </div>
+                                <div class="bg-surface-light/50 rounded-xl p-6">
+                                    <div class="text-body text-muted mb-3">输入："unbelievable"</div>
+                                    <div class="flex gap-2">
+                                        <span class="px-4 py-2 bg-primary/30 rounded-lg text-body">unbel</span>
+                                        <span class="px-4 py-2 bg-blue-500/30 rounded-lg text-body">iev</span>
+                                        <span class="px-4 py-2 bg-green-500/30 rounded-lg text-body">able</span>
+                                    </div>
+                                    <div class="text-body text-muted mt-3">= 3个tokens</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">Token计算器</h3>
+                            <div class="mb-6">
+                                <textarea id="tokenInput" rows="3" class="w-full bg-surface-light/50 border-2 border-primary rounded-xl px-6 py-4 text-body focus:border-primary focus:outline-none resize-none" placeholder="输入文本，计算Token数量..."></textarea>
+                            </div>
+                            <button onclick="calculateTokens()" class="btn-action w-full mb-6">计算Token</button>
+                            <div id="tokenResult" class="hidden">
+                                <div class="grid grid-cols-3 gap-4 mb-6">
+                                    <div class="bg-surface-light/50 rounded-xl p-6 text-center">
+                                        <div class="text-4xl font-display text-primary font-bold" id="tokenCount">0</div>
+                                        <div class="text-body text-muted mt-2">Token数量</div>
+                                    </div>
+                                    <div class="bg-surface-light/50 rounded-xl p-6 text-center">
+                                        <div class="text-4xl font-display text-primary font-bold" id="charCount">0</div>
+                                        <div class="text-body text-muted mt-2">字符数量</div>
+                                    </div>
+                                    <div class="bg-surface-light/50 rounded-xl p-6 text-center">
+                                        <div class="text-4xl font-display text-primary font-bold" id="wordCount">0</div>
+                                        <div class="text-body text-muted mt-2">词数量</div>
+                                    </div>
+                                </div>
+                                <div class="bg-surface-light/30 rounded-xl p-6">
+                                    <p class="text-body text-muted mb-3">Token分解：</p>
+                                    <div id="tokenBreakdown" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第8页：Next Token Prediction -->
+            <section class="slide" data-index="7">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.1.3 Core Mechanism</span>
+                        <h2 class="font-display text-title font-bold mt-4">Next Token Prediction</h2>
+                    </div>
+                    <div class="interactive-box mb-8">
+                        <div class="flex items-center justify-center gap-4">
+                            <div class="text-center">
+                                <div class="w-32 h-32 rounded-2xl bg-surface-light/50 flex items-center justify-center mb-4">
+                                    <span class="font-display text-3xl text-primary">输入</span>
+                                </div>
+                                <p class="text-body text-muted">"今天天气"</p>
+                            </div>
+                            <svg class="w-16 h-16 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                            <div class="text-center">
+                                <div class="w-40 h-40 rounded-full bg-primary/20 border-4 border-primary flex items-center justify-center mb-4">
+                                    <span class="font-display text-2xl text-primary text-center">LLM<br/>预测</span>
+                                </div>
+                            </div>
+                            <svg class="w-16 h-16 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                            <div class="text-center">
+                                <div class="w-32 h-32 rounded-2xl bg-primary/30 flex items-center justify-center mb-4">
+                                    <span class="font-display text-3xl text-primary">输出</span>
+                                </div>
+                                <p class="text-body text-muted">"很好"</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="border-l-4 border-primary pl-8">
+                            <h4 class="font-display text-xl font-semibold mb-4">工作原理</h4>
+                            <p class="text-body text-muted leading-relaxed">LLM通过分析输入文本的上下文，计算每个可能的下一个词的概率，然后选择概率最高的词作为输出。</p>
+                        </div>
+                        <div class="bg-blue-500/10 rounded-2xl p-8 border border-blue-500/30">
+                            <div class="flex items-start gap-4">
+                                <svg class="w-10 h-10 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="text-body text-muted">这个过程会不断重复，每次生成一个词，直到生成完整的回答。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第9页：AI发展历程 -->
+            <section class="slide" data-index="8">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.2.1 AI Evolution</span>
+                        <h2 class="font-display text-title font-bold mt-4">AI发展历程</h2>
+                    </div>
+                    <div class="interactive-box">
+                        <div class="relative">
+                            <div class="absolute left-0 right-0 top-1/2 h-2 bg-white/10 rounded-full"></div>
+                            <div class="relative flex justify-between items-center py-12">
+                                <div class="timeline-node text-center cursor-pointer" onclick="showTimelineDetail(0)">
+                                    <div class="w-20 h-20 rounded-full bg-surface-light border-4 border-primary flex items-center justify-center mb-4 mx-auto hover:border-primary/80 transition-all">
+                                        <span class="font-display text-xl">1950s</span>
+                                    </div>
+                                    <p class="text-body font-semibold">图灵测试</p>
+                                    <p class="text-body text-muted">AI概念诞生</p>
+                                </div>
+                                <div class="timeline-node text-center cursor-pointer" onclick="showTimelineDetail(1)">
+                                    <div class="w-20 h-20 rounded-full bg-surface-light border-4 border-primary flex items-center justify-center mb-4 mx-auto hover:border-primary/80 transition-all">
+                                        <span class="font-display text-xl">2010s</span>
+                                    </div>
+                                    <p class="text-body font-semibold">深度学习</p>
+                                    <p class="text-body text-muted">神经网络复兴</p>
+                                </div>
+                                <div class="timeline-node text-center cursor-pointer" onclick="showTimelineDetail(2)">
+                                    <div class="w-20 h-20 rounded-full bg-surface-light border-4 border-primary flex items-center justify-center mb-4 mx-auto hover:border-primary/80 transition-all">
+                                        <span class="font-display text-xl">2017</span>
+                                    </div>
+                                    <p class="text-body font-semibold">Transformer</p>
+                                    <p class="text-body text-muted">注意力机制</p>
+                                </div>
+                                <div class="timeline-node text-center cursor-pointer" onclick="showTimelineDetail(3)">
+                                    <div class="w-20 h-20 rounded-full bg-primary/30 border-4 border-primary flex items-center justify-center mb-4 mx-auto">
+                                        <span class="font-display text-xl">2022</span>
+                                    </div>
+                                    <p class="text-body font-semibold text-primary">ChatGPT</p>
+                                    <p class="text-body text-muted">大模型爆发</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="timelineDetail" class="mt-8 p-8 bg-surface-light/50 rounded-xl hidden">
+                            <p class="text-body" id="timelineText">点击上方时间节点查看详情</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第10页：Transformer架构 -->
+            <section class="slide" data-index="9">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.2.2 Architecture</span>
+                        <h2 class="font-display text-title font-bold mt-4">Transformer架构</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="interactive-box h-[500px] flex items-center justify-center">
+                            <svg viewBox="0 0 400 500" class="w-full h-full">
+                                <rect x="150" y="20" width="100" height="50" rx="10" fill="rgba(212,175,55,0.2)" stroke="#4F46E5" stroke-width="2"/>
+                                <text x="200" y="50" text-anchor="middle" fill="#4F46E5" font-size="16">输入</text>
+                                <rect x="100" y="120" width="200" height="80" rx="10" fill="rgba(100,149,237,0.2)" stroke="#6495ED" stroke-width="2" class="hover:stroke-accent cursor-pointer" onclick="showArchDetail('attention')"/>
+                                <text x="200" y="165" text-anchor="middle" fill="#6495ED" font-size="16">注意力机制</text>
+                                <rect x="100" y="240" width="200" height="80" rx="10" fill="rgba(144,238,144,0.2)" stroke="#90EE90" stroke-width="2" class="hover:stroke-accent cursor-pointer" onclick="showArchDetail('ffn')"/>
+                                <text x="200" y="285" text-anchor="middle" fill="#90EE90" font-size="16">前馈神经网络</text>
+                                <rect x="150" y="380" width="100" height="50" rx="10" fill="rgba(212,175,55,0.2)" stroke="#4F46E5" stroke-width="2"/>
+                                <text x="200" y="410" text-anchor="middle" fill="#4F46E5" font-size="16">输出</text>
+                                <line x1="200" y1="70" x2="200" y2="120" stroke="#666" stroke-width="2"/>
+                                <line x1="200" y1="200" x2="200" y2="240" stroke="#666" stroke-width="2"/>
+                                <line x1="200" y1="320" x2="200" y2="380" stroke="#666" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-primary pl-8">
+                                <p class="text-body leading-relaxed">Transformer是2017年由Google提出的神经网络架构，它是现代大语言模型的基础。</p>
+                            </div>
+                            <div id="archDetail" class="bg-surface-light/50 rounded-2xl p-8">
+                                <p class="text-body text-muted">点击左侧架构组件查看详细说明</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第11页：自注意力示例 -->
+            <section class="slide" data-index="10">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.2.2 Architecture</span>
+                        <h2 class="font-display text-title font-bold mt-4">自注意力（Self-Attention）示例</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <!-- 左侧：交互句子 -->
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">点击"它"查看注意力</h3>
+                            <div class="text-center py-12">
+                                <p class="text-subtitle">
+                                    <span class="word px-3 py-2 rounded hover:bg-primary/20 cursor-pointer transition-all" data-word="猫">猫</span>
+                                    <span class="word px-3 py-2 rounded hover:bg-primary/20 cursor-pointer transition-all" data-word="坐">坐</span>
+                                    <span class="word px-3 py-2 rounded hover:bg-primary/20 cursor-pointer transition-all" data-word="在">在</span>
+                                    <span class="word px-3 py-2 rounded hover:bg-primary/20 cursor-pointer transition-all" data-word="垫子">垫子</span>
+                                    <span class="word px-3 py-2 rounded hover:bg-primary/20 cursor-pointer transition-all" data-word="上">上</span>
+                                    <span class="word px-3 py-2 rounded hover:bg-primary/20 cursor-pointer transition-all" data-word="，">，</span>
+                                    <span class="word px-3 py-2 rounded bg-primary/30 cursor-pointer" id="targetWord" onclick="showAttention()">它</span>
+                                    <span class="word px-3 py-2 rounded hover:bg-primary/20 cursor-pointer transition-all" data-word="很">很</span>
+                                    <span class="word px-3 py-2 rounded hover:bg-primary/20 cursor-pointer transition-all" data-word="舒服">舒服</span>
+                                </p>
+                            </div>
+                            <button onclick="showAttention()" class="btn-action w-full">显示注意力分布</button>
+                        </div>
+                        
+                        <!-- 右侧：注意力可视化 -->
+                        <div class="interactive-box" id="attentionViz">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">注意力权重</h3>
+                            <div class="space-y-4" id="attentionBars">
+                                <div class="flex items-center gap-4">
+                                    <span class="w-20 text-body">猫</span>
+                                    <div class="flex-1 progress-container">
+                                        <div class="progress-fill" style="width: 75%"></div>
+                                    </div>
+                                    <span class="w-20 text-body text-right text-primary font-bold">75%</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="w-20 text-body">垫子</span>
+                                    <div class="flex-1 progress-container">
+                                        <div class="progress-fill" style="width: 15%; opacity: 0.5"></div>
+                                    </div>
+                                    <span class="w-20 text-body text-right">15%</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="w-20 text-body">坐</span>
+                                    <div class="flex-1 progress-container">
+                                        <div class="progress-fill" style="width: 5%; opacity: 0.3"></div>
+                                    </div>
+                                    <span class="w-20 text-body text-right">5%</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <span class="w-20 text-body">其他</span>
+                                    <div class="flex-1 progress-container">
+                                        <div class="progress-fill" style="width: 5%; opacity: 0.2"></div>
+                                    </div>
+                                    <span class="w-20 text-body text-right">5%</span>
+                                </div>
+                            </div>
+                            <div class="mt-8 p-6 bg-blue-500/10 rounded-xl border border-blue-500/30">
+                                <p class="text-body text-muted">当模型看到"它"时，主要注意力集中在"猫"上（75%），因为"它"指代的是"猫"。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第12页：为什么注意力机制重要 -->
+            <section class="slide" data-index="11">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.2.2 Architecture</span>
+                        <h2 class="font-display text-title font-bold mt-4">为什么注意力机制重要？</h2>
+                    </div>
+                    <div class="grid grid-cols-3 gap-8">
+                        <div class="interactive-box text-center">
+                            <div class="w-24 h-24 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-6">
+                                <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="font-display text-xl font-semibold mb-3">捕捉长距离依赖</h4>
+                            <p class="text-body text-muted">能理解句子开头和结尾之间的关系，把握长文本的语义关联</p>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
+                                <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </div>
+                            <h4 class="font-display text-xl font-semibold mb-3">并行计算</h4>
+                            <p class="text-body text-muted">能同时处理句子中的所有词，大幅提升训练速度</p>
+                        </div>
+                        <div class="interactive-box text-center">
+                            <div class="w-24 h-24 rounded-full bg-purple-500/20 flex items-center justify-center mx-auto mb-6">
+                                <svg class="w-12 h-12 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </div>
+                            <h4 class="font-display text-xl font-semibold mb-3">可解释性</h4>
+                            <p class="text-body text-muted">可以看到模型"关注"了哪些词，理解AI的"思考过程"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第12页：不涉及复杂数学的理解方式 -->
+            <section class="slide" data-index="11">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.2.3 Understanding</span>
+                        <h2 class="font-display text-title font-bold mt-4">不涉及复杂数学的理解方式</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12 items-center">
+                        <div class="space-y-8">
+                            <p class="text-body text-muted">你不需要理解Transformer的数学细节。只需要记住：</p>
+                            <div class="space-y-6">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-bold">1</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold mb-2">输入</h4>
+                                        <p class="text-body text-muted">文本被切分成tokens</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-bold">2</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold mb-2">处理</h4>
+                                        <p class="text-body text-muted">通过多层注意力机制，每个token都与其他所有token"交流"</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-bold">3</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold mb-2">输出</h4>
+                                        <p class="text-body text-muted">预测下一个token</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 text-center">会议室比喻</h3>
+                            <div class="text-center">
+                                <svg viewBox="0 0 300 300" class="w-64 h-64 mx-auto">
+                                    <circle cx="150" cy="150" r="100" fill="none" stroke="#4F46E5" stroke-width="2"/>
+                                    <circle cx="150" cy="50" r="20" fill="#4F46E5"/>
+                                    <circle cx="235" cy="100" r="20" fill="#6495ED"/>
+                                    <circle cx="235" cy="200" r="20" fill="#90EE90"/>
+                                    <circle cx="150" cy="250" r="20" fill="#4F46E5"/>
+                                    <circle cx="65" cy="200" r="20" fill="#6495ED"/>
+                                    <circle cx="65" cy="100" r="20" fill="#90EE90"/>
+                                    <line x1="150" y1="50" x2="235" y2="100" stroke="#666" stroke-width="1" opacity="0.5"/>
+                                    <line x1="235" y1="100" x2="235" y2="200" stroke="#666" stroke-width="1" opacity="0.5"/>
+                                    <line x1="235" y1="200" x2="150" y2="250" stroke="#666" stroke-width="1" opacity="0.5"/>
+                                    <line x1="150" y1="250" x2="65" y2="200" stroke="#666" stroke-width="1" opacity="0.5"/>
+                                    <line x1="65" y1="200" x2="65" y2="100" stroke="#666" stroke-width="1" opacity="0.5"/>
+                                    <line x1="65" y1="100" x2="150" y2="50" stroke="#666" stroke-width="1" opacity="0.5"/>
+                                </svg>
+                                <p class="text-body text-muted mt-4">想象一个会议室，里面坐满了代表每个词的人。他们互相讨论、交换信息，最后每个人都对"接下来应该说什么"有了判断。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第13页：Token与计费 -->
+            <section class="slide" data-index="12">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.3.1 Token & Billing</span>
+                        <h2 class="font-display text-title font-bold mt-4">Token与计费</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-primary pl-8">
+                                <h4 class="font-display text-xl font-semibold mb-4">什么是Token？</h4>
+                                <p class="text-body text-muted leading-relaxed">Token是模型处理文本的基本单位。不同的模型对token的定义略有不同，但大致遵循：</p>
+                                <ul class="mt-4 space-y-2 text-body text-muted">
+                                    <li>• 英文：1个token ≈ 0.75个单词</li>
+                                    <li>• 中文：1个token ≈ 0.5个汉字</li>
+                                </ul>
+                            </div>
+                            <div class="bg-primary/10 rounded-2xl p-8 border border-primary/30">
+                                <h4 class="font-display text-xl font-semibold text-primary mb-4">为什么Token很重要？</h4>
+                                <ul class="space-y-3 text-body text-muted">
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary">1.</span>
+                                        <span><strong>计费单位</strong>：API调用按token数量收费</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary">2.</span>
+                                        <span><strong>上下文限制</strong>：模型有最大token限制</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary">3.</span>
+                                        <span><strong>性能影响</strong>：token越多，处理时间越长</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">实际例子</h3>
+                            <div class="bg-surface-light/50 rounded-xl p-6 mb-6">
+                                <p class="text-body text-muted mb-3">文本："你好，请介绍一下深圳的天气情况。"</p>
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">你</span>
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">好</span>
+                                    <span class="px-3 py-1 bg-blue-500/30 rounded text-body">，</span>
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">请</span>
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">介绍</span>
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">一下</span>
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">深圳</span>
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">的</span>
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">天气</span>
+                                    <span class="px-3 py-1 bg-primary/30 rounded text-body">情况</span>
+                                    <span class="px-3 py-1 bg-blue-500/30 rounded text-body">。</span>
+                                </div>
+                                <p class="text-body text-primary font-semibold">大约11个tokens</p>
+                            </div>
+                            <div class="bg-blue-500/10 rounded-xl p-6 border border-blue-500/30">
+                                <p class="text-body text-muted">Token计算器能帮助您根据输入文本，预估其在不同模型上对应的tokens数量。您也可以通过Tokenizer API实现tokens数量的计算</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第14页：上下文窗口 -->
+            <section class="slide" data-index="13">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.3.2 Context Window</span>
+                        <h2 class="font-display text-title font-bold mt-4">上下文窗口</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-primary pl-8">
+                                <h4 class="font-display text-xl font-semibold mb-4">什么是上下文窗口？</h4>
+                                <p class="text-body text-muted leading-relaxed">上下文窗口是模型能"记住"的最大token数量。它包括：你的输入（提示词）、AI之前的回复、系统指令。</p>
+                            </div>
+                            <div class="bg-primary/10 rounded-2xl p-8 border border-primary/30">
+                                <div class="flex items-start gap-4">
+                                    <svg class="w-10 h-10 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="text-body text-muted">"Context Window就是你的'前世今生'。模型根据这个前世今生，计算概率..."</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">常见模型的上下文窗口</h3>
+                            <p class="text-body text-muted mb-4">2026年1月最新数据</p>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-4 bg-surface-light/50 rounded-xl">
+                                    <div>
+                                        <p class="font-semibold text-body">DeepSeek V3.2</p>
+                                        <p class="text-body text-muted">深度求索</p>
+                                    </div>
+                                    <span class="text-primary font-bold text-body">128K tokens</span>
+                                </div>
+                                <div class="flex justify-between items-center p-4 bg-surface-light/50 rounded-xl">
+                                    <div>
+                                        <p class="font-semibold text-body">Qwen3-Max-Thinking</p>
+                                        <p class="text-body text-muted">阿里巴巴</p>
+                                    </div>
+                                    <span class="text-primary font-bold text-body">256K tokens</span>
+                                </div>
+                                <div class="flex justify-between items-center p-4 bg-surface-light/50 rounded-xl">
+                                    <div>
+                                        <p class="font-semibold text-body">月之暗面Kimi</p>
+                                        <p class="text-body text-muted">月之暗面</p>
+                                    </div>
+                                    <span class="text-primary font-bold text-body">200K tokens</span>
+                                </div>
+                                <div class="flex justify-between items-center p-4 bg-surface-light/50 rounded-xl">
+                                    <div>
+                                        <p class="font-semibold text-body">ChatGPT-5.2</p>
+                                        <p class="text-body text-muted">OpenAI</p>
+                                    </div>
+                                    <span class="text-primary font-bold text-body">400K tokens</span>
+                                </div>
+                                <div class="flex justify-between items-center p-4 bg-surface-light/50 rounded-xl">
+                                    <div>
+                                        <p class="font-semibold text-body">Claude Opus</p>
+                                        <p class="text-body text-muted">Anthropic</p>
+                                    </div>
+                                    <span class="text-primary font-bold text-body">200K tokens</span>
+                                </div>
+                                <div class="flex justify-between items-center p-4 bg-surface-light/50 rounded-xl">
+                                    <div>
+                                        <p class="font-semibold text-body">Gemini 3.0 Pro</p>
+                                        <p class="text-body text-muted">Google</p>
+                                    </div>
+                                    <span class="text-primary font-bold text-body">1M tokens</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第15页：Temperature参数 -->
+            <section class="slide" data-index="14">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.3.3 Temperature</span>
+                        <h2 class="font-display text-title font-bold mt-4">温度（Temperature）</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-primary pl-8">
+                                <h4 class="font-display text-xl font-semibold mb-4">什么是Temperature？</h4>
+                                <p class="text-body text-muted leading-relaxed">Temperature是一个控制模型输出"随机性"的参数。</p>
+                            </div>
+                            <div class="bg-primary/10 rounded-2xl p-8 border border-primary/30">
+                                <h4 class="font-display text-xl font-semibold text-primary mb-4">工作原理</h4>
+                                <ul class="space-y-3 text-body text-muted">
+                                    <li>• <strong>Temperature = 0</strong>：模型总是选择概率最高的词（确定性输出）</li>
+                                    <li>• <strong>Temperature = 1</strong>：模型按原始概率分布选择（平衡模式）</li>
+                                    <li>• <strong>Temperature > 1</strong>：模型更倾向于选择低概率的词（更有创造性）</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">实际对比</h3>
+                            <p class="text-body text-muted mb-4">提示词："请为一款面向深夜加班族的能量饮料写一句简短、有力的广告语。"</p>
+                            <div class="space-y-4">
+                                <div class="bg-blue-500/10 rounded-xl p-4 border border-blue-500/30">
+                                    <p class="text-body text-blue-400 font-semibold mb-2">Temperature = 0（低，更确定）</p>
+                                    <p class="text-body">"加班到凌晨，喝它提精神！"</p>
+                                </div>
+                                <div class="bg-primary/10 rounded-xl p-4 border border-primary/30">
+                                    <p class="text-body text-primary font-semibold mb-2">Temperature = 1.0（中，平衡）</p>
+                                    <p class="text-body">"夜再深，劲儿仍足！"</p>
+                                </div>
+                                <div class="bg-purple-500/10 rounded-xl p-4 border border-purple-500/30">
+                                    <p class="text-body text-purple-400 font-semibold mb-2">Temperature = 2（高，更有创意）</p>
+                                    <p class="text-body">"夜深人不蔫，罐启能量燃！"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第16页：如何选择Temperature -->
+            <section class="slide" data-index="15">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.3.3 Temperature</span>
+                        <h2 class="font-display text-title font-bold mt-4">如何选择Temperature？</h2>
+                    </div>
+                    <div class="interactive-box mb-8">
+                        <table class="w-full text-body">
+                            <thead>
+                                <tr class="border-b-2 border-primary/30">
+                                    <th class="text-left py-4 px-4">场景</th>
+                                    <th class="text-left py-4 px-4">推荐Temperature</th>
+                                    <th class="text-left py-4 px-4">原因</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-muted">
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-4">代码生成</td>
+                                    <td class="py-4 px-4 text-primary">0.0 - 0.3</td>
+                                    <td class="py-4 px-4">需要准确无误</td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-4">数据分析</td>
+                                    <td class="py-4 px-4 text-primary">0.1 - 0.3</td>
+                                    <td class="py-4 px-4">需要事实准确</td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-4">一般问答</td>
+                                    <td class="py-4 px-4 text-primary">0.5 - 0.7</td>
+                                    <td class="py-4 px-4">平衡准确性和流畅性</td>
+                                </tr>
+                                <tr class="border-b border-primary/20">
+                                    <td class="py-4 px-4">创意写作</td>
+                                    <td class="py-4 px-4 text-primary">0.8 - 1.2</td>
+                                    <td class="py-4 px-4">需要多样性和创意</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-4 px-4">头脑风暴</td>
+                                    <td class="py-4 px-4 text-primary">1.0 +</td>
+                                    <td class="py-4 px-4">需要跳出常规思维</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h4 class="font-display text-xl font-semibold mb-4">交互演示</h4>
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-body text-muted">确定性</span>
+                                    <span class="text-body text-primary font-bold" id="tempValue">1.0</span>
+                                    <span class="text-body text-muted">创造性</span>
+                                </div>
+                                <input type="range" id="tempSlider" min="0" max="20" value="10" class="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer" oninput="updateTemp(this.value)">
+                            </div>
+                            <button onclick="generateWithTemp()" class="btn-action w-full">生成广告语</button>
+                        </div>
+                        <div id="tempResult" class="interactive-box">
+                            <p class="text-body text-muted">调节滑块并点击生成，查看不同Temperature的效果</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第17页：其他重要参数 -->
+            <section class="slide" data-index="16">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.3.4 Other Parameters</span>
+                        <h2 class="font-display text-title font-bold mt-4">其他重要参数</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                                    <span class="font-display text-2xl text-blue-400 font-bold">Top-p</span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">Nucleus Sampling</h3>
+                            </div>
+                            <div class="space-y-4 text-body text-muted">
+                                <p>• 控制模型从概率最高的多少比例的词中选择</p>
+                                <p>• Top-p = 0.9 表示只从概率累计达到90%的词中选择</p>
+                                <p>• 一般来说<strong class="text-primary">Temperature和Top-p只选择一个进行调节</strong></p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center">
+                                    <span class="font-display text-2xl text-green-400 font-bold">Max</span>
+                                </div>
+                                <h3 class="font-display text-subtitle font-semibold">Max Tokens</h3>
+                            </div>
+                            <div class="space-y-4 text-body text-muted">
+                                <p>• 限制AI回复的最大token数</p>
+                                <p>• 用于控制成本和回复长度</p>
+                                <p>• 防止模型生成过长的内容</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第18页：提示词输入的重要性 -->
+            <section class="slide" data-index="17">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.4.2 Prompt Importance</span>
+                        <h2 class="font-display text-title font-bold mt-4">提示词输入的重要性</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12 items-center">
+                        <div class="space-y-8">
+                            <div class="border-l-4 border-primary pl-8">
+                                <p class="text-body leading-relaxed">既然AI是基于概率预测下一个词，那么<strong class="text-primary">输入的质量直接决定了输出的质量</strong>。</p>
+                            </div>
+                            <div class="bg-primary/10 rounded-2xl p-8 border border-primary/30">
+                                <h4 class="font-display text-xl font-semibold text-primary mb-4">提示词工程的核心</h4>
+                                <p class="text-body text-muted">通过精心设计的输入，引导AI走向正确的概率分布，从而得到更好的输出。</p>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6">输入质量对比</h3>
+                            <div class="space-y-4">
+                                <div class="bg-red-500/10 rounded-xl p-4 border border-red-500/30">
+                                    <p class="text-body text-red-400 font-semibold mb-2">❌ 低质量输入</p>
+                                    <p class="text-body text-muted">"帮我写个东西"</p>
+                                    <p class="text-body text-muted mt-2">→ AI需要反复追问才能理解需求</p>
+                                </div>
+                                <div class="bg-green-500/10 rounded-xl p-4 border border-green-500/30">
+                                    <p class="text-body text-green-400 font-semibold mb-2">✅ 高质量输入</p>
+                                    <p class="text-body text-muted">"帮我写一封请假邮件，我是市场部的员工，因为感冒发烧需要请2天病假，语气要正式但诚恳"</p>
+                                    <p class="text-body text-muted mt-2">→ AI能直接生成符合要求的内容</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第19页：为什么需要结构化提示词 -->
+            <section class="slide" data-index="18">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.5.1 Structured Prompt</span>
+                        <h2 class="font-display text-title font-bold mt-4">为什么需要结构化提示词？</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-12">
+                        <div class="interactive-box">
+                            <div class="flex gap-4 mb-6">
+                                <button onclick="showPromptTab('bad')" id="badTab" class="flex-1 py-4 rounded-xl bg-red-500/20 border-2 border-red-500 text-body font-semibold">差提示词</button>
+                                <button onclick="showPromptTab('good')" id="goodTab" class="flex-1 py-4 rounded-xl bg-surface-light/50 border-2 border-primary text-body font-semibold">好提示词</button>
+                            </div>
+                            <div id="badPrompt" class="bg-red-500/10 rounded-xl p-6 border border-red-500/30">
+                                <p class="text-body text-muted mb-4">"帮我写个关于待出租的房间介绍"</p>
+                                <div class="space-y-2 text-body">
+                                    <p class="text-red-400">❌ 不知道目标受众是谁</p>
+                                    <p class="text-red-400">❌ 不知道风格要求</p>
+                                    <p class="text-red-400">❌ 不知道需要多长</p>
+                                    <p class="text-red-400">❌ 不知道重点是什么</p>
+                                </div>
+                            </div>
+                            <div id="goodPrompt" class="bg-green-500/10 rounded-xl p-6 border border-green-500/30 hidden">
+                                <div class="space-y-3 text-body">
+                                    <p><span class="text-primary">【角色】</span>房产顾问</p>
+                                    <p><span class="text-primary">【任务】</span>为刚毕业的大学生写租房介绍</p>
+                                    <p><span class="text-primary">【要求】</span></p>
+                                    <ul class="ml-6 text-muted space-y-1">
+                                        <li>• 语气亲切友好</li>
+                                        <li>• 突出性价比和安全性</li>
+                                        <li>• 控制在200字以内</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <h3 class="font-display text-subtitle font-semibold">结构化提示词要素</h3>
+                            <div class="space-y-4">
+                                <div class="interactive-box flex items-center gap-6">
+                                    <div class="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="font-display text-2xl text-primary">1</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold mb-1">角色</h4>
+                                        <p class="text-body text-muted">定义AI扮演的身份</p>
+                                    </div>
+                                </div>
+                                <div class="interactive-box flex items-center gap-6">
+                                    <div class="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="font-display text-2xl text-primary">2</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold mb-1">任务</h4>
+                                        <p class="text-body text-muted">明确要AI做什么</p>
+                                    </div>
+                                </div>
+                                <div class="interactive-box flex items-center gap-6">
+                                    <div class="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <span class="font-display text-2xl text-primary">3</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-display text-xl font-semibold mb-1">要求</h4>
+                                        <p class="text-body text-muted">具体约束条件</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第20页：实战练习1 -->
+            <section class="slide" data-index="19">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.6 Practice 1</span>
+                        <h2 class="font-display text-title font-bold mt-4">实战练习1：调节Temperature参数</h2>
+                    </div>
+                    <div class="interactive-box">
+                        <div class="space-y-6 text-body">
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-primary mb-3">目标</h3>
+                                <p class="text-muted">观察不同Temperature设置对输出结果的影响</p>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-primary mb-3">步骤</h3>
+                                <ol class="space-y-4 ml-6">
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary font-bold">1.</span>
+                                        <span>打开Coze或其他AI平台</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary font-bold">2.</span>
+                                        <span>使用提示词："请为一款面向深夜加班族的能量饮料写一句简短、有力的广告语。"</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary font-bold">3.</span>
+                                        <span>分别设置Temperature为：0、1、2</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary font-bold">4.</span>
+                                        <span>记录并比较三次输出的差异</span>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="bg-primary/10 rounded-xl p-6 border border-primary/30">
+                                <h3 class="font-display text-xl font-semibold text-primary mb-3">思考</h3>
+                                <ul class="space-y-2 text-muted">
+                                    <li>• 哪个Temperature产生的广告语最符合你的预期？</li>
+                                    <li>• 如果Temperature=0和Temperature=2的输出差异不大，可能是什么原因？</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第21页：实战练习2 -->
+            <section class="slide" data-index="20">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">1.6 Practice 2</span>
+                        <h2 class="font-display text-title font-bold mt-4">实战练习2：编写结构化提示词</h2>
+                    </div>
+                    <div class="interactive-box">
+                        <div class="space-y-6 text-body">
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-primary mb-3">目标</h3>
+                                <p class="text-muted">用AI辅助编写一个结构化提示词</p>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-xl font-semibold text-primary mb-3">步骤</h3>
+                                <ol class="space-y-4 ml-6">
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary font-bold">1.</span>
+                                        <span>选择一个你日常工作中需要AI协助的场景（如：写邮件、做计划、分析数据等）</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary font-bold">2.</span>
+                                        <span>先用简单的提示词测试，记录AI的输出</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary font-bold">3.</span>
+                                        <span>使用结构化提示词模板（角色+任务+要求）重新编写</span>
+                                    </li>
+                                    <li class="flex items-start gap-3">
+                                        <span class="text-primary font-bold">4.</span>
+                                        <span>对比两次输出的差异</span>
+                                    </li>
+                                </ol>
+                            </div>
+                            <div class="bg-primary/10 rounded-xl p-6 border border-primary/30">
+                                <h3 class="font-display text-xl font-semibold text-primary mb-3">示例场景</h3>
+                                <ul class="space-y-2 text-muted">
+                                    <li>• "我是客服，需要回复客户关于押金退还的咨询"</li>
+                                    <li>• "我需要为新房源写一段吸引人的介绍"</li>
+                                    <li>• "我要帮客户比较两个房源的优缺点"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第22页：知识回顾 -->
+            <section class="slide" data-index="21">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="mb-8">
+                        <span class="text-label text-primary">Chapter Review</span>
+                        <h2 class="font-display text-title font-bold mt-4">知识回顾</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">1</span>
+                                大模型核心概念
+                            </h3>
+                            <ul class="space-y-3 text-body">
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>LLM基于概率预测生成文本</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>Token是模型处理的基本单位</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>输出具有非确定性特征</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">2</span>
+                                技术原理
+                            </h3>
+                            <ul class="space-y-3 text-body">
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>Transformer架构与注意力机制</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>上下文窗口决定记忆长度</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>Temperature控制输出随机性</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">3</span>
+                                提示词工程
+                            </h3>
+                            <ul class="space-y-3 text-body">
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>结构化提示词三要素：角色、任务、要求</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>输入质量决定输出质量</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>提示词是与AI协作的关键技能</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="interactive-box">
+                            <h3 class="font-display text-subtitle font-semibold mb-6 flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary">4</span>
+                                核心心法
+                            </h3>
+                            <ul class="space-y-3 text-body">
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>AI是概率模型，不是真理机器</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>学会验证AI的输出</span>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <span class="text-primary">•</span>
+                                    <span>持续实践，积累经验</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 第23页：课后作业 -->
+            <section class="slide" data-index="22">
+                <div class="slide-content mx-auto h-full flex flex-col justify-center px-12">
+                    <div class="text-center mb-12">
+                        <span class="text-label text-primary">Homework</span>
+                        <h2 class="font-display text-title font-bold mt-4">课后作业</h2>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="interactive-box">
+                            <div class="flex items-start gap-6">
+                                <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                    <span class="font-display text-2xl text-primary font-bold">1</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold mb-3">思考题</h3>
+                                    <p class="text-body text-muted">为什么同样的提示词，AI有时会给出不同的回答？这在实际工作中会带来什么影响？</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-start gap-6">
+                                <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                    <span class="font-display text-2xl text-primary font-bold">2</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold mb-3">实践题</h3>
+                                    <p class="text-body text-muted">为你日常工作中的一个场景（如回复邮件、写报告、数据分析等）编写一个结构化提示词，并测试3次，记录结果。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interactive-box">
+                            <div class="flex items-start gap-6">
+                                <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                    <span class="font-display text-2xl text-primary font-bold">3</span>
+                                </div>
+                                <div>
+                                    <h3 class="font-display text-xl font-semibold mb-3">探索题</h3>
+                                    <p class="text-body text-muted">在Coze平台上创建一个简单的Bot，尝试调节不同的Temperature参数，观察输出差异。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-12 text-center">
+                        <p class="text-body text-muted">下节课预告：<span class="text-primary">提示词进阶技巧与实战案例</span></p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 导航控制 -->
+        <div class="ui-element fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6">
+            <button id="prevBtn" class="nav-btn w-14 h-14 rounded-full bg-surface-light/80 border-2 border-primary flex items-center justify-center hover:border-primary/80 transition-all" onclick="prevSlide()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <div class="px-6 py-3 rounded-full bg-surface-light/80 border-2 border-primary flex items-center gap-3">
+                <span id="currentSlide" class="text-primary font-bold text-lg">1</span>
+                <span class="text-muted">/</span>
+                <span id="totalSlides" class="text-muted text-lg">22</span>
+            </div>
+            <button id="nextBtn" class="nav-btn w-14 h-14 rounded-full bg-surface-light/80 border-2 border-primary flex items-center justify-center hover:border-primary/80 transition-all" onclick="nextSlide()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 页面指示点 -->
+        <div class="ui-element fixed right-8 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3"></div>
+
+        <!-- 全屏按钮 -->
+        <button id="fullscreenBtn" class="ui-element fixed top-8 right-8 z-50 w-12 h-12 rounded-full bg-surface-light/80 border-2 border-primary flex items-center justify-center hover:border-primary/80 transition-all" onclick="toggleFullscreen()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+            </svg>
+        </button>
+
+        <!-- 进度条 -->
+        <div class="ui-element fixed bottom-0 left-0 right-0 h-1 bg-white/10 z-50">
+            <div id="progressBar" class="h-full bg-primary transition-all duration-500" style="width: 5%"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

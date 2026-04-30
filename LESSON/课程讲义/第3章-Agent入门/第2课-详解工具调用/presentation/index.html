@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第2课：详解工具调用</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Comic+Neue:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #3730A3;
+            --secondary: #F0FDF4;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --accent: #8B5CF6;
+            --bg: #EEF2FF;
+            --background: #EEF2FF;
+            --surface: #FFFFFF;
+            --card: #FFFFFF;
+            --text: #312E81;
+            --text-primary: #312E81;
+            --text-secondary: #6366F1;
+            --text-muted: #6B7280;
+            --border: rgba(79, 70, 229, 0.2);
+            --shadow-soft: 8px 8px 16px rgba(79, 70, 229, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.8);
+            --shadow-pressed: inset 4px 4px 8px rgba(79, 70, 229, 0.1), inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+            --shadow-float: 12px 12px 24px rgba(79, 70, 229, 0.2), -12px -12px 24px rgba(255, 255, 255, 0.9);
+            --font-display: 'Baloo 2', cursive;
+            --font-body: 'Comic Neue', cursive;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 28px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        .font-display { font-family: var(--font-display); }
+        .font-body { font-family: var(--font-body); }
+        .font-mono { font-family: var(--font-mono); }
+        
+        .text-hero { font-size: 72px; line-height: 1.1; }
+        .text-hero-sub { font-size: 36px; line-height: 1.3; }
+        .text-title { font-size: 48px; line-height: 1.2; }
+        .text-subtitle { font-size: 32px; line-height: 1.3; }
+        .text-body { font-size: 24px; line-height: 1.6; }
+        .text-label { font-size: 20px; line-height: 1.4; }
+        .code-block { font-size: 18px; line-height: 1.5; }
+        
+        #slides-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .slide-content {
+            width: 95% !important;
+            max-width: 1600px !important;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 2rem;
+        }
+        
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .nav-btn:hover:not(:disabled) {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .slide-counter {
+            font-family: var(--font-display);
+            font-size: 20px;
+            color: var(--text-secondary);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--primary);
+            transition: width 0.5s ease;
+        }
+        
+        .flip-card {
+            perspective: 1000px;
+            width: 280px;
+            height: 200px;
+            cursor: pointer;
+        }
+        
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .flip-card-front {
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .flip-card-back {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            transform: rotateY(180deg);
+        }
+        
+        .accordion-item {
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .accordion-header {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface);
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text);
+            font-family: var(--font-body);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding: 0 1.5rem;
+        }
+        
+        .accordion-item.active .accordion-content {
+            max-height: 500px;
+            padding: 1rem 1.5rem;
+        }
+        
+        .accordion-icon {
+            transition: transform 0.3s ease;
+            font-size: 24px;
+            color: var(--primary);
+        }
+        
+        .accordion-item.active .accordion-icon {
+            transform: rotate(45deg);
+        }
+        
+        .tabs-container {
+            width: 100%;
+        }
+        
+        .tabs-header {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s ease;
+            font-family: var(--font-body);
+            font-weight: 600;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+        
+        .tab-panel {
+            display: none;
+            padding: 1rem;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .step-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .step-line {
+            position: absolute;
+            top: 50%;
+            left: 40px;
+            right: 40px;
+            height: 4px;
+            background: var(--border);
+            z-index: 0;
+        }
+        
+        .step-line-progress {
+            position: absolute;
+            top: 50%;
+            left: 40px;
+            height: 4px;
+            background: var(--primary);
+            z-index: 0;
+            width: 0;
+            transition: width 0.5s ease;
+        }
+        
+        .step-item {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 3px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            margin: 0 auto 0.5rem;
+            transition: all 0.3s ease;
+            font-family: var(--font-display);
+        }
+        
+        .step-item.active .step-number,
+        .step-item:hover .step-number {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .step-label {
+            font-size: 16px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        
+        .step-item.active .step-label {
+            color: var(--primary);
+        }
+        
+        .step-detail {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-soft);
+            min-height: 200px;
+        }
+        
+        .code-container {
+            background: #1E1E3F;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            overflow-x: auto;
+            box-shadow: var(--shadow-float);
+        }
+        
+        .code-container pre {
+            margin: 0;
+            font-family: var(--font-mono);
+            font-size: 16px;
+            line-height: 1.6;
+            color: #E4E4E7;
+        }
+        
+        .code-container .highlight {
+            background: rgba(79, 70, 229, 0.3);
+            display: block;
+            margin: 0 -1.5rem;
+            padding: 0 1.5rem;
+        }
+        
+        .code-comment {
+            color: #6B7280;
+        }
+        
+        .code-keyword {
+            color: #C792EA;
+        }
+        
+        .code-string {
+            color: #C3E88D;
+        }
+        
+        .code-function {
+            color: #82AAFF;
+        }
+        
+        .code-number {
+            color: #F78C6C;
+        }
+        
+        .tool-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-float);
+        }
+        
+        .decision-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .decision-node {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 300px;
+        }
+        
+        .decision-node:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-float);
+        }
+        
+        .decision-node.result {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+        
+        .decision-options {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .decision-option {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            border: 2px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .decision-option:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .decision-option.selected {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .comparison-table th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-family: var(--font-display);
+        }
+        
+        .comparison-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .comparison-table tr:hover td {
+            background: var(--bg);
+        }
+        
+        .check-icon {
+            color: #22C55E;
+            font-size: 24px;
+        }
+        
+        .cross-icon {
+            color: #EF4444;
+            font-size: 24px;
+        }
+        
+        .partial-icon {
+            color: #F59E0B;
+            font-size: 24px;
+        }
+        
+        .flow-animation {
+            position: relative;
+            padding: 2rem;
+        }
+        
+        .flow-step {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-soft);
+            opacity: 0.5;
+            transform: translateX(-20px);
+            transition: all 0.5s ease;
+            border-left: 4px solid var(--border);
+        }
+        
+        .flow-step.active {
+            opacity: 1;
+            transform: translateX(0);
+            border-left-color: var(--primary);
+            box-shadow: var(--shadow-float);
+        }
+        
+        .flow-arrow {
+            text-align: center;
+            font-size: 24px;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+        
+        .slot-filling-demo {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .slot-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .slot-item.filled {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .slot-key {
+            font-weight: bold;
+            color: var(--primary);
+            min-width: 120px;
+        }
+        
+        .slot-value {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            margin-left: 1rem;
+        }
+        
+        .json-output {
+            background: #1E1E3F;
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: #E4E4E7;
+            overflow-x: auto;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .badge-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .badge-accent {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .badge-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+        
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: -100px;
+            right: -100px;
+        }
+        
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            background: var(--accent);
+            bottom: -50px;
+            left: -50px;
+        }
+        
+        .shape-3 {
+            width: 150px;
+            height: 150px;
+            background: var(--warning);
+            top: 50%;
+            left: 10%;
+        }
+        
+        .homework-item {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-soft);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .homework-item.optional {
+            border-left-color: var(--accent);
+        }
+        
+        .api-spec {
+            background: #1E1E3F;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+        
+        .api-spec .method {
+            color: #22C55E;
+            font-weight: bold;
+        }
+        
+        .api-spec .endpoint {
+            color: #82AAFF;
+        }
+        
+        .api-spec .key {
+            color: #C3E88D;
+        }
+        
+        .api-spec .value {
+            color: #E4E4E7;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+    <div id="slides-container">
+        <!-- Slide 0: Cover -->
+        <section class="slide active" data-index="0">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+            <div class="slide-content text-center relative z-10">
+                <span class="text-label text-accent font-display mb-4 block">第3章 Agent入门</span>
+                <h1 class="font-display text-hero gradient-text mb-6">第2课：详解工具调用</h1>
+                <p class="text-hero-sub text-text-secondary mb-8">Tool Calling - 扩展AI能力边界的关键技术</p>
+                <div class="flex justify-center gap-4 mt-8">
+                    <span class="badge badge-primary">90分钟</span>
+                    <span class="badge badge-accent">Tutorial + How-to</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 1: Course Overview -->
+        <section class="slide" data-index="1">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">课程概览</span>
+                <h2 class="font-display text-title mb-8">学习目标</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="tool-card animate-fadeInUp">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-3xl">🎯</span>
+                            <h3 class="font-display text-subtitle">理解核心概念</h3>
+                        </div>
+                        <p class="text-body text-text-muted">工具调用的核心概念和在Dify中的实现方式</p>
+                    </div>
+                    <div class="tool-card animate-fadeInUp delay-1">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-3xl">⚙️</span>
+                            <h3 class="font-display text-subtitle">掌握工作原理</h3>
+                        </div>
+                        <p class="text-body text-text-muted">Function Calling的工作原理和执行流程</p>
+                    </div>
+                    <div class="tool-card animate-fadeInUp delay-2">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-3xl">🛠️</span>
+                            <h3 class="font-display text-subtitle">学会两种模式</h3>
+                        </div>
+                        <p class="text-body text-text-muted">工作流模式 vs 自定义工具模式开发工具</p>
+                    </div>
+                    <div class="tool-card animate-fadeInUp delay-3">
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-3xl">🛡️</span>
+                            <h3 class="font-display text-subtitle">掌握最佳实践</h3>
+                        </div>
+                        <p class="text-body text-text-muted">错误处理和兜底逻辑的最佳实践</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 2: Why Agent Needs Tools -->
+        <section class="slide" data-index="2">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">一、课程导入</span>
+                <h2 class="font-display text-title mb-6">为什么Agent需要工具？</h2>
+                <p class="text-body text-text-secondary mb-8">Agent的四大核心能力：感知、规划、决策、执行。其中，<strong class="text-primary">执行能力</strong>是Agent与外部世界交互的关键。</p>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="flip-card" onclick="flipCard(this)">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="text-4xl mb-3">📚</span>
+                                <h3 class="font-display text-subtitle mb-2">知识截止</h3>
+                                <p class="text-label text-text-muted">点击查看详情</p>
+                            </div>
+                            <div class="flip-card-back">
+                                <p class="text-body">模型训练数据有时间限制</p>
+                                <p class="text-label mt-2 opacity-80">示例：无法知道今天的天气</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flip-card" onclick="flipCard(this)">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="text-4xl mb-3">🔢</span>
+                                <h3 class="font-display text-subtitle mb-2">无法计算</h3>
+                                <p class="text-label text-text-muted">点击查看详情</p>
+                            </div>
+                            <div class="flip-card-back">
+                                <p class="text-body">复杂计算容易出错</p>
+                                <p class="text-label mt-2 opacity-80">示例：精确数学运算</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flip-card" onclick="flipCard(this)">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="text-4xl mb-3">💾</span>
+                                <h3 class="font-display text-subtitle mb-2">无法存储</h3>
+                                <p class="text-label text-text-muted">点击查看详情</p>
+                            </div>
+                            <div class="flip-card-back">
+                                <p class="text-body">不能持久化数据</p>
+                                <p class="text-label mt-2 opacity-80">示例：保存用户信息</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flip-card" onclick="flipCard(this)">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="text-4xl mb-3">⚡</span>
+                                <h3 class="font-display text-subtitle mb-2">无法操作</h3>
+                                <p class="text-label text-text-muted">点击查看详情</p>
+                            </div>
+                            <div class="flip-card-back">
+                                <p class="text-body">不能执行实际操作</p>
+                                <p class="text-label mt-2 opacity-80">示例：发送邮件、创建日程</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 p-6 bg-surface rounded-lg shadow-soft border-l-4 border-primary">
+                    <p class="text-body"><strong class="text-primary">解决方案：</strong>工具调用（Tool Calling）是AI系统识别并使用外部功能的能力，极大扩展了模型的能力边界。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Practical Tools -->
+        <section class="slide" data-index="3">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">一、课程导入</span>
+                <h2 class="font-display text-title mb-6">本节课实战场景</h2>
+                <p class="text-body text-text-secondary mb-6">以<strong class="text-primary">安居乐寓</strong>AI找房为例，你将学会开发以下工具：</p>
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="tool-card">
+                        <div class="text-4xl mb-4">🏠</div>
+                        <h3 class="font-display text-subtitle mb-3">房源接口工具</h3>
+                        <div class="text-left">
+                            <p class="text-label mb-2"><strong class="text-primary">功能：</strong>查询符合条件的房源列表</p>
+                            <p class="text-label mb-2"><strong class="text-primary">输入：</strong>城市、预算、户型、位置等</p>
+                            <p class="text-label"><strong class="text-primary">输出：</strong>Markdown格式的房源表格</p>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="text-4xl mb-4">👨‍💼</div>
+                        <h3 class="font-display text-subtitle mb-3">管家接口工具</h3>
+                        <div class="text-left">
+                            <p class="text-label mb-2"><strong class="text-primary">功能：</strong>查询门店管家信息</p>
+                            <p class="text-label mb-2"><strong class="text-primary">输入：</strong>门店名称</p>
+                            <p class="text-label"><strong class="text-primary">输出：</strong>管家联系信息和企微二维码</p>
+                        </div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="text-4xl mb-4">📚</div>
+                        <h3 class="font-display text-subtitle mb-3">知识库检索工具</h3>
+                        <div class="text-left">
+                            <p class="text-label mb-2"><strong class="text-primary">功能：</strong>从知识库检索相关文档</p>
+                            <p class="text-label mb-2"><strong class="text-primary">输入：</strong>用户查询问题</p>
+                            <p class="text-label"><strong class="text-primary">输出：</strong>相关文档内容</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Two Development Modes -->
+        <section class="slide" data-index="4">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">一、课程导入</span>
+                <h2 class="font-display text-title mb-6">Dify中的两种工具开发模式</h2>
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="tool-card" style="border-left-color: var(--primary);">
+                        <h3 class="font-display text-subtitle mb-4 text-primary">工作流模式</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <span class="check-icon">✓</span>
+                                <span class="text-body">复杂逻辑处理</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="check-icon">✓</span>
+                                <span class="text-body">多步骤处理</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="check-icon">✓</span>
+                                <span class="text-body">数据转换</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-border">
+                            <span class="badge badge-primary">开发难度：中等</span>
+                            <span class="badge badge-accent ml-2">灵活性：高</span>
+                        </div>
+                    </div>
+                    <div class="tool-card" style="border-left-color: var(--accent);">
+                        <h3 class="font-display text-subtitle mb-4 text-accent">自定义工具模式</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <span class="check-icon">✓</span>
+                                <span class="text-body">简单API调用</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="check-icon">✓</span>
+                                <span class="text-body">快速接入外部服务</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="partial-icon">◐</span>
+                                <span class="text-body">有限的数据处理</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-border">
+                            <span class="badge badge-accent">开发难度：低</span>
+                            <span class="badge badge-primary ml-2">灵活性：中等</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: What is Tool Calling -->
+        <section class="slide" data-index="5">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">二、工具调用基础概念</span>
+                <h2 class="font-display text-title mb-6">什么是工具调用？</h2>
+                <div class="bg-surface rounded-lg p-6 shadow-soft mb-6">
+                    <p class="text-body"><strong class="text-primary">工具调用（Tool Calling）</strong>是指大语言模型根据用户的输入，自主判断是否需要调用外部工具（如API、函数、数据库等），并生成符合工具要求的结构化调用参数，最终由系统执行工具并将结果返回给模型。</p>
+                </div>
+                <h3 class="font-display text-subtitle mb-4">核心特点</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="tool-card text-center">
+                        <div class="text-4xl mb-3">🧠</div>
+                        <h4 class="font-display text-body mb-2">自主性</h4>
+                        <p class="text-label text-text-muted">模型自主决策是否使用工具</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <div class="text-4xl mb-3">📋</div>
+                        <h4 class="font-display text-body mb-2">结构化</h4>
+                        <p class="text-label text-text-muted">生成固定格式的调用参数（JSON）</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <div class="text-4xl mb-3">🚀</div>
+                        <h4 class="font-display text-body mb-2">扩展性</h4>
+                        <p class="text-label text-text-muted">通过工具无限扩展模型能力</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Tool Calling vs Function Calling -->
+        <section class="slide" data-index="6">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">二、工具调用基础概念</span>
+                <h2 class="font-display text-title mb-6">Tool Calling vs Function Calling</h2>
+                <p class="text-body text-text-secondary mb-6">在实际应用中，这两个术语经常被混用，但有一些细微差别：</p>
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="tool-card" style="border-left-color: var(--primary);">
+                        <h3 class="font-display text-subtitle mb-4">Tool Calling</h3>
+                        <div class="space-y-3">
+                            <p class="text-body"><strong class="text-primary">侧重点：</strong>"工具"的概念</p>
+                            <p class="text-body"><strong class="text-primary">使用场景：</strong></p>
+                            <ul class="list-disc list-inside text-label text-text-muted ml-4">
+                                <li>调用外部API</li>
+                                <li>插件服务</li>
+                                <li>外部服务集成</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="tool-card" style="border-left-color: var(--accent);">
+                        <h3 class="font-display text-subtitle mb-4">Function Calling</h3>
+                        <div class="space-y-3">
+                            <p class="text-body"><strong class="text-accent">侧重点：</strong>"函数"的概念</p>
+                            <p class="text-body"><strong class="text-accent">使用场景：</strong></p>
+                            <ul class="list-disc list-inside text-label text-text-muted ml-4">
+                                <li>调用代码函数</li>
+                                <li>内置方法</li>
+                                <li>程序内部逻辑</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-surface rounded-lg shadow-soft">
+                    <p class="text-body">💡 在Dify平台中，我们通常使用<strong class="text-primary">工具（Tool）</strong>或<strong class="text-primary">工作流（Workflow）</strong>来实现工具调用功能。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Slot Filling Concept -->
+        <section class="slide" data-index="7">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">三、Function Calling工作原理</span>
+                <h2 class="font-display text-title mb-6">核心概念：填槽与调用</h2>
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="tool-card mb-4" style="border-left-color: var(--primary);">
+                            <h3 class="font-display text-subtitle mb-3">填槽（Slot Filling）</h3>
+                            <p class="text-body text-text-muted">将用户的自然语言输入，提取并填充到预定义的参数结构中</p>
+                            <p class="text-label text-primary mt-2">类似于表单的自动填写</p>
+                        </div>
+                        <div class="tool-card" style="border-left-color: var(--accent);">
+                            <h3 class="font-display text-subtitle mb-3">调用（Function Call）</h3>
+                            <p class="text-body text-text-muted">根据填槽结果，生成结构化的函数调用请求</p>
+                            <p class="text-label text-accent mt-2">系统执行对应的工具/函数</p>
+                        </div>
+                    </div>
+                    <div class="slot-filling-demo">
+                        <h4 class="font-display text-body mb-4">用户输入示例：</h4>
+                        <p class="text-body mb-4 p-3 bg-bg rounded-lg">"我想在深圳租一套5000元左右的房子"</p>
+                        <button onclick="startSlotFilling()" class="px-6 py-2 bg-primary text-white rounded-lg font-display hover:bg-primary-dark transition mb-4">开始填槽演示</button>
+                        <div id="slotResult">
+                            <div class="slot-item" id="slot1">
+                                <span class="slot-key">城市</span>
+                                <span class="slot-value" id="slotCity">-</span>
+                            </div>
+                            <div class="slot-item" id="slot2">
+                                <span class="slot-key">预算</span>
+                                <span class="slot-value" id="slotBudget">-</span>
+                            </div>
+                            <div class="slot-item" id="slot3">
+                                <span class="slot-key">minPrice</span>
+                                <span class="slot-value" id="slotMin">-</span>
+                            </div>
+                            <div class="slot-item" id="slot4">
+                                <span class="slot-key">maxPrice</span>
+                                <span class="slot-value" id="slotMax">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Function Calling Flow -->
+        <section class="slide" data-index="8">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">三、Function Calling工作原理</span>
+                <h2 class="font-display text-title mb-4">执行流程</h2>
+                <div class="flex gap-8">
+                    <div class="flex-1">
+                        <div class="flow-animation">
+                            <div class="flow-step" id="flowStep1">
+                                <h4 class="font-display text-body mb-2">Step 1: 意图识别</h4>
+                                <p class="text-label text-text-muted">识别用户意图：查询房源<br>判断需要使用房源查询工具</p>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step" id="flowStep2">
+                                <h4 class="font-display text-body mb-2">Step 2: 填槽（参数提取）</h4>
+                                <p class="text-label text-text-muted">城市：深圳<br>预算：5000元左右 → minPrice: 4000, maxPrice: 6000</p>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step" id="flowStep3">
+                                <h4 class="font-display text-body mb-2">Step 3: 生成调用请求</h4>
+                                <p class="text-label text-text-muted">生成JSON格式的调用参数</p>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step" id="flowStep4">
+                                <h4 class="font-display text-body mb-2">Step 4: 执行工具</h4>
+                                <p class="text-label text-text-muted">系统调用房源查询API<br>获取实时房源数据</p>
+                            </div>
+                            <div class="flow-arrow">↓</div>
+                            <div class="flow-step" id="flowStep5">
+                                <h4 class="font-display text-body mb-2">Step 5: 结果返回与生成回复</h4>
+                                <p class="text-label text-text-muted">API返回房源列表<br>LLM生成："为您找到3套符合条件的房源..."</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-80">
+                        <button onclick="startFlowAnimation()" class="w-full px-6 py-3 bg-primary text-white rounded-lg font-display hover:bg-primary-dark transition mb-4">▶ 开始演示</button>
+                        <button onclick="resetFlowAnimation()" class="w-full px-6 py-2 bg-surface border-2 border-primary text-primary rounded-lg font-display hover:bg-primary hover:text-white transition mb-4">↺ 重置</button>
+                        <div class="json-output" id="jsonOutput">
+<pre>{
+  "tool": "house_search",
+  "parameters": {
+    "city": "深圳",
+    "minPrice": 4000,
+    "maxPrice": 6000
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Tool Definition Schema -->
+        <section class="slide" data-index="9">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">三、Function Calling工作原理</span>
+                <h2 class="font-display text-title mb-6">Dify中的工具定义</h2>
+                <p class="text-body text-text-secondary mb-4">在Dify中，工具的定义通过Schema描述：</p>
+                <div class="code-container">
+<pre><span class="code-comment"># 工具定义示例（房源查询工具）</span>
+<span class="code-keyword">tool</span>:
+  <span class="code-string">name</span>: house_search
+  <span class="code-string">description</span>: 查询安居乐寓平台的房源信息，支持按城市、预算、户型等条件筛选
+  <span class="code-string">parameters</span>:
+    <span class="code-keyword">type</span>: object
+    <span class="code-string">properties</span>:
+      <span class="code-string">city</span>:
+        <span class="code-keyword">type</span>: string
+        <span class="code-string">description</span>: 城市名称，如深圳、北京
+      <span class="code-string">minPrice</span>:
+        <span class="code-keyword">type</span>: integer
+        <span class="code-string">description</span>: 最低预算（元/月）
+      <span class="code-string">maxPrice</span>:
+        <span class="code-keyword">type</span>: integer
+        <span class="code-string">description</span>: 最高预算（元/月）
+      <span class="code-string">layoutName</span>:
+        <span class="code-keyword">type</span>: string
+        <span class="code-string">description</span>: 户型名称，如一室一厅、两室一厅
+    <span class="code-string">required</span>: [<span class="code-string">"city"</span>]</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: API Analysis -->
+        <section class="slide" data-index="10">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">四、实操演示：开发房源接口工具</span>
+                <h2 class="font-display text-title mb-6">房源接口API分析</h2>
+                <div class="api-spec">
+<pre><span class="code-comment"># 房源接口 API 规格</span>
+<span class="code-keyword">endpoint</span>: <span class="endpoint">https://uat-weapp.szajly.com/api/wechat/ai/searchHouse</span>
+<span class="code-keyword">method</span>: <span class="method">POST</span>
+<span class="code-keyword">headers</span>:
+  - <span class="key">applet-token</span>: <span class="value">{用户Token}</span>
+  - <span class="key">wxMiniAppId</span>: <span class="value">{小程序ID}</span>
+
+<span class="code-keyword">request_body</span>:
+  <span class="key">lat</span>: <span class="value">"纬度（可选）"</span>
+  <span class="key">lng</span>: <span class="value">"经度（可选）"</span>
+  <span class="key">storeNames</span>: <span class="value">"门店名称（可选）"</span>
+  <span class="key">area</span>: <span class="value">"区域（可选）"</span>
+  <span class="key">layoutName</span>: <span class="value">"户型名称（可选）"</span>
+  <span class="key">maxPrice</span>: <span class="value">"最高价格（可选）"</span>
+  <span class="key">minPrice</span>: <span class="value">"最低价格（可选）"</span>
+
+<span class="code-keyword">response</span>:
+  <span class="key">code</span>: <span class="value">200</span>  <span class="code-comment"># 状态码</span>
+  <span class="key">data</span>:
+    <span class="key">list</span>:
+      - <span class="key">storeName</span>: <span class="value">"门店名称"</span>
+        <span class="key">layoutList</span>:
+          - <span class="key">price</span>: <span class="value">5000</span>
+            <span class="key">layoutName</span>: <span class="value">"两室一厅"</span></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Workflow Mode Steps -->
+        <section class="slide" data-index="11">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">四、实操演示</span>
+                <h2 class="font-display text-title mb-6">模式一：工作流模式（5个步骤）</h2>
+                <div class="step-flow mb-6">
+                    <div class="step-line"></div>
+                    <div class="step-line-progress" id="stepLineProgress"></div>
+                    <div class="step-item active" onclick="showWorkflowStep(1)">
+                        <div class="step-number">1</div>
+                        <div class="step-label">创建工作流</div>
+                    </div>
+                    <div class="step-item" onclick="showWorkflowStep(2)">
+                        <div class="step-number">2</div>
+                        <div class="step-label">配置开始节点</div>
+                    </div>
+                    <div class="step-item" onclick="showWorkflowStep(3)">
+                        <div class="step-number">3</div>
+                        <div class="step-label">HTTP请求节点</div>
+                    </div>
+                    <div class="step-item" onclick="showWorkflowStep(4)">
+                        <div class="step-number">4</div>
+                        <div class="step-label">代码执行节点</div>
+                    </div>
+                    <div class="step-item" onclick="showWorkflowStep(5)">
+                        <div class="step-number">5</div>
+                        <div class="step-label">配置结束节点</div>
+                    </div>
+                </div>
+                <div class="step-detail" id="workflowStepDetail">
+                    <h4 class="font-display text-subtitle mb-3">步骤1：创建工作流</h4>
+                    <ol class="list-decimal list-inside text-body space-y-2">
+                        <li>进入Dify工作室，点击"创建空白应用"</li>
+                        <li>选择"工作流"类型</li>
+                        <li>命名：<code class="bg-bg px-2 py-1 rounded">房源接口工作流</code></li>
+                        <li>点击"创建"</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12: Code Execution Node -->
+        <section class="slide" data-index="12">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">四、实操演示</span>
+                <h2 class="font-display text-title mb-4">代码执行节点（数据处理）</h2>
+                <p class="text-body text-text-secondary mb-4">这是工作流模式的核心优势——可以编写Python代码处理返回数据：</p>
+                <div class="code-container" style="max-height: 500px; overflow-y: auto;">
+<pre><span class="code-keyword">import</span> json
+
+<span class="code-keyword">def</span> <span class="code-function">main</span>(arg1):
+    <span class="code-comment"># 1. 基础解析</span>
+    <span class="code-keyword">try</span>:
+        data_obj = json.loads(arg1) <span class="code-keyword">if</span> isinstance(arg1, str) <span class="code-keyword">else</span> arg1
+    <span class="code-keyword">except</span> Exception <span class="code-keyword">as</span> e:
+        <span class="code-keyword">return</span> {<span class="code-string">"result"</span>: f<span class="code-string">"❌ **JSON 解析异常**：{str(e)}"</span>}
+
+    <span class="code-comment"># 2. 报错兜底逻辑</span>
+    code = data_obj.get(<span class="code-string">"code"</span>)
+    msg = data_obj.get(<span class="code-string">"msg"</span>) <span class="code-keyword">or</span> <span class="code-string">"未知错误"</span>
+
+    <span class="code-keyword">if</span> code != <span class="code-number">200</span>:
+        <span class="code-keyword">return</span> {<span class="code-string">"result"</span>: f<span class="code-string">"⚠️ **查询失败**\n\n> 错误代码：{code}"</span>}
+
+    <span class="code-comment"># 3. 数据存在性校验</span>
+    data = data_obj.get(<span class="code-string">"data"</span>, {})
+    stores = data.get(<span class="code-string">"list"</span>, []) <span class="code-keyword">if</span> data <span class="code-keyword">else</span> []
+    
+    <span class="code-keyword">if not</span> stores:
+        <span class="code-keyword">return</span> {<span class="code-string">"result"</span>: <span class="code-string">"ℹ️ **暂无房源信息**"</span>}
+
+    <span class="code-comment"># 4. 构建 Markdown 表格</span>
+    header = [<span class="code-string">"预览图"</span>, <span class="code-string">"门店名称"</span>, <span class="code-string">"价格(元)"</span>, <span class="code-string">"户型"</span>]
+    <span class="code-comment"># ... 构建表格逻辑</span>
+    
+    <span class="code-keyword">return</span> {<span class="code-string">"result"</span>: md_table}</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Custom Tool Mode -->
+        <section class="slide" data-index="13">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">四、实操演示</span>
+                <h2 class="font-display text-title mb-6">模式二：自定义工具模式（3个步骤）</h2>
+                <div class="grid grid-cols-3 gap-6 mb-6">
+                    <div class="tool-card text-center">
+                        <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-display mx-auto mb-4">1</div>
+                        <h4 class="font-display text-subtitle mb-2">创建自定义工具</h4>
+                        <p class="text-label text-text-muted">进入Dify工具菜单，创建自定义工具</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-display mx-auto mb-4">2</div>
+                        <h4 class="font-display text-subtitle mb-2">配置Schema</h4>
+                        <p class="text-label text-text-muted">在Schema编辑器中定义输入参数</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <div class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-display mx-auto mb-4">3</div>
+                        <h4 class="font-display text-subtitle mb-2">测试并发布</h4>
+                        <p class="text-label text-text-muted">填写测试参数，验证后保存</p>
+                    </div>
+                </div>
+                <div class="api-spec">
+<pre><span class="code-comment"># Schema 定义示例</span>
+<span class="code-keyword">openapi</span>: <span class="value">3.1.0</span>
+<span class="code-keyword">info</span>:
+  <span class="key">title</span>: <span class="value">房源查询工具</span>
+  <span class="key">version</span>: <span class="value">"v1.0.0"</span>
+<span class="code-keyword">paths</span>:
+  <span class="endpoint">/api/wechat/ai/searchHouse</span>:
+    <span class="code-keyword">post</span>:
+      <span class="key">description</span>: <span class="value">查询房源信息</span>
+      <span class="key">requestBody</span>:
+        <span class="key">content</span>:
+          <span class="key">application/json</span>:
+            <span class="key">schema</span>:
+              <span class="key">properties</span>:
+                <span class="key">city</span>:
+                  <span class="key">type</span>: <span class="value">string</span>
+                  <span class="key">description</span>: <span class="value">城市名称</span></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Mode Comparison -->
+        <section class="slide" data-index="14">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">四、实操演示</span>
+                <h2 class="font-display text-title mb-6">两种模式对比</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>对比维度</th>
+                            <th>工作流模式</th>
+                            <th>自定义工具模式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>开发步骤</strong></td>
+                            <td>5步（较复杂）</td>
+                            <td>3步（简单）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>数据处理</strong></td>
+                            <td><span class="check-icon">✓</span> 支持Python代码处理</td>
+                            <td><span class="cross-icon">✗</span> 直接返回API结果</td>
+                        </tr>
+                        <tr>
+                            <td><strong>错误处理</strong></td>
+                            <td><span class="check-icon">✓</span> 可自定义错误逻辑</td>
+                            <td><span class="partial-icon">◐</span> 依赖API返回</td>
+                        </tr>
+                        <tr>
+                            <td><strong>格式转换</strong></td>
+                            <td><span class="check-icon">✓</span> 可转换为Markdown等</td>
+                            <td><span class="cross-icon">✗</span> 原始JSON</td>
+                        </tr>
+                        <tr>
+                            <td><strong>适用场景</strong></td>
+                            <td>复杂逻辑、数据转换</td>
+                            <td>简单API调用</td>
+                        </tr>
+                        <tr>
+                            <td><strong>灵活性</strong></td>
+                            <td>高</td>
+                            <td>中等</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="mt-6 p-4 bg-surface rounded-lg shadow-soft">
+                    <p class="text-body"><strong class="text-primary">选择建议：</strong></p>
+                    <ul class="list-disc list-inside text-body mt-2">
+                        <li>需要数据转换、错误兜底 → 使用<strong class="text-primary">工作流模式</strong></li>
+                        <li>快速接入、简单调用 → 使用<strong class="text-accent">自定义工具模式</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 15: Butler Tool Example -->
+        <section class="slide" data-index="15">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">五、实战案例</span>
+                <h2 class="font-display text-title mb-4">案例1：管家接口工具</h2>
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="showTab(event, 'butler-api')">API规格</button>
+                        <button class="tab-btn" onclick="showTab(event, 'butler-code')">代码实现</button>
+                        <button class="tab-btn" onclick="showTab(event, 'butler-features')">关键优化</button>
+                    </div>
+                    <div id="butler-api" class="tab-panel active">
+                        <div class="api-spec">
+<pre><span class="code-comment"># 管家接口 API 规格</span>
+<span class="code-keyword">endpoint</span>: <span class="endpoint">https://uat-weapp.szajly.com/api/wechat/ai/recommend/butler</span>
+<span class="code-keyword">method</span>: <span class="method">POST</span>
+
+<span class="code-keyword">response</span>:
+  <span class="key">code</span>: <span class="value">200</span>
+  <span class="key">data</span>:
+    <span class="key">list</span>:
+      - <span class="key">realname</span>: <span class="value">"管家姓名"</span>
+        <span class="key">phone</span>: <span class="value">"联系电话"</span>
+        <span class="key">storeName</span>: <span class="value">"所属门店"</span>
+        <span class="key">pictureUrl</span>: <span class="value">"企微二维码URL"</span></pre>
+                        </div>
+                    </div>
+                    <div id="butler-code" class="tab-panel">
+                        <div class="code-container" style="max-height: 400px; overflow-y: auto;">
+<pre><span class="code-comment"># 构建 Markdown 表格</span>
+header = [<span class="code-string">"姓名"</span>, <span class="code-string">"联系电话"</span>, <span class="code-string">"所属门店"</span>, <span class="code-string">"企微二维码"</span>]
+
+<span class="code-keyword">for</span> person <span class="code-keyword">in</span> staff_list:
+    name = person.get(<span class="code-string">"realname"</span>, <span class="code-string">"-"</span>)
+    phone = person.get(<span class="code-string">"phone"</span>, <span class="code-string">"-"</span>)
+    <span class="code-comment"># 优化电话显示，支持点击拨打</span>
+    phone_md = f<span class="code-string">"[{phone}](tel:{phone})"</span> <span class="code-keyword">if</span> phone != <span class="code-string">"-"</span> <span class="code-keyword">else</span> <span class="code-string">"-"</span>
+    
+    <span class="code-comment"># 处理企微二维码预览</span>
+    pic_url = person.get(<span class="code-string">"pictureUrl"</span>, <span class="code-string">""</span>)
+    img_md = f<span class="code-string">"![{name}]({pic_url})"</span> <span class="code-keyword">if</span> pic_url <span class="code-keyword">else</span> <span class="code-string">"暂无企微二维码"</span></pre>
+                        </div>
+                    </div>
+                    <div id="butler-features" class="tab-panel">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="tool-card">
+                                <span class="text-3xl mb-2">📞</span>
+                                <h4 class="font-display text-body mb-2">电话可点击拨打</h4>
+                                <p class="text-label text-text-muted">使用Markdown链接语法</p>
+                            </div>
+                            <div class="tool-card">
+                                <span class="text-3xl mb-2">🖼️</span>
+                                <h4 class="font-display text-body mb-2">企微二维码预览</h4>
+                                <p class="text-label text-text-muted">直接显示图片方便扫码</p>
+                            </div>
+                            <div class="tool-card">
+                                <span class="text-3xl mb-2">💬</span>
+                                <h4 class="font-display text-body mb-2">友好空数据提示</h4>
+                                <p class="text-label text-text-muted">明确提示无管家信息</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 16: Knowledge Base Tool -->
+        <section class="slide" data-index="16">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">五、实战案例</span>
+                <h2 class="font-display text-title mb-4">案例2：知识库检索工具（防弹版代码）</h2>
+                <p class="text-body text-text-secondary mb-4">知识库检索工具需要从向量数据库中检索相关文档，只能使用工作流模式实现。</p>
+                <div class="code-container" style="max-height: 450px; overflow-y: auto;">
+<pre><span class="code-keyword">import</span> json
+
+<span class="code-keyword">def</span> <span class="code-function">main</span>(input_data):
+    <span class="code-string">"""
+    防弹版提取函数：无论输入什么，保证不报错
+    """</span>
+    <span class="code-comment"># 1. 预设默认值</span>
+    result_text = <span class="code-string">""</span>
+    
+    <span class="code-keyword">try</span>:
+        <span class="code-comment"># 数据预处理</span>
+        <span class="code-keyword">if</span> input_data <span class="code-keyword">is</span> <span class="code-keyword">None</span>:
+            data = []
+        <span class="code-keyword">else</span>:
+            data = input_data
+
+        <span class="code-comment"># 如果传入的是字符串，尝试转成对象</span>
+        <span class="code-keyword">if</span> isinstance(data, str):
+            <span class="code-keyword">try</span>:
+                data = json.loads(data)
+            <span class="code-keyword">except</span>:
+                <span class="code-keyword">pass</span>
+        
+        <span class="code-comment"># 兼容性处理</span>
+        <span class="code-keyword">if</span> isinstance(data, dict):
+            <span class="code-keyword">if</span> <span class="code-string">'result'</span> <span class="code-keyword">in</span> data: 
+                data = data[<span class="code-string">'result'</span>]
+            <span class="code-keyword">elif</span> <span class="code-string">'data'</span> <span class="code-keyword">in</span> data: 
+                data = data[<span class="code-string">'data'</span>]
+            <span class="code-keyword">else</span>:
+                data = [data]
+        
+        <span class="code-comment"># 确保 data 是列表</span>
+        <span class="code-keyword">if not</span> isinstance(data, list):
+            data = []
+
+        <span class="code-comment"># 核心提取逻辑</span>
+        contents = []
+        <span class="code-keyword">for</span> item <span class="code-keyword">in</span> data:
+            <span class="code-keyword">if</span> isinstance(item, dict):
+                c = item.get(<span class="code-string">'content'</span>, <span class="code-string">''</span>)
+                <span class="code-keyword">if</span> c:
+                    contents.append(str(c).strip())
+        
+        result_text = <span class="code-string">"\n\n"</span>.join(contents)
+
+    <span class="code-keyword">except</span> Exception <span class="code-keyword">as</span> e:
+        result_text = f<span class="code-string">"数据处理异常: {str(e)}"</span>
+
+    <span class="code-keyword">return</span> {<span class="code-string">"combined_text"</span>: result_text}</pre>
+                </div>
+                <div class="mt-4 grid grid-cols-4 gap-3">
+                    <div class="p-3 bg-surface rounded-lg text-center shadow-soft">
+                        <span class="text-2xl">🛡️</span>
+                        <p class="text-label mt-1">多层异常捕获</p>
+                    </div>
+                    <div class="p-3 bg-surface rounded-lg text-center shadow-soft">
+                        <span class="text-2xl">🔄</span>
+                        <p class="text-label mt-1">类型兼容</p>
+                    </div>
+                    <div class="p-3 bg-surface rounded-lg text-center shadow-soft">
+                        <span class="text-2xl">📋</span>
+                        <p class="text-label mt-1">字段兼容</p>
+                    </div>
+                    <div class="p-3 bg-surface rounded-lg text-center shadow-soft">
+                        <span class="text-2xl">💪</span>
+                        <p class="text-label mt-1">永不崩溃</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 17: Error Handling -->
+        <section class="slide" data-index="17">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">五、实战案例</span>
+                <h2 class="font-display text-title mb-6">案例3：错误处理与兜底逻辑</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>场景</th>
+                            <th>工作流模式</th>
+                            <th>自定义工具模式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>API超时</strong></td>
+                            <td><span class="check-icon">✓</span> 可捕获并返回友好提示</td>
+                            <td><span class="cross-icon">✗</span> 返回原始错误</td>
+                        </tr>
+                        <tr>
+                            <td><strong>认证失败</strong></td>
+                            <td><span class="check-icon">✓</span> 可提示重新登录</td>
+                            <td><span class="partial-icon">◐</span> 返回401状态码</td>
+                        </tr>
+                        <tr>
+                            <td><strong>空数据</strong></td>
+                            <td><span class="check-icon">✓</span> 可返回引导性提示</td>
+                            <td><span class="partial-icon">◐</span> 返回空数组</td>
+                        </tr>
+                        <tr>
+                            <td><strong>数据格式错误</strong></td>
+                            <td><span class="check-icon">✓</span> 可尝试修复或提示</td>
+                            <td><span class="cross-icon">✗</span> 直接报错</td>
+                        </tr>
+                        <tr>
+                            <td><strong>格式转换</strong></td>
+                            <td><span class="check-icon">✓</span> Markdown/HTML等</td>
+                            <td><span class="cross-icon">✗</span> 仅JSON</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Slide 18: Tool Types -->
+        <section class="slide" data-index="18">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">六、工具类型与应用场景</span>
+                <h2 class="font-display text-title mb-6">常见工具类型</h2>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="tool-card text-center">
+                        <span class="text-4xl mb-3 block">🔍</span>
+                        <h4 class="font-display text-body mb-2">搜索工具</h4>
+                        <p class="text-label text-text-muted">获取实时信息</p>
+                        <p class="text-label text-primary mt-2">搜索引擎、知识库</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <span class="text-4xl mb-3 block">🔢</span>
+                        <h4 class="font-display text-body mb-2">计算工具</h4>
+                        <p class="text-label text-text-muted">执行精确计算</p>
+                        <p class="text-label text-primary mt-2">计算器、代码解释器</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <span class="text-4xl mb-3 block">🗄️</span>
+                        <h4 class="font-display text-body mb-2">数据库工具</h4>
+                        <p class="text-label text-text-muted">数据存储和查询</p>
+                        <p class="text-label text-primary mt-2">用户信息、业务数据</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <span class="text-4xl mb-3 block">🌐</span>
+                        <h4 class="font-display text-body mb-2">API工具</h4>
+                        <p class="text-label text-text-muted">调用外部服务</p>
+                        <p class="text-label text-primary mt-2">天气、地图、支付</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <span class="text-4xl mb-3 block">📁</span>
+                        <h4 class="font-display text-body mb-2">文件工具</h4>
+                        <p class="text-label text-text-muted">文件读写操作</p>
+                        <p class="text-label text-primary mt-2">文档处理、报表生成</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <span class="text-4xl mb-3 block">📧</span>
+                        <h4 class="font-display text-body mb-2">通讯工具</h4>
+                        <p class="text-label text-text-muted">消息发送和通知</p>
+                        <p class="text-label text-primary mt-2">邮件、短信、即时通讯</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <span class="text-4xl mb-3 block">💻</span>
+                        <h4 class="font-display text-body mb-2">代码工具</h4>
+                        <p class="text-label text-text-muted">代码执行和调试</p>
+                        <p class="text-label text-primary mt-2">编程辅助、自动化脚本</p>
+                    </div>
+                    <div class="tool-card text-center">
+                        <span class="text-4xl mb-3 block">📚</span>
+                        <h4 class="font-display text-body mb-2">知识库工具</h4>
+                        <p class="text-label text-text-muted">专业知识检索</p>
+                        <p class="text-label text-primary mt-2">房产知识、法律条文</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 19: Decision Tree -->
+        <section class="slide" data-index="19">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">六、工具类型与应用场景</span>
+                <h2 class="font-display text-title mb-6">工具选择决策树</h2>
+                <div class="decision-tree" id="decisionTree">
+                    <div class="decision-node" id="decisionQ1">
+                        <p class="text-body font-display mb-3">是否需要复杂数据处理？</p>
+                        <div class="decision-options">
+                            <div class="decision-option" onclick="makeDecision('q1', 'yes')">是</div>
+                            <div class="decision-option" onclick="makeDecision('q1', 'no')">否</div>
+                        </div>
+                    </div>
+                    <div class="decision-node hidden" id="decisionQ2">
+                        <p class="text-body font-display mb-3">是否需要代码执行？</p>
+                        <div class="decision-options">
+                            <div class="decision-option" onclick="makeDecision('q2', 'yes')">是</div>
+                            <div class="decision-option" onclick="makeDecision('q2', 'no')">否</div>
+                        </div>
+                    </div>
+                    <div class="decision-node hidden" id="decisionQ3">
+                        <p class="text-body font-display mb-3">API是否简单直接？</p>
+                        <div class="decision-options">
+                            <div class="decision-option" onclick="makeDecision('q3', 'yes')">是</div>
+                            <div class="decision-option" onclick="makeDecision('q3', 'no')">否</div>
+                        </div>
+                    </div>
+                    <div class="decision-node result hidden" id="resultWorkflow">
+                        <span class="text-4xl mb-3 block">🔧</span>
+                        <p class="text-body font-display">推荐使用 <strong>工作流模式</strong></p>
+                        <p class="text-label mt-2 opacity-80">知识检索 / HTTP请求+代码执行 / 多步骤流程</p>
+                    </div>
+                    <div class="decision-node result hidden" id="resultCustom">
+                        <span class="text-4xl mb-3 block">⚡</span>
+                        <p class="text-body font-display">推荐使用 <strong>自定义工具模式</strong></p>
+                        <p class="text-label mt-2 opacity-80">快速接入 / 配置简单</p>
+                    </div>
+                </div>
+                <button onclick="resetDecisionTree()" class="mt-4 px-6 py-2 bg-surface border-2 border-primary text-primary rounded-lg font-display hover:bg-primary hover:text-white transition">↺ 重新选择</button>
+            </div>
+        </section>
+
+        <!-- Slide 20: Summary -->
+        <section class="slide" data-index="20">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">七、课程总结</span>
+                <h2 class="font-display text-title mb-6">核心知识点回顾</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="tool-card">
+                        <h4 class="font-display text-subtitle mb-3 text-primary">1. 工具调用定义</h4>
+                        <ul class="text-label text-text-muted space-y-2">
+                            <li>• AI系统识别并使用外部功能的能力</li>
+                            <li>• 扩展模型能力边界的关键技术</li>
+                            <li>• Dify中通过工作流或自定义工具实现</li>
+                        </ul>
+                    </div>
+                    <div class="tool-card">
+                        <h4 class="font-display text-subtitle mb-3 text-primary">2. Function Calling工作原理</h4>
+                        <ul class="text-label text-text-muted space-y-2">
+                            <li>• 意图识别 → 填槽 → 调用 → 执行 → 回复</li>
+                            <li>• 结构化参数提取（JSON格式）</li>
+                            <li>• 系统执行工具并返回结果</li>
+                        </ul>
+                    </div>
+                    <div class="tool-card">
+                        <h4 class="font-display text-subtitle mb-3 text-primary">3. Dify两种工具开发模式</h4>
+                        <ul class="text-label text-text-muted space-y-2">
+                            <li>• 工作流模式：5步骤，适合复杂逻辑</li>
+                            <li>• 自定义工具模式：3步骤，适合简单API</li>
+                        </ul>
+                    </div>
+                    <div class="tool-card">
+                        <h4 class="font-display text-subtitle mb-3 text-primary">4. 错误处理与兜底逻辑</h4>
+                        <ul class="text-label text-text-muted space-y-2">
+                            <li>• 多层异常捕获：输入→解析→业务→数据处理</li>
+                            <li>• 友好错误提示</li>
+                            <li>• 空数据兜底</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 21: Homework -->
+        <section class="slide" data-index="21">
+            <div class="slide-content">
+                <span class="text-label text-accent font-display mb-2">七、课程总结</span>
+                <h2 class="font-display text-title mb-6">课后作业</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="homework-item">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="badge badge-primary">必做</span>
+                            <h4 class="font-display text-body">作业一：概念理解</h4>
+                        </div>
+                        <p class="text-label text-text-muted">解释工具调用概念、执行流程、两种模式对比、防弹版代码意义</p>
+                    </div>
+                    <div class="homework-item">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="badge badge-primary">必做</span>
+                            <h4 class="font-display text-body">作业二：房源接口工具复现</h4>
+                        </div>
+                        <p class="text-label text-text-muted">在Dify中创建工作流模式的房源查询工具，测试多种场景</p>
+                    </div>
+                    <div class="homework-item">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="badge badge-primary">必做</span>
+                            <h4 class="font-display text-body">作业三：管家接口工具开发</h4>
+                        </div>
+                        <p class="text-label text-text-muted">分别用两种模式开发管家查询工具，对比开发体验</p>
+                    </div>
+                    <div class="homework-item optional">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="badge badge-accent">选做</span>
+                            <h4 class="font-display text-body">作业四：知识库检索工具</h4>
+                        </div>
+                        <p class="text-label text-text-muted">创建知识库，开发检索工作流，实现防弹版代码</p>
+                    </div>
+                    <div class="homework-item optional">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="badge badge-accent">选做</span>
+                            <h4 class="font-display text-body">作业五：错误处理优化</h4>
+                        </div>
+                        <p class="text-label text-text-muted">按照五层错误处理模型优化代码，设计异常测试用例</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Navigation -->
+    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-6">
+        <button id="prevBtn" onclick="prevSlide()" class="nav-btn">←</button>
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">22</span>
+        </div>
+        <button id="nextBtn" onclick="nextSlide()" class="nav-btn">→</button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="fixed bottom-0 left-0 right-0 h-1 bg-white/20 z-50">
+        <div id="progressBar" class="progress-bar" style="width: 4.5%"></div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        let totalSlides = 0;
+
+        function initSlides() {
+            const slides = document.querySelectorAll('.slide');
+            totalSlides = slides.length;
+            document.getElementById('totalSlides').textContent = totalSlides;
+            updateSlideDisplay();
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function updateSlideDisplay() {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                    slide.style.opacity = '1';
+                    slide.style.visibility = 'visible';
+                } else {
+                    slide.classList.remove('active');
+                    slide.style.opacity = '0';
+                    slide.style.visibility = 'hidden';
+                }
+            });
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlideDisplay();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlideDisplay();
+            }
+        }
+
+        function handleKeyPress(e) {
+            switch(e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                case ' ':
+                case 'PageDown':
+                    e.preventDefault();
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                case 'PageUp':
+                    e.preventDefault();
+                    prevSlide();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    currentSlide = 0;
+                    updateSlideDisplay();
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    currentSlide = totalSlides - 1;
+                    updateSlideDisplay();
+                    break;
+            }
+        }
+
+        function flipCard(card) {
+            card.classList.toggle('flipped');
+        }
+
+        function showTab(event, tabId) {
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        const workflowSteps = {
+            1: {
+                title: '步骤1：创建工作流',
+                content: `<ol class="list-decimal list-inside text-body space-y-2">
+                    <li>进入Dify工作室，点击"创建空白应用"</li>
+                    <li>选择"工作流"类型</li>
+                    <li>命名：<code class="bg-bg px-2 py-1 rounded">房源接口工作流</code></li>
+                    <li>点击"创建"</li>
+                </ol>`
+            },
+            2: {
+                title: '步骤2：配置开始节点（输入参数）',
+                content: `<p class="text-body mb-3">在开始节点中定义所有输入参数：</p>
+                <table class="w-full text-label">
+                    <tr class="border-b"><th class="text-left p-2">参数名</th><th class="text-left p-2">类型</th><th class="text-left p-2">必填</th></tr>
+                    <tr class="border-b"><td class="p-2">wxMiniAppId</td><td class="p-2">text</td><td class="p-2">是</td></tr>
+                    <tr class="border-b"><td class="p-2">token</td><td class="p-2">text</td><td class="p-2">是</td></tr>
+                    <tr class="border-b"><td class="p-2">city</td><td class="p-2">text</td><td class="p-2">否</td></tr>
+                    <tr><td class="p-2">minPrice/maxPrice</td><td class="p-2">text</td><td class="p-2">否</td></tr>
+                </table>`
+            },
+            3: {
+                title: '步骤3：添加HTTP请求节点',
+                content: `<div class="space-y-2 text-label">
+                    <p><strong>请求方法：</strong>POST</p>
+                    <p><strong>URL：</strong>https://uat-weapp.szajly.com/api/wechat/ai/searchHouse</p>
+                    <p><strong>请求头：</strong>applet-token, wxMiniAppId</p>
+                    <p><strong>请求体类型：</strong>JSON</p>
+                    <p><strong>超时设置：</strong>30秒</p>
+                    <p><strong>重试次数：</strong>3次</p>
+                </div>`
+            },
+            4: {
+                title: '步骤4：添加代码执行节点',
+                content: `<p class="text-body mb-3">这是工作流模式的核心优势——可以编写Python代码处理返回数据：</p>
+                <ul class="list-disc list-inside text-label space-y-2">
+                    <li>JSON解析处理HTTP返回的JSON字符串</li>
+                    <li>错误兜底检查API返回的code</li>
+                    <li>空数据检查返回友好提示</li>
+                    <li>Markdown表格构建格式化房源数据</li>
+                </ul>`
+            },
+            5: {
+                title: '步骤5：配置结束节点',
+                content: `<p class="text-body mb-3">添加结束节点，输出代码执行节点的result变量：</p>
+                <div class="bg-bg p-4 rounded-lg text-label font-mono">
+                    输出变量: result = {{#code.result#}}
+                </div>`
+            }
+        };
+
+        function showWorkflowStep(stepNum) {
+            const stepDetail = document.getElementById('workflowStepDetail');
+            const step = workflowSteps[stepNum];
+            stepDetail.innerHTML = `<h4 class="font-display text-subtitle mb-3">${step.title}</h4>${step.content}`;
+            
+            document.querySelectorAll('.step-item').forEach((item, index) => {
+                if (index < stepNum) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            const progress = ((stepNum - 1) / 4) * 100;
+            document.getElementById('stepLineProgress').style.width = `calc(${progress}% - 40px)`;
+        }
+
+        let flowAnimationStep = 0;
+        let flowAnimationInterval = null;
+
+        function startFlowAnimation() {
+            resetFlowAnimation();
+            flowAnimationStep = 1;
+            flowAnimationInterval = setInterval(() => {
+                if (flowAnimationStep <= 5) {
+                    document.getElementById(`flowStep${flowAnimationStep}`).classList.add('active');
+                    flowAnimationStep++;
+                } else {
+                    clearInterval(flowAnimationInterval);
+                }
+            }, 1000);
+        }
+
+        function resetFlowAnimation() {
+            if (flowAnimationInterval) {
+                clearInterval(flowAnimationInterval);
+            }
+            flowAnimationStep = 0;
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`flowStep${i}`).classList.remove('active');
+            }
+        }
+
+        function startSlotFilling() {
+            const slots = ['slot1', 'slot2', 'slot3', 'slot4'];
+            slots.forEach(s => document.getElementById(s).classList.remove('filled'));
+            
+            setTimeout(() => {
+                document.getElementById('slot1').classList.add('filled');
+                document.getElementById('slotCity').textContent = '深圳';
+            }, 300);
+            
+            setTimeout(() => {
+                document.getElementById('slot2').classList.add('filled');
+                document.getElementById('slotBudget').textContent = '5000元左右';
+            }, 600);
+            
+            setTimeout(() => {
+                document.getElementById('slot3').classList.add('filled');
+                document.getElementById('slotMin').textContent = '4000';
+            }, 900);
+            
+            setTimeout(() => {
+                document.getElementById('slot4').classList.add('filled');
+                document.getElementById('slotMax').textContent = '6000';
+            }, 1200);
+        }
+
+        function makeDecision(question, answer) {
+            document.querySelectorAll('.decision-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            if (question === 'q1') {
+                if (answer === 'yes') {
+                    document.getElementById('decisionQ1').classList.add('hidden');
+                    document.getElementById('decisionQ2').classList.remove('hidden');
+                } else {
+                    document.getElementById('decisionQ1').classList.add('hidden');
+                    document.getElementById('decisionQ3').classList.remove('hidden');
+                }
+            } else if (question === 'q2') {
+                document.getElementById('decisionQ2').classList.add('hidden');
+                document.getElementById('resultWorkflow').classList.remove('hidden');
+            } else if (question === 'q3') {
+                document.getElementById('decisionQ3').classList.add('hidden');
+                if (answer === 'yes') {
+                    document.getElementById('resultCustom').classList.remove('hidden');
+                } else {
+                    document.getElementById('resultWorkflow').classList.remove('hidden');
+                }
+            }
+        }
+
+        function resetDecisionTree() {
+            document.querySelectorAll('.decision-node').forEach(node => {
+                node.classList.add('hidden');
+            });
+            document.querySelectorAll('.decision-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.getElementById('decisionQ1').classList.remove('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', initSlides);
+    </script>
+</body>
+</html>
